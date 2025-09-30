@@ -1,1 +1,1 @@
-//# Scoring algorithms
+//# Scoring algorithms (level, time and moves)

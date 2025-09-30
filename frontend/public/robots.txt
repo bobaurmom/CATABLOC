@@ -3,5 +3,4 @@ Disallow: /api/
 Disallow: /admin/
 Disallow: /private/
 Allow: /
-
 Sitemap: /sitemap.xml
