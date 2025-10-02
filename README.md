@@ -4,8 +4,8 @@ An interactive, gamified learning platform for freshman student to learn about s
 
 ## 🚀 Tech Stack
 
-- **Frontend:** React, JavaScript, CSS
-- **Backend:** Node.js, Express.js
+- **Frontend:** React, JavaScript, CSS , Vite , Tailwind
+- **Backend:** Node.js, Express.js , Swagger
 - **Database:** PostgreSQL
 
 ## 📁 Project Structure
@@ -14,12 +14,11 @@ An interactive, gamified learning platform for freshman student to learn about s
 ## 🛠️ Development Setup
 
 1.  **Prerequisites:** Ensure you have installed:
-    - [Docker](https://www.docker.com/products/docker-desktop)
     - [Git](https://git-scm.com/)
 
 2.  **Clone and run:**
     ```bash
-    git clone <repo-url>
+    git clone https://github.com/bobaurmom/CATABLOC.git
     cd catabloc
     ```
 
@@ -32,6 +31,5 @@ An interactive, gamified learning platform for freshman student to learn about s
 
 1. Create a new branch: `git checkout -b feat/my-new-feature`
 2. Make your changes in the `/frontend` or `/backend` folders.
-3. Test your changes: `docker-compose up --build`
 4. Commit and push your changes.
 5. Create a Pull Request to merge into `main`.
