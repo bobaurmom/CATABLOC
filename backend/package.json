@@ -7,15 +7,17 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "start:backend": "cd ../backend && npm run dev",
-    "start:frontend": "npm start",
-    "start:all": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+    "start:frontend": "cd ../frontend && npm run dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
