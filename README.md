@@ -4,7 +4,7 @@ An interactive, gamified learning platform for freshman student to learn about s
 
 ## 🚀 Tech Stack
 
-- **Frontend:** React, JavaScript, CSS , Vite , Tailwind
+- **Frontend:** React, JavaScript, CSS , Vite , 
 - **Backend:** Node.js, Express.js , Swagger
 - **Database:** PostgreSQL
 
