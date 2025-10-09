@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from '../../assets/logo.svg';
 import '../../style/header.css';
+import Btn from '../ui/button';
 const Header: React.FC = () => {
   return (
     <header className="header">
@@ -14,9 +15,7 @@ const Header: React.FC = () => {
         <a href="#help" className="header_text">HELP CENTER</a>
       </nav>
       
-      <button className="header-right">
-        SIGN IN
-      </button>
+    <Btn text="Sign Up"></Btn>
     </header>
   );
 };
