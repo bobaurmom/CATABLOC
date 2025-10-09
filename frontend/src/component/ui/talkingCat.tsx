@@ -7,7 +7,7 @@ interface prop {
 const TalkingCat:React.FC<prop> = ({text}) => {
     return(
         <div className="talkingCat">
-            <img src={logo} alt="Cat"/>
+            <img src={logo} alt="Cat" style={{width: "80px"}}/>
             <div className="text">{text}</div>
         </div>
     )
