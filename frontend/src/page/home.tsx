@@ -1,4 +1,6 @@
 import logo from '../assets/logo.svg';
+import Header from '../component/layout/header';
+import Footer from '../component/layout/footer';
 
 
 
@@ -12,7 +14,7 @@ function Home() {
           />
           <h1>Start <br /> Your Learning Now</h1>
           <p>Explore the most fun game while learning algorithms</p>
-          <button>Start Now</button>
+          <a href="/login"><button>Start Now</button></a>
         </div>
       </main>
     )
