@@ -1,4 +1,5 @@
 
+import React from "react";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
 import Btn from "../../component/ui/button";
