@@ -1,5 +1,7 @@
 import logo from '../assets/logo.svg';
 
+
+
 function Home() {
     return (
         <main className="main-content">
@@ -10,16 +12,7 @@ function Home() {
           />
           <h1>Start <br/> Your Learning Now</h1>
           <p>Explore the most fun game while learning algorithms</p>
-          <button>
-            <a 
-              href="/dashboard" 
-              className="start-button" 
-              style={{ textDecoration: 'none', color: 'inherit' }}>
-              Start Now
-            </a>
-          </button>
-
-
+          <button>Start Now</button>
         </div>
       </main>
     )
