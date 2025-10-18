@@ -1,6 +1,5 @@
 //# JWT token verification
-import e, { NextFunction, Response ,Request} from "express";
-import { User } from "../models/User";
+import { NextFunction, Response ,Request} from "express";
 import { ErrorResponse } from "../types/auth";
 
 export const errorHandler = (error:Error,req:Request,res:Response,next:NextFunction):void=>{
@@ -36,15 +35,15 @@ export const errorHandler = (error:Error,req:Request,res:Response,next:NextFunct
     res.json (response);
 };
 //404 not found
-export const NotFoundHandler = (req:e.Request,res:e.Response):void=>{
+export const NotFoundHandler = (req:Request,res:Response):void=>{
     const response : ErrorResponse ={
         success:false,
         message:`Route ${req.method} ${req.path} not found`
     };
     res.status (404).json (response);
-};
+}; //async handler to wrap async functions and catch errors
 export const asyncHandler = (fn:Function)=>{
-    return (req:e.Request,res:e.Response,next:NextFunction)=>{
+    return (req:Request,res:Response,next:NextFunction)=>{
         Promise.resolve (fn (req,res,next)).catch (next);
     };  
 };
