@@ -8,9 +8,9 @@ import rateLimit from 'express-rate-limit';
 import { NotFoundHandler ,errorHandler} from './middleware/auth';
 import authRoutes from './routes/auth.routes';
 
-const app = express();
-app.use(helmet());
-dotenv.config();
+const app = express(); 
+app.use(helmet()); //helmet for security http header
+dotenv.config(); //load env
 
 app.get('/', (req, res) => {
     res.json({
@@ -19,9 +19,9 @@ app.get('/', (req, res) => {
         version: '1.0.0'
     })
 });
-
+//CORS middleware cors is used to allow requests between frontend and backend
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:8000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     allowedHeaders: 'Content-Type,Authorization'
@@ -30,7 +30,7 @@ app.use(cors({
 // serve swagger docs before 404 handler remember that
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-//rate limiting
+//rate limiting for all routes to prevent DDoS attacks but idk if it work tbh (just copy paste from stackoverflow)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max:100, // limit each IP to 100 requests per windowMs
@@ -41,7 +41,7 @@ const limiter = rateLimit({
     legacyHeaders: false,
 });
 app.use(limiter);
-
+// limit login and register routes cannot be brute forced not 100% secure tho but better than nothing
 const authlimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max:5, // only 5 attempts per IP
@@ -53,7 +53,7 @@ const authlimiter = rateLimit({
 });
 app.use('/api/auth', authlimiter , authRoutes);
 // error handlers should be last learn it the hard way ngl
-app.use(NotFoundHandler);
-app.use(errorHandler);
+app.use(NotFoundHandler); //404 handler
+app.use(errorHandler); //general error handler
 
 export default app;

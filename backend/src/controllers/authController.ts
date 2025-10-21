@@ -10,14 +10,16 @@ type fakeuser = {
     password: string;
     created_at: Date;
 };
+//in-memory user store need to replace with database
 const emailToUser = new Map<string, fakeuser>();
 let nextUserId = 1;
-//new email
+//new email register
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, username, password }: SignupRequest = req.body;
-        const normalEmail = email.toLowerCase();
-        if (emailToUser.has(normalEmail)) {
+        const { email, username, password ,confirmPassword}: SignupRequest = req.body; //signup request body
+        const normalEmail = email.toLowerCase(); //email casesensitive
+        //unique email
+        if (emailToUser.has(normalEmail)) { 
             const response: ErrorResponse = {
                 success: false,
                 message: 'email already exists'
@@ -25,12 +27,27 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             res.status(400).json(response);
             return;
         }
-        //unique username??
-
-
-        //generatetoken
-        const hashed = await hashPassword(password);
-        const now = new Date();
+        //unique username
+        if ([...emailToUser.values()].some(user => user.username === username)) {
+            const response: ErrorResponse = {
+                success: false,
+                message: 'username already exists'
+            };
+            res.status(400).json(response);
+            return;
+        }
+        //password match confirm password
+        if (password !== confirmPassword) {
+            const response: ErrorResponse = {
+                success: false,
+                message: 'passwords do not match'
+            };
+            res.status(400).json(response);
+            return;
+        }
+        const hashed = await hashPassword(password); //hash password
+        const now = new Date(); //current date
+        //create new user
         const newUser: fakeuser = {
             id: nextUserId++,
             email: normalEmail,
@@ -39,20 +56,21 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             created_at: now
 
         }
-        emailToUser.set(normalEmail, newUser);
-
+        emailToUser.set(normalEmail, newUser); //store user
+        //generate token
         const token = await generateToken({
             userId: newUser.id,
             email: newUser.email,
             username: newUser.username
         });
+        //refresh token
         const refreshToken = await generateRefreshToken({
             userId: newUser.id,
             email: newUser.email,
             username: newUser.username
         });
-        const { password: _, ...userWithoutPassword } = newUser;
-        const response: AuthResponse = {
+        const { password: _, ...userWithoutPassword } = newUser; //exclude password for security?
+        const response: AuthResponse = { //response body
             success: true,
             message: 'user register successful',
             data: {
@@ -71,11 +89,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
 };
+// login existing user
 export const login = async (req: AuthenticatedRequest, res: Response): Promise<void> =>{
     try {
-        const {email , password}:LoginRequest = req.body;
-        const normalEmail = email.toLowerCase();
-        const user = emailToUser.get(normalEmail);
+        const {email , password}:LoginRequest = req.body; //req body login
+        const normalEmail = email.toLowerCase(); //email casesensitive
+        const user = emailToUser.get(normalEmail); //get user from store
+        //invalid email or password
         if(!user){
             const response: ErrorResponse ={
                 success:false,
@@ -84,8 +104,8 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
             res.status(401).json(response);
             return;
         }
-        const ok = await comparePassword (password,user.password);
-        if(!ok){
+        const ok = await comparePassword (password,user.password); //compare password
+        if(!ok){ //if invalid password
             const response : ErrorResponse ={
                 success:false,
                 message:'invalid email or password'
@@ -99,13 +119,14 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
             email:user.email,
             username:user.username
         });
+        //refresh token
         const refreshToken = await generateRefreshToken ({
             userId: user.id,
             email:user.email,
             username:user.username
         });
-        const { password: _, ...userWithoutPassword } = user;
-        const response: AuthResponse = {
+        const { password: _, ...userWithoutPassword } = user; //exclude password
+        const response: AuthResponse = { //response body
             success: true,
             message: 'user login successful',
             data: {

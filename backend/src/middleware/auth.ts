@@ -8,13 +8,13 @@ export const errorHandler = (error:Error,req:Request,res:Response,next:NextFunct
     //error response
     const response : ErrorResponse ={
         success:false,
-        message:process.env.NODE_ENV==='production' ? 'internal server error' : error.message
+        message:process.env.NODE_ENV==='hmmmm' ? 'internal server error' : error.message
     };
-    //specific error handling
-    if (error.name === 'validationError'){
+    //specific error handling in auth
+    if (error.name === 'validationError'){ 
         response.message = 'validation error';
         res.status(400);
-    }else if(error.name === 'UnauthorizedError'){
+    }else if(error.name === 'UnauthorizedError'){ 
         response.message = 'unauthorized';
         res.status(401);
     }else if(error.name === 'ForbiddenError'){
