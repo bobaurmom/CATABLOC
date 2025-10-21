@@ -34,7 +34,7 @@ export const loginSchema = z.object({
 export const validateSchema = (schema: z.ZodSchema<any>) => { 
     return (req: Request, res: Response, next: NextFunction) :void => { 
         try{ 
-            const validatedData = schema.parse(req.body); 
+            const validatedData = schema.parse(req.body);  
             req.body = validatedData;
             next();
         }catch (error){
@@ -58,7 +58,7 @@ export const validateSchema = (schema: z.ZodSchema<any>) => {
         }
     };
 };
-export const validateRegister = validateSchema(registerSchema);
+export const validateRegister = validateSchema(registerSchema); 
 export const validateLogin = validateSchema(loginSchema);
 // password validation middleware as the name suggests 
 export const validatePasswordMiddleware = (req:Request,res:Response,next:NextFunction):void=>{

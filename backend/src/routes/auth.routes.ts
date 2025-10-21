@@ -29,7 +29,7 @@ const router = Router();
  *       '409':
  *         description: "User already exists"
  */
-router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddleware, register);
+router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddleware, register); //register route
 /**
  * @swagger
  * /api/auth/login:
@@ -54,5 +54,5 @@ router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddle
  *       '401':
  *         description: "Unauthorized"
  */
-router.post('/login', sanitizeInput, validateLogin, login); 
+router.post('/login', sanitizeInput, validateLogin, login); //login route
 export default router;
