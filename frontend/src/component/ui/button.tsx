@@ -9,7 +9,7 @@ interface prop {
 }
 const Btn: React.FC<prop> = ({text, bgColor = "blue",btnType,fSize = 1,width}) => {
     return(
-        <button type={btnType} style={{backgroundColor:`${bgColor}`,fontSize:`${fSize}rem`,width:`${width}%`}}>
+        <button type={btnType} style={{backgroundColor:`${bgColor}`,fontSize:`${fSize}rem`,width:`${width}%`}} id="btn">
             {text}
         </button>
     )
