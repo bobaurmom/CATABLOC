@@ -21,7 +21,8 @@ export const registerSchema = z.object({
     message: 'passwords do not match',
 
     path: ['confirmPassword'],
-})
+});
+
 //vali schema for login
 export const loginSchema = z.object({
     email: z.string()

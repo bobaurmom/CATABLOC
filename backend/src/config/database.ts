@@ -19,7 +19,6 @@ const initializeTables = async (): Promise<void> => {
   const client = await pool.connect();
   try {
     //can create table here
-    
   } catch (error) {
     console.error('Error initializing tables', error);
   } finally {

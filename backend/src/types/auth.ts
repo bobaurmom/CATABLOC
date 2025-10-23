@@ -1,6 +1,6 @@
 import { error } from 'console';
 
-export interface SignupRequest {
+export interface RegisterRequest {
     email: string;
     password: string;
     username: string;
@@ -19,7 +19,7 @@ export interface AuthResponse {
             id: number;
             email: string;
             username: string;
-            created_at: Date;
+            createdAt: Date;
         };
     };
     token?: string;

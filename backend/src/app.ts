@@ -1,3 +1,4 @@
+import 'dotenv/config' // Must be first!
 import express from 'express';
 import cors from 'cors';
 import swaggerUi from "swagger-ui-express";
@@ -11,7 +12,7 @@ import authRoutes from './routes/auth.routes';
 const app = express(); 
 app.use(helmet()); //helmet for security http header
 dotenv.config(); //load env
-
+app.use(express.json()); //parse json body
 app.get('/', (req, res) => {
     res.json({
         success: true,
@@ -21,7 +22,7 @@ app.get('/', (req, res) => {
 });
 //CORS middleware cors is used to allow requests between frontend and backend
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:8000',
+    origin: '*', //allow all origins security risk but idc for now
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     allowedHeaders: 'Content-Type,Authorization'
@@ -43,14 +44,15 @@ const limiter = rateLimit({
 app.use(limiter);
 // limit login and register routes cannot be brute forced not 100% secure tho but better than nothing
 const authlimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max:5, // only 5 attempts per IP
+    windowMs: 15 * 60 * 10000, // 15 minutes
+    max:50, // only 5 attempts per IP
     message: {
         success: false,
         message: 'Too many login/register attempts from this IP, please try again later.'
     }, standardHeaders: true,
     legacyHeaders: false,
 });
+
 app.use('/api/auth', authlimiter , authRoutes);
 // error handlers should be last learn it the hard way ngl
 app.use(NotFoundHandler); //404 handler
