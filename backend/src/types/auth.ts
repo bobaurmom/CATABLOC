@@ -16,7 +16,7 @@ export interface AuthResponse {
     message: string;
     data?: {
         user?: {
-            id: number;
+            user_id: number;
             email: string;
             username: string;
             createdAt: Date;
@@ -32,7 +32,7 @@ export interface userResponse {
         id: number;
         email: string;
         username: string;
-        created_at: Date;
+        createdAt: Date;
     };
 }
 export interface Validationerror {

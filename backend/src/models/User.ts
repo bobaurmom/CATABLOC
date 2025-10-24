@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 import { hashPassword , comparePassword} from '../utils/hash';
 
 export interface User {
-    id: number;
+    user_id: number;
     email: string;
     password: string;
     username: string;

@@ -43,14 +43,14 @@ const swaggerOptions = {
                             example: "username",
                             description: "User's unique username"
                         },
-                        created_at: {
+                        createdAt: {
                             type: "string",
                             format: "date-time",
                             example: "2024-01-01T00:00:00.000Z",
                             description: "User creation timestamp"
                         },
                     },
-                    required: ["id", "email", "username", "created_at", "updated_at"]
+                    required: ["id", "email", "username", "createdAt", "updatedAt"]
                 },
                 RegisterRequest: {
                     type: "object",

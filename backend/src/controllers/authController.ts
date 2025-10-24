@@ -52,36 +52,36 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
     const newUser = await User.create({
       email: normalizedEmail,
       username,
-      password: hashed
+      password_hash: hashed
     });
 
     // Generate tokens
     const token = await generateToken({
-      userId: newUser.id,
+      userId: (newUser as any).user_id,
       email: newUser.email,
       username: newUser.username
     });
 
     const refreshToken = await generateRefreshToken({
-      userId: newUser.id,
+      userId: (newUser as any).user_id,
       email: newUser.email,
       username: newUser.username
     });
 
     // Remove password from response
     const userResponse = {
-      id: newUser.id,
+      id: (newUser as any).user_id,
       email: newUser.email,
       username: newUser.username,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt
+      created_at: (newUser as any).created_at || newUser.created_at,
+      updated_at: (newUser as any).updated_at || newUser.updated_at
     };
 
     const response: AuthResponse = {
       success: true,
       message: 'User registered successfully',
       data: {
-        user: userResponse
+        user: userResponse as any
       },
       token,
       refreshToken
@@ -122,7 +122,7 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
     }
 
     // Verify password
-    const passwordValid = await comparePassword(password, user.password);
+    const passwordValid = await comparePassword(password, (user as any).password_hash);
     if (!passwordValid) {
       const response: ErrorResponse = {
         success: false,
@@ -134,31 +134,31 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
 
     // Generate tokens
     const token = await generateToken({
-      userId: user.id,
+      userId: (user as any).user_id,
       email: user.email,
       username: user.username
     });
 
     const refreshToken = await generateRefreshToken({
-      userId: user.id,
+      userId: (user as any).user_id,
       email: user.email,
       username: user.username
     });
 
     // Prepare response without password
     const userResponse = {
-      id: user.id,
+      id: (user as any).user_id,
       email: user.email,
       username: user.username,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      created_at: (user as any).created_at || user.created_at,
+      updated_at: (user as any).updated_at || user.updated_at
     };
 
     const response: AuthResponse = {
       success: true,
       message: 'Login successful',
       data: {
-        user: userResponse
+        user: userResponse as any
       },
       token,
       refreshToken

@@ -1,29 +1,30 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/sequelize';
+import { tr } from 'zod/locales';
 
 interface UserAttributes {
-  id: number;
+  user_id: number;
   email: string;
   username: string;
-  password: string;
+  password_hash: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'user_id'> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: number;
+  public user_id!: number;
   public email!: string;
   public username!: string;
-  public password!: string;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  public password_hash!: string;
+  public readonly created_at!: Date;
+  public readonly updated_at!: Date;
 }
 
 User.init(
   {
-    id: {
+    user_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -45,29 +46,20 @@ User.init(
         notEmpty: true,
       },
     },
-    password: {
+    password_hash: {
       type: DataTypes.STRING(255),
       allowNull: false,
       validate: {
         notEmpty: true,
       },
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
+
   },
   {
     sequelize,
     tableName: 'users',
     timestamps: true,
-    underscored: false,
+    underscored: true,
     indexes: [
       {
         fields: ['email'],

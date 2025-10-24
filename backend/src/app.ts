@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { NotFoundHandler ,errorHandler} from './middleware/auth';
 import authRoutes from './routes/auth.routes';
+import { httpUrl } from 'zod';
 
 const app = express(); 
 app.use(helmet()); //helmet for security http header
@@ -22,7 +23,7 @@ app.get('/', (req, res) => {
 });
 //CORS middleware cors is used to allow requests between frontend and backend
 app.use(cors({
-    origin: '*', //allow all origins security risk but idc for now
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     allowedHeaders: 'Content-Type,Authorization'
