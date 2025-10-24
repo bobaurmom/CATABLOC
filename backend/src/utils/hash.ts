@@ -32,7 +32,5 @@ export const validatePassword = (password: string): { isValid: boolean; messages
     if (!/[0-9]/.test(password)) {
         return { isValid: false, messages: "Password must contain at least one digit" };
     }
-    
-
     return { isValid: true, messages: "Password is valid" };
 }

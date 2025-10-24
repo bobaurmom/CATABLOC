@@ -17,7 +17,7 @@ const Header: React.FC = () => {
         <a href="#help" className="header_text">HELP CENTER</a>
       </nav>
       
-    <a href="/signUp"><Btn text="Sign Up"></Btn></a>
+    <a href="/register"><Btn text="Sign Up"></Btn></a>
 
     </header>
   );

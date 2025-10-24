@@ -1,6 +1,6 @@
 import { error } from 'console';
 
-export interface SignupRequest {
+export interface RegisterRequest {
     email: string;
     password: string;
     username: string;
@@ -16,10 +16,10 @@ export interface AuthResponse {
     message: string;
     data?: {
         user?: {
-            id: number;
+            user_id: number;
             email: string;
             username: string;
-            created_at: Date;
+            createdAt: Date;
         };
     };
     token?: string;
@@ -32,7 +32,7 @@ export interface userResponse {
         id: number;
         email: string;
         username: string;
-        created_at: Date;
+        createdAt: Date;
     };
 }
 export interface Validationerror {

@@ -5,7 +5,7 @@ import Footer from './component/layout/footer';
 import Header from './component/layout/header';
 import Home from './page/home';
 import Login from './page/auth/login';
-import SignUp from './page/auth/singup';
+import SignUp from './page/auth/signup';
 function App() {
   
   return (
@@ -15,7 +15,7 @@ function App() {
       <Routes> 
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<SignUp />} /> 
+        <Route path='/register' element={<SignUp />} /> 
       </Routes>
       <Footer />
     </div>

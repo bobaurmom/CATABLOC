@@ -3,7 +3,6 @@ import { register, login } from '../controllers/authController';
 import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput } from '../middleware/validation';
 
 
-
 const router = Router();
 /**
  * @swagger
