@@ -69,11 +69,7 @@ const login = async (form: HTMLFormElement): Promise<Response | undefined> => {
       });
       const resData = await res.json();
       if (!res.ok) {
-        throw new Error(
-          `HTTP error!!! status: ${res.status} response ${JSON.stringify(
-            resData
-          )}`
-        );
+        return resData;
       }
       console.log("login called");
       return res;

@@ -38,8 +38,7 @@ const Input: React.FC<input> = ({
         // value={value}
         // onChange={onChange}
       />
-      {error && <p style={{ color: "red", fontSize: "12px" }}>{error}</p>}
-      <br />
+      {error && <p style={{ color: "red", fontSize: "12px" ,margin:"0"}}>{error}</p>}
     </div>
   );
 };

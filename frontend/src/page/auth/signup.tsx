@@ -15,23 +15,28 @@ const SignUp: React.FC = () => {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
-    // console.log("form Data:",formData);// Debug line
     const response = await signUp(form);
-    console.log(response);
     if (response && response.ok) {
       // Handle successful signup (e.g., redirect to login page)
       console.log("Signup successful!");
       nav("/login");
     } else {
       const errorData = JSON.parse(JSON.stringify(response));
-      console.log("Error Data:", errorData);
-      console.log("Error Message:", errorData.message);
-      setErrorMessage({
-        email: errorData.message.includes("email") ? errorData.message : null,
-        username: errorData.message.includes("username") ? errorData.message : null,
-        password: errorData.message.includes("password") ? errorData.message : null,
-        confirmPassword: errorData.message.includes("password") ? errorData.message : null,
-      });
+      if(errorData.errors){
+        setErrorMessage({
+          email: errorData.errors.find((error: any) => error.field === "email")?.message || null,
+          username: errorData.errors.find((error: any) => error.field === "username")?.message || null,
+          password: errorData.errors.find((error: any) => error.field === "password")?.message || null,
+          confirmPassword: errorData.errors.find((error: any) => error.field === "confirmPassword")?.message || null,
+        });
+      } else {
+        setErrorMessage({
+          email: errorData.message.includes("email") ? errorData.message : null,
+          username: errorData.message.includes("username") ? errorData.message : null,
+          password: errorData.message.includes("password") ? errorData.message : null,
+          confirmPassword: errorData.message.includes("Password") ? errorData.message : null,
+        });
+      }
     };
 }
   return (
@@ -64,7 +69,6 @@ const SignUp: React.FC = () => {
             type="email"
             placeHolder="Email"
             name="email"
-            required="required"
             error={errorMessage.email}
           ></Input>
           <Input
@@ -72,7 +76,6 @@ const SignUp: React.FC = () => {
             type="text"
             placeHolder="Username"
             name="username"
-            required="required"
             error={errorMessage.username}
           ></Input>
           <Input
@@ -80,7 +83,6 @@ const SignUp: React.FC = () => {
             type="password"
             placeHolder="Password"
             name="password"
-            required="required"
             error={errorMessage.password}
           ></Input>
           <Input
@@ -88,12 +90,10 @@ const SignUp: React.FC = () => {
             type="password"
             placeHolder="confirmPassword"
             name="confirmPassword"
-            required="required"
             error={errorMessage.confirmPassword}
           ></Input>
           <Btn text="Sign Up" btnType="submit"></Btn>
         </form>
-        <h1 id="test">Hello</h1>
         {/* <Footer/> */}
       </div>
     </>

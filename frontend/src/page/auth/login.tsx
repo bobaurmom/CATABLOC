@@ -5,15 +5,38 @@ import Input from "../../component/ui/input";
 import { login } from "../../services/authService";
 
 const Login: React.FC = () => {
+  const [errorMessage, setErrorMessage] = React.useState<{
+    email: string | null;
+    password: string | null;
+  }>({
+    email: null,
+    password: null,
+  });
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const res = await login(form);
-    if (res) {
+    if (res && res.ok) {
       console.log("Login successful");
       console.log(res);
+    } else {
+      const data = JSON.parse(JSON.stringify(res));
+      console.log("Error Data:", data);
+      if (data.errors) {
+        console.log("There are errors array");
+        setErrorMessage({
+          email: data.errors.find((error: any) => error.field === "email")?.message || null,
+          password: data.errors.find((error: any) => error.field === "password")?.message || null,
+        });
+        console.log(errorMessage);
+      } else {
+        setErrorMessage({
+          email:data.message || null,
+          password:data.message || null,
+        });
+      }
     }
-  };
+  }
   return (
     <>
       {/* <Header/> */}
@@ -42,12 +65,14 @@ const Login: React.FC = () => {
             type="email"
             name="email"
             placeHolder="Email"
+            error={errorMessage.email}
           ></Input>
           <Input
             label="Password:"
             type="password"
             name="password"
             placeHolder="Password"
+            error={errorMessage.password}
           ></Input>
           <Btn text="Login" btnType="submit" width="30"></Btn>
         </form>
