@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { register, login } from '../controllers/authController';
+import { register, login, sendOTP as sendOTPController, verifyOTP as verifyOTPController, resendOTP as resendOTPController } from '../controllers/authController';
 import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput } from '../middleware/validation';
-import { sendOTP, verifyOTP } from '../service/otpgenerator';
 // import { generateOTP } from '../service/otpgenerator';
 // import { sendOTPEmail } from '../service/email';
 
@@ -97,7 +96,7 @@ router.post('/login', sanitizeInput, validateLogin, login); //login route
  *       429:
  *         description: Too many requests
  */
-router.post('/send-otp', sanitizeInput, sendOTP);
+router.post('/send-otp', sanitizeInput, sendOTPController);
 /**
  * @swagger
  * /api/auth/verify-otp:
@@ -144,6 +143,48 @@ router.post('/send-otp', sanitizeInput, sendOTP);
  *       429:
  *         description: Too many requests
  */
-router.post('/verify-otp', sanitizeInput, verifyOTP);
+router.post('/verify-otp', sanitizeInput, verifyOTPController);
+
+/**
+ * @swagger
+ * /api/auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP code
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               type:
+ *                 type: string
+ *                 enum: [email_verification, password_reset]
+ *             required: [email, type]
+ *           example:
+ *             email: "user@example.com"
+ *             type: "email_verification"
+ *     responses:
+ *       200:
+ *         description: OTP resent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid request
+ *       429:
+ *         description: Too many requests
+ */
+router.post('/resend-otp', sanitizeInput, resendOTPController);
 
 export default router;

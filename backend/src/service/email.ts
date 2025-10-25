@@ -1,6 +1,7 @@
 import nodemailer , { Transporter ,SendMailOptions } from 'nodemailer';
 import { config } from 'dotenv';
 import { tr } from 'zod/locales';
+
 config(); 
 
 interface EmailConfig {
@@ -34,12 +35,12 @@ const createTransporter = (): Transporter => {
 const getOTPTemplate = (otpCode: string, type: 'email_verification' | 'password_reset'): EmailTemplate => {
   const getSubjectAndMessage = () => {
     switch (type) {
-      case 'email_verification':
-        return {
-          subject: '🔐 Verify Your Email - CATABLOC',
-          title: 'Email Verification',
-          message: 'Please use the following code to verify your email address:'
-        };
+      // case 'email_verification':
+      //   return {
+      //     subject: '🔐 Verify Your Email - CATABLOC',
+      //     title: 'Email Verification',
+      //     message: 'Please use the following code to verify your email address:'
+      //   };
       case 'password_reset':
         return {
           subject: '🔑 Password Reset Code - CATABLOC',
@@ -50,7 +51,7 @@ const getOTPTemplate = (otpCode: string, type: 'email_verification' | 'password_
         return {
           subject: '🔐 Verification Code - CATABLOC',
           title: 'Verification Code',
-          message: 'Please use the following code:'
+          message: ' Please use the following code:'
         };
     }
   };
@@ -58,19 +59,22 @@ const getOTPTemplate = (otpCode: string, type: 'email_verification' | 'password_
   return {
     subject,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #4a90e2;">${title}</h1>
-        <p>${message}</p>
-        <div style="background-color: #f8f9fa; border: 2px solid #4a90e2; padding: 30px; border-radius: 12px; margin: 30px 0; text-align: center;">
-          <h2 style="color: #4a90e2; font-size: 36px; letter-spacing: 8px; margin: 0; font-family: 'Courier New', monospace;">${otpCode}</h2>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #ffffff; color: #1a1a1a;">
+        <h1 style="color: #010a15; font-weight: 600; margin-bottom: 16px; font-size: 24px;">${title}</h1>
+        <p style="line-height: 1.6; color: #2d2d2d;">${message}</p>
+
+        <div style="background-color: #f8f9fa; border: 1px solid #0d0d0d; padding: 26px; border-radius: 12px; margin: 28px 0; text-align: center; box-shadow: 0 2px 4px rgba(1, 10, 21, 0.06);">
+          <h2 style="color: #010a15; font-size: 30px; letter-spacing: 5px; margin: 0; font-family: 'Courier New', monospace; font-weight: normal;">${otpCode}</h2>
         </div>
-        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="color: #856404; margin: 0; font-size: 14px;">
-            <strong>Important:</strong> This code will expire in 10 minutes. Do not share this code with anyone.
+
+        <div style="background-color: #e6f0fc; border-left: 4px solid #2c7be5; padding: 14px 16px; border-radius: 6px; margin: 24px 0;">
+          <p style="color: #010a15; margin: 0; font-size: 14px; line-height: 1.5;">
+            <strong style="color: #d92d2d;">Important:</strong> This code will expire in 10 minutes. Do not share this code with anyone.
           </p>
         </div>
-        <p>If you didn't request this code, please ignore this email.</p>
-        <p>The CATABLOC Team</p>
+
+        <p style="color: #5a5a5a; font-size: 14px; margin-top: 20px;">If you didn't request this code, please ignore this email.</p>
+        <p style="color: #5a5a5a; font-size: 14px; margin-top: 24px; font-weight: 500;">The CATABLOC</p>
       </div>
     `,
     text: `${title}\n\n${message}\n\nYour verification code is: ${otpCode}\n\nThis code will expire in 10 minutes. Do not share this code with anyone.\n\nIf you didn't request this code, please ignore this email.\n\nThe CATABLOC Team`
