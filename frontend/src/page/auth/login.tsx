@@ -1,25 +1,87 @@
-
 import React from "react";
 import Btn from "../../component/ui/button";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
+import { login } from "../../services/authService";
 
-const Login :React.FC = () =>{
-    return(
-        <>
-        {/* <Header/> */}
-        <div style={{display: "flex",flexDirection: "column",alignItems: "center", justifyContent:"center", margin:"120px 0px"}}>
+const Login: React.FC = () => {
+  const [errorMessage, setErrorMessage] = React.useState<{
+    email: string | null;
+    password: string | null;
+  }>({
+    email: null,
+    password: null,
+  });
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const res = await login(form);
+    if (res && res.ok) {
+      console.log("Login successful");
+      console.log(res);
+    } else {
+      const data = JSON.parse(JSON.stringify(res));
+      console.log("Error Data:", data);
+      if (data.errors) {
+        console.log("There are errors array");
+        setErrorMessage({
+          email: data.errors.find((error: any) => error.field === "email")?.message || null,
+          password: data.errors.find((error: any) => error.field === "password")?.message || null,
+        });
+        console.log(errorMessage);
+      } else {
+        setErrorMessage({
+          email:data.message || null,
+          password:data.message || null,
+        });
+      }
+    }
+  }
+  return (
+    <>
+      {/* <Header/> */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "120px 0px",
+        }}
+      >
         <TalkingCat text="Login to resume your progress!"></TalkingCat>
-        <form action="" method="" style={{display:"flex",flexDirection:"column",gap:"30px",margin:"40px 0",alignItems:"center"}}>
-        <Input label="Email:" type="email" name="email" placeHolder="Email"></Input>
-        <Input label="Password:" type="password" name="password" placeHolder="Password"></Input>
-        <Btn text="Login" btnType="submit" width="30"></Btn>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "30px",
+            margin: "40px 0",
+            alignItems: "center",
+          }}
+        >
+          <Input
+            label="Email:"
+            type="email"
+            name="email"
+            placeHolder="Email"
+            error={errorMessage.email}
+          ></Input>
+          <Input
+            label="Password:"
+            type="password"
+            name="password"
+            placeHolder="Password"
+            error={errorMessage.password}
+          ></Input>
+          <Btn text="Login" btnType="submit" width="30"></Btn>
         </form>
-        <a href="#">Forgot password???</a><br/>
-        <a href="/signUp">New to CATABLOC?? Sign Up</a>
+        <a href="#">Forgot password???</a>
+        <br />
+        <a href="/register">New to CATABLOC?? Sign Up</a>
         {/* <Footer/> */}
-        </div>
-        </>
-    )
-}
+      </div>
+    </>
+  );
+};
 export default Login;

@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { NotFoundHandler ,errorHandler} from './middleware/auth';
 import authRoutes from './routes/auth.routes';
-import { httpUrl } from 'zod';
+
 
 const app = express(); 
 app.use(helmet()); //helmet for security http header

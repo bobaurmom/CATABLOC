@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { register, login } from '../controllers/authController';
 import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput } from '../middleware/validation';
+// import { generateOTP } from '../service/otpgenerator';
+// import { sendOTPEmail } from '../service/email';
 
 
 const router = Router();
@@ -54,4 +56,5 @@ router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddle
  *         description: "Unauthorized"
  */
 router.post('/login', sanitizeInput, validateLogin, login); //login route
+
 export default router;

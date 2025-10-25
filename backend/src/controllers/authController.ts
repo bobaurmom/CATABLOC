@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { comparePassword, hashPassword } from "../utils/hash";
 import { generateToken, generateRefreshToken, AuthenticatedRequest } from "../utils/jwt";
 import { RegisterRequest, LoginRequest, AuthResponse, ErrorResponse } from "../types/auth";
-
+import { WelcomeEmail} from "../utils/emailtemplate";
 // type fakeuser = {
 //     id: number;
 //     email: string;
@@ -70,7 +70,7 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
 
     // Remove password from response
     const userResponse = {
-      id: (newUser as any).user_id,
+      user_id: (newUser as any).user_id,
       email: newUser.email,
       username: newUser.username,
       created_at: (newUser as any).created_at || newUser.created_at,
@@ -81,16 +81,16 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
       success: true,
       message: 'User registered successfully',
       data: {
-        user: userResponse as any
-      },
-      token,
-      refreshToken
+        user: userResponse,
+        token,
+        refreshToken 
+      } 
     };
-
     res.status(201).json(response);
+
   } catch (error) {
     console.error('Registration error:', error);
-    
+
     const response: ErrorResponse = {
       success: false,
       message: error instanceof Error ? error.message : 'Registration failed'
@@ -111,6 +111,7 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
     const user = await User.findOne({
       where: { email: normalizedEmail }
     });
+
 
     if (!user) {
       const response: ErrorResponse = {
@@ -158,10 +159,10 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
       success: true,
       message: 'Login successful',
       data: {
-        user: userResponse as any
-      },
-      token,
-      refreshToken
+        user: userResponse as any,
+        token,
+        refreshToken
+      }
     };
 
     res.status(200).json(response);
