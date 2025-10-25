@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
 import Btn from "../../component/ui/button";
