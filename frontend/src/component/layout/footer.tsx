@@ -13,15 +13,23 @@ const Footer: React.FC = () => {
             <span className="footer-title">CATABLOC</span>
           </div>
           <div className="footer-links">
-            <a href="#" className="footer-link">About</a>
-            <a href="#" className="footer-link">Community</a>
-            <a href="#" className="footer-link">Help Center</a>
+            <a href="#" className="footer-link">
+              About
+            </a>
+            <a href="#" className="footer-link">
+              Community
+            </a>
+            <a href="#" className="footer-link">
+              Help Center
+            </a>
           </div>
         </div>
         <div className="footer-section">
           <h3 className="footer-heading">Practice</h3>
           <div className="footer-links">
-            <a href="#" className="footer-link">Challenge</a>
+            <a href="#" className="footer-link">
+              Challenge
+            </a>
             <span className="footer-coming-soon">Coming Soon...</span>
             <span className="footer-coming-soon">Coming Soon...</span>
             <span className="footer-coming-soon">Coming Soon...</span>
@@ -30,15 +38,41 @@ const Footer: React.FC = () => {
         <div className="footer-section">
           <h3 className="footer-heading">Learn More</h3>
           <div className="footer-links">
-            <a href="https://www.geeksforgeeks.org/" target="_blank" rel="noopener noreferrer" className="footer-link">GeeksforGeeks</a>
-            <a href="https://www.programiz.com/" target="_blank" rel="noopener noreferrer" className="footer-link">Programiz</a>
-            <a href="https://www.w3schools.com/" target="_blank" rel="noopener noreferrer" className="footer-link">W3Schools</a>
-            <a href="https://www.codedex.io/" target="_blank" rel="noopener noreferrer" className="footer-link">Codedex</a>
+            <a
+              href="https://www.geeksforgeeks.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              GeeksforGeeks
+            </a>
+            <a
+              href="https://www.programiz.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              Programiz
+            </a>
+            <a
+              href="https://www.w3schools.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              W3Schools
+            </a>
+            <a
+              href="https://www.codedex.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              Codedex
+            </a>
           </div>
         </div>
       </div>
-
-
     </footer>
   );
 };
