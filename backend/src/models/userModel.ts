@@ -7,8 +7,8 @@ interface UserAttributes {
   email: string;
   username: string;
   password_hash: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'user_id'> {}

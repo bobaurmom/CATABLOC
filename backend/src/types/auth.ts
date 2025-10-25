@@ -14,16 +14,16 @@ export interface LoginRequest {
 export interface AuthResponse {
     success: boolean;
     message: string;
-    data?: {
-        user?: {
+    data: {
+        user: {
             user_id: number;
             email: string;
             username: string;
-            createdAt: Date;
+            created_at: Date;
         };
+        token: string;
+        refreshToken?: string;
     };
-    token?: string;
-    refreshToken?: string;
 }
 export interface userResponse {
     success: boolean;
@@ -32,7 +32,7 @@ export interface userResponse {
         id: number;
         email: string;
         username: string;
-        createdAt: Date;
+        created_at: Date;
     };
 }
 export interface Validationerror {
