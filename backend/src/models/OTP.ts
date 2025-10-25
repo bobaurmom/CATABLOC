@@ -6,9 +6,9 @@ interface OTPAttributes{
     user_id?: number;
     email: string;
     code: string;
-    expiresAt: Date;
+    expired_at: Date;
     attempts: number;
-    type: 'registration' | 'password_reset' ;
+    type: 'email_verification' | 'password_reset';
     expired: boolean;
     attemptLimit: number;
     created_at?: Date;
@@ -22,9 +22,9 @@ class OTP extends Model<OTPAttributes, OTPCreationAttributes> implements OTPAttr
     public user_id?: number;
     public email!: string;
     public code!: string;
-    public expiresAt!: Date;
+    public expired_at!: Date;
     public attempts!: number;
-    public type!: 'registration' | 'password_reset';
+    public type!: 'email_verification' | 'password_reset';
     public expired!: boolean;
     public attemptLimit!: number;
     public readonly created_at?: Date;
@@ -32,7 +32,7 @@ class OTP extends Model<OTPAttributes, OTPCreationAttributes> implements OTPAttr
 
     public incrementAttempts!: () => Promise<void>;
     public isExpired(): boolean {
-        return this.expiresAt !== undefined && new Date() > this.expiresAt;
+        return this.expired_at !== undefined && new Date() > this.expired_at;
     }
 
     public isValid(): boolean {
@@ -64,10 +64,10 @@ OTP.init(
             validate: { len: [6, 6] , isNumeric: true },
         },
         type: {
-            type: DataTypes.ENUM('registration', 'password_reset'),
+            type: DataTypes.ENUM('email_verification', 'password_reset'),
             allowNull: false,
         },
-        expiresAt: {
+        expired_at: {
             type: DataTypes.DATE,
             allowNull: false,
         },
@@ -89,7 +89,7 @@ OTP.init(
     },
     {
         sequelize,
-        tableName: "otps",
+        tableName: "otp",
         timestamps: true,
         underscored: true,
         indexes: [
@@ -97,7 +97,7 @@ OTP.init(
                 fields: ['email', 'type'],
             },
             {
-                fields: ['expiredAt'],
+                fields: ['expired_at'],
             },
         ],
     }

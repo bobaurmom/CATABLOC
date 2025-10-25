@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { register, login } from '../controllers/authController';
 import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput } from '../middleware/validation';
+import { sendOTP, verifyOTP } from '../service/otpgenerator';
 // import { generateOTP } from '../service/otpgenerator';
 // import { sendOTPEmail } from '../service/email';
 
@@ -56,5 +57,93 @@ router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddle
  *         description: "Unauthorized"
  */
 router.post('/login', sanitizeInput, validateLogin, login); //login route
+/**
+ * @swagger
+ * /api/auth/send-otp:
+ *   post:
+ *     summary: Send OTP for email verification
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               type:
+ *                 type: string
+ *                 enum: [email_verification, password_reset]
+ *             required: [email, type]
+ *           example:
+ *             email: "user@example.com"
+ *             type: "email_verification"
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid request or OTP already sent
+ *       429:
+ *         description: Too many requests
+ */
+router.post('/send-otp', sanitizeInput, sendOTP);
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP code
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 pattern: '^[0-9]{6}$'
+ *               type:
+ *                 type: string
+ *                 enum: [email_verification, password_reset]
+ *             required: [email, code, type]
+ *           example:
+ *             email: "user@example.com"
+ *             code: "123456"
+ *             type: "email_verification"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Invalid OTP or expired
+ *       429:
+ *         description: Too many requests
+ */
+router.post('/verify-otp', sanitizeInput, verifyOTP);
 
 export default router;
