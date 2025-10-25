@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { comparePassword, hashPassword } from "../utils/hash";
 import { generateToken, generateRefreshToken, AuthenticatedRequest } from "../utils/jwt";
 import { RegisterRequest, LoginRequest, AuthResponse, ErrorResponse } from "../types/auth";
-import { WelcomeEmail} from "../utils/emailtemplate";
+import { sendOTP as sendOTPService , verifyOTP as verifyOTPService , resendOTP as resendOTPService, incrementOTPAttempts } from '../service/otpgenerator';
 // type fakeuser = {
 //     id: number;
 //     email: string;
@@ -177,3 +177,123 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
     res.status(500).json(response);
   }
 };
+//send otp
+export const sendOTP = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { email, type } = req.body;
+
+    if (!email || !type) {
+      const response: ErrorResponse = {
+        success: false,
+        message: 'Email and type are required'
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const result = await sendOTPService({ email, type });
+    
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    
+    const response: ErrorResponse = {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to send OTP'
+    };
+
+    res.status(500).json(response);
+  }
+};
+
+// Verify OTP
+export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { email, code, type } = req.body;
+
+    if (!email || !code || !type) {
+      const response: ErrorResponse = {
+        success: false,
+        message: 'Email, code, and type are required'
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const result = await verifyOTPService({ email, code, type });
+    
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message,
+        data: result.data
+      });
+    } else {
+      await incrementOTPAttempts(email, code, type);
+      
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    
+    const response: ErrorResponse = {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to verify OTP'
+    };
+
+    res.status(500).json(response);
+  }
+};
+
+// Resend OTP
+export const resendOTP = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { email, type } = req.body;
+
+    if (!email || !type) {
+      const response: ErrorResponse = {
+        success: false,
+        message: 'Email and type are required'
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    const result = await resendOTPService({ email, type });
+    
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    
+    const response: ErrorResponse = {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to resend OTP'
+    };
+
+    res.status(500).json(response);
+  }
+};
+
