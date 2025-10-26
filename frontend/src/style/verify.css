@@ -1,40 +1,70 @@
-.verfication-popUp{
-    width:100vw;
-    background-color: rgba(255,0,0,0.5);
-    display:flex;
-    align-items: center;
-}
-.verification-container{
-    margin:min(10%,50px);
-    padding: min(10px,5%) min(50px,10%);
-    width:clamp(300px,80%,400px);
-    background-color: white;
+.verification-popUp {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    justify-content: center;
-    align-self: center;
-    justify-self: center;
-    gap:10px;
-    box-shadow: 3px 3px 3px 3px rgba(0,0,0,0.5);
-    border-radius: 10px;
+    z-index: 1000;
 }
-.input-container{
-    display:flex;
-    width:50%;
-    justify-content: center;
-    padding:10px;
-    background-color: white;
-    border:1px dashed cyan;
-    border-radius: 50px;
-    gap:10px;
-}
-.verification-input{
-    width:calc(100%/24);
+
+.verification-container {
+    background: white;
+    padding: 40px; 
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     text-align: center;
-    border:none;
-    border-bottom: 1px solid black;
+    max-width: 90%;
+    width: 400px;
+    
 }
-.verification-input:focus{
+
+.verification-logo {
+    width: 80px;
+    margin-bottom: 5px;
+}
+
+.verification-container h1 {
+    font-size: 24px; 
+    margin: 8px 0; 
+    color: #333;
+}
+
+.verification-instruction {
+    font-size: 15.2px; 
+    color: #666;
+    margin: 16px 0 24px; 
+    line-height: 1.5;
+}
+
+.input-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 28.8px; 
+}
+
+.verification-input {
+    width: 50px;
+    height: 60px;
+    font-size: 24px; 
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 8px;
     outline: none;
+    transition: all 0.2s ease;
+    background-color: #fafafa;
+}
+
+.verification-input:focus {
+    border-color: #4a6cf7;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+}
+
+.verification-input::placeholder {
+    color: transparent;
 }
