@@ -19,14 +19,14 @@ const Input: React.FC<input> = ({
   error,
 }) => {
   return (
-    <div>
+    <div style={{width: "100%"}}>
       <label htmlFor={name}>{label}</label>
       <br />
       <input
         type={type}
         placeholder={placeHolder}
         style={{
-          width: "550px",
+          width: "100%",
           border: `1px solid ${error ? "red" : "blue"}`,
           borderRadius: "20px",
           padding: "15px 0",

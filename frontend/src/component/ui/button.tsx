@@ -6,6 +6,7 @@ interface button {
   btnType?: HTMLButtonElement["type"];
   fSize?: string;
   width?: string;
+  id?: string;
 }
 const Btn: React.FC<button> = ({
   text,
@@ -13,6 +14,7 @@ const Btn: React.FC<button> = ({
   btnType,
   fSize = 1,
   width,
+  id,
 }) => {
   return (
     <button
@@ -22,7 +24,7 @@ const Btn: React.FC<button> = ({
         fontSize: `${fSize}rem`,
         width: `${width}%`,
       }}
-      id="btn"
+      id={id}
     >
       {text}
     </button>
