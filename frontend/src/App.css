@@ -1,3 +1,8 @@
+@media screen and (max-width:768px){
+  html{
+    font-size: 12px;
+  }
+}
 .app-container {
   display: flex;
   flex-direction: column;

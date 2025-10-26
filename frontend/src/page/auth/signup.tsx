@@ -62,6 +62,7 @@ const SignUp: React.FC = () => {
             gap: "30px",
             margin: "40px 0",
             alignItems: "center",
+            width: "36%",
           }}
         >
           <Input
@@ -88,7 +89,7 @@ const SignUp: React.FC = () => {
           <Input
             label="Confirm Password:"
             type="password"
-            placeHolder="confirmPassword"
+            placeHolder="Confirm Password"
             name="confirmPassword"
             error={errorMessage.confirmPassword}
           ></Input>
