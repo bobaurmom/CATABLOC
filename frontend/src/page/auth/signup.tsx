@@ -4,6 +4,8 @@ import Input from "../../component/ui/input";
 import Btn from "../../component/ui/button";
 import { signUp } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+
+
 const SignUp: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<{
     email: string | null;

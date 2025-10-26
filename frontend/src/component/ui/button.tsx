@@ -1,28 +1,37 @@
 import React from "react";
 
-interface button {
+interface ButtonProps {
   text: string;
   bgColor?: string;
-  btnType?: HTMLButtonElement["type"];
-  fSize?: string;
-  width?: string;
+  btnType?: HTMLButtonElement["type"]; //type for button element
+  fSize?: number | string;
+  width?: number | string;
   id?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
-const Btn: React.FC<button> = ({
+
+const Btn: React.FC<ButtonProps> = ({
   text,
   bgColor = "blue",
-  btnType,
+  btnType = "button",
   fSize = 1,
   width,
   id,
+  onClick,
 }) => {
   return (
     <button
       type={btnType}
+      onClick={onClick}
       style={{
-        backgroundColor: `${bgColor}`,
+        backgroundColor: bgColor,
         fontSize: `${fSize}rem`,
-        width: `${width}%`,
+        width: width !== undefined ? `${width}%` : "auto", 
+        border: "none",
+        padding: "0.5rem 1rem",
+        cursor: "pointer",
+        color: "white",
+        borderRadius: "4px",
       }}
       id={id}
     >
@@ -30,4 +39,5 @@ const Btn: React.FC<button> = ({
     </button>
   );
 };
+
 export default Btn;

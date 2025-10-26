@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "nodemailer": "^7.0.9",
+    "prisma": "^6.18.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^7.0.2"
+  }
+}
