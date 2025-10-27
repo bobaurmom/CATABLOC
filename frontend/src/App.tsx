@@ -7,6 +7,7 @@ import Home from './page/home';
 import Login from './page/auth/login';
 import SignUp from './page/auth/signup';
 import Verification from './component/ui/verification';
+import Dashboard from './page/dashboard';
 function App() {
   
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<SignUp />} />
         <Route path='/verify' element={<Verification />} />
+        <Route path='/dashboard' element={<Dashboard />} />
       </Routes>
       <Footer />
     </div>
