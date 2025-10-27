@@ -1,0 +1,110 @@
+.dashboard-container {
+    min-height: calc(100vh - 120px);
+    padding: 40px 20px;
+    background: #ffffff;
+}
+
+.dashboard-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 100px;
+}
+
+.dashboard-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1 1 680px;
+    min-width: 300px;
+    max-width: 680px;
+    gap: 20px;
+}
+
+.dashboard-games-grid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.dashboard-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 0 1 380px;
+    min-width: 300px;
+    gap: 25px;
+    position: sticky;
+    top: 80px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+    .dashboard-wrapper {
+        flex-wrap: wrap;
+    }
+    
+    .dashboard-right {
+        position: static;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .dashboard-container {
+        padding: 20px 10px;
+    }
+    
+    .dashboard-wrapper {
+        gap: 25px;
+    }
+    
+    .dashboard-left,
+    .dashboard-right {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .dashboard-games-grid {
+        gap: 20px;
+    }
+}
+
+/* Animation for cards on load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-left > *,
+.dashboard-right > * {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.dashboard-left > *:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.dashboard-left > *:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dashboard-right > *:nth-child(1) {
+    animation-delay: 0.15s;
+}
+
+.dashboard-right > *:nth-child(2) {
+    animation-delay: 0.25s;
+}
