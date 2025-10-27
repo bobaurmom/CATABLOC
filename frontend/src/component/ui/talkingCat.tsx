@@ -12,4 +12,4 @@ const TalkingCat: React.FC<prop> = ({ text }) => {
     </div>
   );
 };
-export default TalkingCat;
+export default TalkingCat; 

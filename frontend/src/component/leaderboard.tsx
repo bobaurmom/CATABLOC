@@ -20,18 +20,18 @@ const profiles: Profile[] = [
 
 const Leaderboard: React.FC = () => {
   return (
-    <section className="card">
+    <section className="leaderboard-card">
       <header className="title">
         <img src={medalIcon} alt="medal" className="medal" />
         <h1>Leaderboard</h1>
       </header>
       <ul className="profile-list">
         {profiles.map(({ rank, name, bio, points }) => (
-          <li key={rank} className="profile">
+          <li key={rank} className="profile-leaderboard">
             <h2>{rank}</h2>
             <div className="details">
-              <div className="profile-image">
-                <img src={catImage} alt="profile" className="image" />
+              <div className="profile-leader-image">
+                <img src={catImage} alt="profile" className="image-leader" />
               </div>
               <div className="profile-info">
                 <span className="name">{name}</span>
