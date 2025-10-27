@@ -4,6 +4,8 @@ import Input from "../../component/ui/input";
 import Btn from "../../component/ui/button";
 import { signUp } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+
+
 const SignUp: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<{
     email: string | null;
@@ -62,6 +64,7 @@ const SignUp: React.FC = () => {
             gap: "30px",
             margin: "40px 0",
             alignItems: "center",
+            width: "36%",
           }}
         >
           <Input
@@ -88,7 +91,7 @@ const SignUp: React.FC = () => {
           <Input
             label="Confirm Password:"
             type="password"
-            placeHolder="confirmPassword"
+            placeHolder="Confirm Password"
             name="confirmPassword"
             error={errorMessage.confirmPassword}
           ></Input>

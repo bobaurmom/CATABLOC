@@ -6,7 +6,7 @@ import Header from './component/layout/header';
 import Home from './page/home';
 import Login from './page/auth/login';
 import SignUp from './page/auth/signup';
-import Dashboard from './page/dashboard';
+import Verification from './component/ui/verification';
 function App() {
   
   return (
@@ -16,8 +16,8 @@ function App() {
       <Routes> 
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<SignUp />} /> 
-        <Route path='/dashboard' element={<Dashboard />} /> 
+        <Route path='/register' element={<SignUp />} />
+        <Route path='/verify' element={<Verification />} />
       </Routes>
       <Footer />
     </div>

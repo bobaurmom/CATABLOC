@@ -1,6 +1,7 @@
 import nodemailer , { Transporter ,SendMailOptions } from 'nodemailer';
 import { config } from 'dotenv';
 import { tr } from 'zod/locales';
+import { OTPTemplate } from '../utils/emailtemplate';
 
 config(); 
 
