@@ -13,3 +13,4 @@ const TalkingCat: React.FC<prop> = ({ text }) => {
   );
 };
 export default TalkingCat;
+

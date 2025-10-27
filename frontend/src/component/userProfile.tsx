@@ -3,17 +3,22 @@ import "../style/userProfile.css";
 import catImage from "../assets/cat.png";
 import starIcon from "../assets/star.svg";
 import fireIcon from "../assets/fire.svg";
+import Btn from "./ui/button";
+interface a {
+  name: string;
+  bio: string;
+}
 
-const userProfile: React.FC = () => {
+const userProfile: React.FC<a>= ({name, bio}) => {
   return (
     <div className="userCard">
       <div className="profile">
         <div className="profile-image">
-          <img src={catImage} alt="cat" className="image" />
+          <img src={catImage} alt="cat" className="image-user" />
         </div>
-        <div className="text">
-          <span className="name">Boba</span>
-          <span className="job">Student</span>
+        <div className="text-user">
+          <span className="name">{name}</span>
+          <span className="job">{bio}</span>
         </div>
       </div>
       <div className="stats">
@@ -36,7 +41,8 @@ const userProfile: React.FC = () => {
           </div>
         </div>
       </div>
-      <button>View Profile</button>
+      <Btn text="View Profile"></Btn>
+      {/* <button>View Profile</button> */}
     </div>
   );
 };
