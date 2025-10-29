@@ -3,13 +3,7 @@ import { comparePassword, hashPassword } from "../utils/hash";
 import { generateToken, generateRefreshToken, AuthenticatedRequest } from "../utils/jwt";
 import { RegisterRequest, LoginRequest, AuthResponse, ErrorResponse } from "../types/auth";
 import { sendOTP as sendOTPService , verifyOTP as verifyOTPService , resendOTP as resendOTPService, incrementOTPAttempts } from '../service/otpgenerator';
-// type fakeuser = {
-//     id: number;
-//     email: string;
-//     username: string;
-//     password: string;
-//     created_at: Date;
-// };
+
 import User from "../models/userModel";
 export const register = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -52,43 +46,62 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
     const newUser = await User.create({
       email: normalizedEmail,
       username,
-      password_hash: hashed
+      password_hash: hashed,
+      status: 'pending'
+    });
+    //send OTP after registration
+    const otpResult = await sendOTPService({ email: normalizedEmail, type: 'email_verification' });
+    if (!otpResult.success) {
+      await User.destroy({ where: { user_id: (newUser as any).user_id} });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP. '
+      });
+      return;
+    }
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully. Please verify your email using the OTP sent.',
+      data: {
+        email: newUser.email,
+        username: newUser.username
+      }
     });
 
     // Generate tokens
-    const token = await generateToken({
-      userId: (newUser as any).user_id,
-      email: newUser.email,
-      username: newUser.username
-    });
+    // const token = await generateToken({
+    //   userId: (newUser as any).user_id,
+    //   email: newUser.email,
+    //   username: newUser.username
+    // });
 
-    const refreshToken = await generateRefreshToken({
-      userId: (newUser as any).user_id,
-      email: newUser.email,
-      username: newUser.username
-    });
+    // const refreshToken = await generateRefreshToken({
+    //   userId: (newUser as any).user_id,
+    //   email: newUser.email,
+    //   username: newUser.username
+    // });
 
     // Remove password from response
-    const userResponse = {
-      user_id: (newUser as any).user_id,
-      email: newUser.email,
-      username: newUser.username,
-      created_at: (newUser as any).created_at || newUser.created_at,
-      updated_at: (newUser as any).updated_at || newUser.updated_at
-    };
+  //   const userResponse = {
+  //     user_id: (newUser as any).user_id,
+  //     email: newUser.email,
+  //     username: newUser.username,
+  //     created_at: (newUser as any).created_at || newUser.created_at,
+  //     updated_at: (newUser as any).updated_at || newUser.updated_at
+  //   };
 
-    const response: AuthResponse = {
-      success: true,
-      message: 'User registered successfully',
-      data: {
-        user: userResponse,
-        token,
-        refreshToken 
-      } 
-    };
-    res.status(201).json(response);
-
-  } catch (error) {
+  //   const response: AuthResponse = {
+  //     success: true,
+  //     message: 'User registered successfully',
+  //     data: {
+  //       user: userResponse,
+  //       token,
+  //       refreshToken 
+  //     } 
+  //   };
+  //   res.status(201).json(response);
+  } 
+  catch (error) {
     console.error('Registration error:', error);
 
     const response: ErrorResponse = {
@@ -109,7 +122,7 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
 
     // Find user by email
     const user = await User.findOne({
-      where: { email: normalizedEmail }
+      where: { email: normalizedEmail ,status:'active' }
     });
 
 
@@ -233,11 +246,52 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
     const result = await verifyOTPService({ email, code, type });
     
     if (result.success) {
-      res.status(200).json({
-        success: true,
-        message: result.message,
-        data: result.data
+      //find user with pending
+      const user = await User.findOne({
+        where: { email, status: 'pending' }
       });
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: 'No pending user found for this email'
+        });
+        return;
+      }
+      // Update user status to 'active'
+      await User.update({ status: 'active' }, { where: { email } });
+
+    // Generate token 
+    const token = await generateToken({
+      userId: user.user_id,
+      email: user.email,
+      username: user.username
+    });
+
+    const refreshToken = await generateRefreshToken({
+      userId: user.user_id,
+      email: user.email,
+      username: user.username
+    });
+
+    //Remove password from response
+    const userResponse = {
+      user_id: user.user_id,
+      email: user.email,
+      username: user.username,
+      created_at: user.created_at || user.created_at,
+      updated_at: user.updated_at || user.updated_at
+    };
+
+    const response: AuthResponse = {
+      success: true,
+      message: 'User registered successfully',
+      data: {
+        user: userResponse,
+        token,
+        refreshToken 
+      } 
+    };
+    res.status(200).json(response);
     } else {
       await incrementOTPAttempts(email, code, type);
       
@@ -246,6 +300,7 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
         message: result.message
       });
     }
+
   } catch (error) {
     console.error('Verify OTP error:', error);
     

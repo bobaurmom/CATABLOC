@@ -1,12 +1,12 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/sequelize';
-import { tr } from 'zod/locales';
 
 interface UserAttributes {
   user_id: number;
   email: string;
   username: string;
   password_hash: string;
+  status:  'pending' | 'active' | 'suspended';
   created_at?: Date;
   updated_at?: Date;
 }
@@ -20,6 +20,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public password_hash!: string;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
+  public status!: 'pending' | 'active' | 'suspended';
 }
 
 User.init(
@@ -52,6 +53,11 @@ User.init(
       validate: {
         notEmpty: true,
       },
+    },
+    status: {
+      type: DataTypes.ENUM('pending', 'active', 'suspended'),
+      allowNull: false,
+      defaultValue: 'pending',
     },
 
   },
