@@ -3,6 +3,7 @@ import OTP from '../models/OTP';
 import emailService from './email';
 import { ca } from 'zod/locales';
 import { send } from 'process';
+import bcrypt from 'bcrypt';
 
 export interface OTPRequest {
     email: string;
@@ -10,7 +11,7 @@ export interface OTPRequest {
 }
 export interface OTPVerification{
     email: string;
-    code: string;
+    hashedOTPCode: string;
     type: 'email_verification' | 'password_reset';
 
 }
@@ -104,11 +105,11 @@ export async function sendOTP(request: OTPRequest): Promise<{ success: boolean ,
     //VERIFY OTP
 export async function verifyOTP(verification: OTPVerification): Promise<{ success: boolean; message: string ;data?: any}> {
     try {
-        const { email, code, type } = verification;
+        const { email, hashedOTPCode, type } = verification;
         const otpRecord = await OTP.findOne({
             where: {
                 email,
-                code,
+                code: hashedOTPCode,
                 type,
             },
         });
@@ -178,3 +179,9 @@ export async function resendOTP( request: OTPRequest ): Promise< {success : bool
     }
 }
 
+//hashOTP code function
+export const hashOTPCode = async ( code: string ): Promise<string> => {
+    const saltRounds = 10;
+    const hashedCode = await bcrypt.hash(code, saltRounds);
+    return hashedCode;
+};

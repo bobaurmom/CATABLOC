@@ -1,7 +1,6 @@
 import nodemailer , { Transporter ,SendMailOptions } from 'nodemailer';
 import { config } from 'dotenv';
 import { tr } from 'zod/locales';
-import { OTPTemplate } from '../utils/emailtemplate';
 
 config(); 
 
@@ -36,12 +35,6 @@ const createTransporter = (): Transporter => {
 const getOTPTemplate = (otpCode: string, type: 'email_verification' | 'password_reset'): EmailTemplate => {
   const getSubjectAndMessage = () => {
     switch (type) {
-      // case 'email_verification':
-      //   return {
-      //     subject: '🔐 Verify Your Email - CATABLOC',
-      //     title: 'Email Verification',
-      //     message: 'Please use the following code to verify your email address:'
-      //   };
       case 'password_reset':
         return {
           subject: '🔑 Password Reset Code - CATABLOC',

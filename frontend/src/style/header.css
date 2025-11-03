@@ -48,7 +48,7 @@
 .header-right {
     flex: 0 0 auto;
 }
-button {
+.header button {
     background-color: #142ab6;
     color: white;
     border: none;

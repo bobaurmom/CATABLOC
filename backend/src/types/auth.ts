@@ -5,11 +5,24 @@ export interface RegisterRequest {
     password: string;
     username: string;
     confirmPassword: string;
+    status?: 'active' | 'pending' ;
 }
 export interface LoginRequest {
     email: string;
     password: string;
     username?: string;
+    status?: 'active' | 'pending';
+}
+export interface EmailVerificationRequest {
+    email: string;
+    status?: 'active' | 'pending';
+    code?: string;
+}
+export interface ResetPasswordRequest {
+    email: string;
+    resetToken: string;
+    newPassword: string;
+    confirmNewPassword: string;
 }
 export interface AuthResponse {
     success: boolean;

@@ -1,10 +1,8 @@
 import { Router } from 'express';
 import { register, login, sendOTP as sendOTPController, verifyOTP as verifyOTPController, resendOTP as resendOTPController } from '../controllers/authController';
 import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput } from '../middleware/validation';
-// import { generateOTP } from '../service/otpgenerator';
-// import { sendOTPEmail } from '../service/email';
-
-
+import swaggerDocs from '../config/swagger';
+import { resetPassword as resetPasswordController } from '../controllers/authController';
 const router = Router();
 /**
  * @swagger
@@ -186,5 +184,68 @@ router.post('/verify-otp', sanitizeInput, verifyOTPController);
  *         description: Too many requests
  */
 router.post('/resend-otp', sanitizeInput, resendOTPController);
+/**swagger
+ * /api/auth/forgot-password:
+ *  post:
+ *    summary: Forgot password
+ *    tags: [Auth]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *           $ref: '#/components/schemas/ForgotPasswordRequest'
+ *    responses:
+ *     '200':
+ *       description: Password reset email sent successfully
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               success:
+ *                 type: boolean
+ *               message:
+ *                 type: string
+ *     '400':
+ *       description: Invalid email
+ *     '404':
+ *       description: User not found
+ *     '500':
+ *       description: Internal server error
+ */
+//router.post('/email-verification', sanitizeInput, emailVerificationController); //email verification route
+/**swagger
+ * /api/auth/reset-password:
+ *  patch:
+ *   summary: Reset password
+ *   tags: [Auth]
+ *   requestBody:
+ *    required: true
+ *   content:
+ *    application/json:
+ *     schema:
+ *     $ref: '#/components/schemas/ResetPasswordRequest'
+ *  responses:
+ *   '200':
+ *    description: Password reset successfully
+ *   content:
+ *    application/json:
+ *    schema:
+ *    type: object
+ *    properties:
+ *    success:
+ *    type: boolean
+ *   message:
+ *   type: string
+ *  '400':
+ *  description: Invalid request
+ * '404':
+ *  description: User not found
+ * '500':
+ *  description: Internal server error
+ */ 
+router.patch('/reset-password', sanitizeInput, resetPasswordController); //reset password route
+
 
 export default router;

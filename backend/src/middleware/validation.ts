@@ -100,3 +100,17 @@ export const sanitizeInput = (req:Request,res:Response,next:NextFunction):void=>
     req.body = sanitize(req.body);
     next(); // continue to next middleware
 };  
+export const validatePasswordResetSchema = z.object({
+    email: z.string()
+        .email('please provide a valid email address')
+        .min(1, 'email is required')
+        .max(100, 'email must be less than 100 characters'),
+    resetToken: z.string()
+        .min(1, 'reset token is required'),
+    newPassword: z.string()
+        .min(1, 'new password is required'),
+    confirmNewPassword: z.string()
+        .min(1, 'confirm new password is required')
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'new passwords do not match',
+});
