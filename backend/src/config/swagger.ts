@@ -1,5 +1,7 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import { Router } from "express";       
+import { stat } from "fs";
+import { hashPassword } from "../utils/hash";
 
 const swaggerOptions = {
     definition: {
@@ -27,7 +29,7 @@ const swaggerOptions = {
                 User: {
                     type: "object",
                     properties: {
-                        id: {
+                        user_id: {
                             type: "integer",
                             example: 1,
                             description: "Unique user identifier"
@@ -43,14 +45,25 @@ const swaggerOptions = {
                             example: "username",
                             description: "User's unique username"
                         },
+                        status: {
+                            type: "string",
+                            enum: ["pending", "active", "suspended"],
+                            description: "User account status"
+                        },
                         createdAt: {
                             type: "string",
                             format: "date-time",
                             example: "2024-01-01T00:00:00.000Z",
                             description: "User creation timestamp"
                         },
+                        updatedAt: {
+                            type: "string",
+                            format: "date-time",
+                            example: "2024-01-01T00:00:00.000Z",
+                            description: "User update timestamp"
+                        }
                     },
-                    required: ["id", "email", "username", "createdAt", "updatedAt"]
+                    required: ["user_id", "email", "username","status", "createdAt", "updatedAt"]
                 },
                 RegisterRequest: {
                     type: "object",
@@ -100,6 +113,34 @@ const swaggerOptions = {
                     },
                     required: ["email", "password"]
                 },
+                forgotPasswordRequest: {
+                    type: "object",
+                    properties: {
+                        email: {
+                            type: "string",
+                            format: "email",
+                            example: "user@example.com",
+                            description: "User's email address"
+                        }
+                    },
+                    required: ["email"]
+                },
+                ResetPasswordRequest: {
+                    type: "object",
+                    properties: {
+                        newPassword: {
+                            type: "string",
+                            example: "NewSecurePass123!",
+                            description: "New password (min 8 chars, must contain uppercase, lowercase, number, special char)"
+                        },
+                        confirmPassword: {
+                            type: "string",
+                            example: "NewSecurePass123!",
+                            description: "Password confirmation (must match new password)"
+                        }
+                    },
+                    required: ["newPassword", "confirmPassword"]
+                },
                 AuthResponse: {
                     type: "object",
                     properties: {
@@ -132,7 +173,10 @@ const swaggerOptions = {
                             }
                         }
                     }
+                
+
                 },
+                
                 UserResponse: {
                     type: "object",
                     properties: {
