@@ -8,12 +8,11 @@ interface OTPAttributes{
     code: string;
     expired_at: Date;
     attempts: number;
-    type: 'email_verification' | 'password_reset';
+    otp_type: 'email_verification' | 'password_reset';
     expired: boolean;
     attemptLimit: number;
     created_at?: Date;
     updated_at?: Date;
-
 }
 interface OTPCreationAttributes extends Optional<OTPAttributes, 'otp_id' | 'user_id' | 'attempts' | 'expired' | 'created_at' | 'updated_at'> {}
 
@@ -24,7 +23,7 @@ class OTP extends Model<OTPAttributes, OTPCreationAttributes> implements OTPAttr
     public code!: string;
     public expired_at!: Date;
     public attempts!: number;
-    public type!: 'email_verification' | 'password_reset';
+    public otp_type!: 'email_verification' | 'password_reset';
     public expired!: boolean;
     public attemptLimit!: number;
     public readonly created_at?: Date;
@@ -59,11 +58,14 @@ OTP.init(
             validate: { isEmail: true },
         },
         code: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(60),
             allowNull: false,
-            validate: { len: [6, 6] , isNumeric: true },
+            validate:
+            {
+                notEmpty: true,
+            },
         },
-        type: {
+        otp_type: {
             type: DataTypes.ENUM('email_verification', 'password_reset'),
             allowNull: false,
         },
@@ -94,7 +96,7 @@ OTP.init(
         underscored: true,
         indexes: [
             {
-                fields: ['email', 'type'],
+                fields: ['email', 'otp_type'],
             },
             {
                 fields: ['expired_at'],

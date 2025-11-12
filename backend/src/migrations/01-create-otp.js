@@ -31,7 +31,7 @@ module.exports = {
           isNumeric: true
         }
       },
-      type: {
+      otp_type: {
         type: Sequelize.ENUM('email_verification', 'password_reset'),
         allowNull: false
       },
@@ -62,7 +62,7 @@ module.exports = {
     });
 
     // Add indexes
-    await queryInterface.addIndex('otp', ['email', 'type']);
+    await queryInterface.addIndex('otp', ['email', 'otp_type']);
     await queryInterface.addIndex('otp', ['expiresAt']);
   },
 

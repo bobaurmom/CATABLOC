@@ -20,6 +20,21 @@ export const comparePassword = async (password: string, hashedPassword: string):
         throw new Error("Error comparing the password");
     }
 }
+
+export const hashOTPCode = async ( code: string ): Promise<string> => {
+    const saltRounds = 10;
+    const hashedCode = await bcrypt.hash(code, saltRounds);
+    return hashedCode;
+};
+
+export const compareOTP = async (otp: string, hashedOTP: string): Promise<boolean> => {
+    try {
+        return await bcrypt.compare(otp, hashedOTP);
+    } catch (error) {
+        throw new Error("Error comparing the OTP");
+    }
+}
+
 // validate if a password meets the thing
 export const validatePassword = (password: string): { isValid: boolean; messages: string } => {
     

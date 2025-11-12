@@ -213,18 +213,16 @@ export const optionalAuth = async (
         next();
     }
 };
-export const invalidateResetToken = (email: string, resetToken: string): void => {    
+export const invalidateResetToken = (email: string, resetToken: string): void => {
     try {
         const decoded = jwt.verify(resetToken, JWT_RESET_SECRET, {
             issuer: 'catabloc-api',
             audience: 'catabloc-client'
         }) as ResetTokenPayload;
 
-        if (decoded.email !== email) {
-            throw new Error('Invalid token');
+        if (decoded.email !== email || decoded.type !== 'password_reset') {
+            throw new Error('Invalid reset token');
         }
-
-        // Invalidate the token (implementation depends on your strategy)
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             throw new Error('Reset token expired');
@@ -232,5 +230,85 @@ export const invalidateResetToken = (email: string, resetToken: string): void =>
             throw new Error('Invalid reset token');
         }
         throw new Error('Error verifying reset token');
+    }
+};
+// auto-generated-jwt-cookie-management
+export const setAuthCookies = (res: Response, accessToken: string, refreshToken: string) => {
+    // Access token - short lived
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+    
+    // Refresh token - long lived
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    });
+};
+
+// Clear cookies on logout
+export const clearAuthCookies = (res: Response) => {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+};
+
+// logout endpoint
+export const logout = (req: Request, res: Response) => {
+    clearAuthCookies(res);
+    res.json({
+        success: true,
+        message: 'Logged out successfully'
+    });
+};
+
+export const refreshAccessToken = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+        
+        if (!refreshToken) {
+            res.status(401).json({
+                success: false,
+                message: 'Refresh token required'
+            });
+            return;
+        }
+        
+        const decoded = await verifyRefreshToken(refreshToken);
+        
+        // Generate new access token
+        const newAccessToken = await generateToken({
+            userId: decoded.userId,
+            email: decoded.email,
+            username: decoded.username
+        });
+        
+        // Set new access token cookie
+        res.cookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 15 * 60 * 1000
+        });
+        
+        res.json({
+            success: true,
+            message: 'Token refreshed successfully'
+        });
+    } catch (error) {
+        // Clear invalid cookies
+        clearAuthCookies(res);
+        
+        res.status(401).json({
+            success: false,
+            message: error instanceof Error ? error.message : 'Invalid refresh token'
+        });
     }
 };

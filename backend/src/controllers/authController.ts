@@ -11,12 +11,12 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
   try {
     const { email, username, password }: RegisterRequest = req.body;
 
-    const normalizedEmail = email.toLowerCase();
-    const normalizedUsername = username.toLowerCase();
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedUsername = username.toLowerCase().trim();
     const pendingUsers = await User.findAll({
       where: { email: normalizedEmail, status: 'pending' }
     });
-    // Delete pending users with the same email
+    // Delete pending users with the same email.
     if(pendingUsers){
       await User.destroy({ where: { email: normalizedEmail, status: 'pending' } });
     }
@@ -61,12 +61,16 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
       await User.destroy({ where: { user_id: newUser.user_id } });
       res.status(500).json({
         success: false,
-        message: 'Failed to send OTP. '
+        message: 'Failed to send OTP.hehhe '
       });
       return;
     }
-  } 
-  catch (error) {
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully. Please verify your email.',
+    });
+    
+  } catch (error) {
     console.error('Registration error:', error);
 
     const response: ErrorResponse = {
@@ -197,7 +201,6 @@ export const sendOTP = async (req: AuthenticatedRequest, res: Response): Promise
 export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { email, code, type } = req.body;
-
     if (!email || !code || !type) {
       const response: ErrorResponse = {
         success: false,
@@ -206,9 +209,7 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
       res.status(400).json(response);
       return;
     }
-
     const result = await verifyOTPService({ email, hashedOTPCode: code, type });
-    
     if (result.success) {
       //find user with pending
       const user = await User.findOne({
@@ -385,7 +386,6 @@ export const verifyResetCode = async (req: AuthenticatedRequest, res: Response):
       res.status(400).json({ success: false, message: otpResult.message });
       return;
     }
-
     // Generate a short-lived reset token (optional but recommended)
     // This proves the user verified the OTP
     const resetToken = await generateResetPasswordToken(normalizedEmail);

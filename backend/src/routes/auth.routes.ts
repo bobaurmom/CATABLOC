@@ -184,7 +184,8 @@ router.post('/verify-otp', sanitizeInput, verifyOTPController);
  *         description: Too many requests
  */
 router.post('/resend-otp', sanitizeInput, resendOTPController);
-/**swagger
+/** 
+ * @swagger
  * /api/auth/forgot-password:
  *  post:
  *    summary: Forgot password
@@ -214,38 +215,38 @@ router.post('/resend-otp', sanitizeInput, resendOTPController);
  *     '500':
  *       description: Internal server error
  */
-//router.post('/email-verification', sanitizeInput, emailVerificationController); //email verification route
-/**swagger
+router.post('/email-verification', sanitizeInput); //email verification route
+/**
+ * @swagger
  * /api/auth/reset-password:
- *  patch:
- *   summary: Reset password
- *   tags: [Auth]
- *   requestBody:
- *    required: true
- *   content:
- *    application/json:
- *     schema:
- *     $ref: '#/components/schemas/ResetPasswordRequest'
- *  responses:
- *   '200':
- *    description: Password reset successfully
- *   content:
- *    application/json:
- *    schema:
- *    type: object
- *    properties:
- *    success:
- *    type: boolean
- *   message:
- *   type: string
- *  '400':
- *  description: Invalid request
- * '404':
- *  description: User not found
- * '500':
- *  description: Internal server error
- */ 
-router.patch('/reset-password', sanitizeInput, resetPasswordController); //reset password route
-
+ *   patch:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ResetPasswordRequest'
+ *     responses:
+ *       '200':
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       '400':
+ *         description: Invalid request
+ *       '404':
+ *         description: User not found
+ *       '500':
+ *         description: Internal server error
+ */
+router.patch('/reset-password', sanitizeInput, resetPasswordController);
 
 export default router;
