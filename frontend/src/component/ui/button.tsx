@@ -1,25 +1,25 @@
 import React from "react";
-
+import "../../style/button.css";
 interface ButtonProps {
   text: string;
-  bgColor?: string;
   btnType?: HTMLButtonElement["type"]; //type for button element
   fSize?: number | string;
   width?: number | string;
   id?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  state?: "default" | "disabled" | "completed" | "warning";
 }
 
 const Btn: React.FC<ButtonProps> = ({
   text,
-  bgColor = "#1013C4",
   btnType = "button",
   fSize = 1,
   width,
   id,
   onClick,
   disabled = false,
+  state = "default",
 }) => {
   return (
     <button
@@ -27,11 +27,10 @@ const Btn: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       style={{
-        backgroundColor: disabled ? "#999" : bgColor,
         fontSize: `${fSize}rem`,
         width: width !== undefined ? `${width}%` : "auto", 
         border: "none",
-        padding: "0.5rem 1rem",
+        padding: "0.6rem 1rem",
         cursor: disabled ? "not-allowed" : "pointer",
         color: "white",
         borderRadius: "4px",
@@ -51,7 +50,9 @@ const Btn: React.FC<ButtonProps> = ({
           e.currentTarget.style.boxShadow = "none";
         }
       }}
+      className={state}
     >
+
       {text}
     </button>
   );

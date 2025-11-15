@@ -4,15 +4,16 @@ import logo from "../../assets/logo.svg";
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
+      <div className="footer-brand">
+        <div className="footer-icon">
+          <img src={logo} alt="Catabloc Logo" className="footer-logo" />
+        </div>
+        <span className="footer-title">CATABLOC</span>
+      </div>
       <div className="footer-container">
         <div className="footer-section">
-          <div className="footer-brand">
-            <div className="footer-icon">
-              <img src={logo} alt="Catabloc Logo" className="footer-logo" />
-            </div>
-            <span className="footer-title">CATABLOC</span>
-          </div>
-          <div className="footer-links">
+          <h3 className="footer-heading">About</h3>
+          <div className="footer-link-container">
             <a href="#" className="footer-link">
               About
             </a>
@@ -26,7 +27,7 @@ const Footer: React.FC = () => {
         </div>
         <div className="footer-section">
           <h3 className="footer-heading">Practice</h3>
-          <div className="footer-links">
+          <div className="footer-link-container">
             <a href="#" className="footer-link">
               Challenge
             </a>
@@ -37,7 +38,7 @@ const Footer: React.FC = () => {
         </div>
         <div className="footer-section">
           <h3 className="footer-heading">Learn More</h3>
-          <div className="footer-links">
+          <div className="footer-link-container">
             <a
               href="https://www.geeksforgeeks.org/"
               target="_blank"

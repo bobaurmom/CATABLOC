@@ -3,22 +3,38 @@ import logo from "../../assets/logo.svg";
 import "../../style/header.css";
 import Btn from "../ui/button";
 const Header: React.FC = () => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const dropDown = () => {
+      setIsOpen(!isOpen);
+    }
   return (
     <header className="header">
       <div className="header-left">
+          <div className={`burger ${isOpen ? "burger-open" : ""}`} onClick={dropDown}>
+            <div className="line line-first"></div>
+            <div className="line line-second"></div>
+            <div className="line line-third"></div>
+          <div className={`dropDown ${isOpen ? "dropDown-show" : ""}`}>
+          <div className="dropDown-content">
+            <a href="/dashboard" className="drop-content">Dashboard</a>
+            <a href="#about" className="drop-content">About Us</a>
+            <a href="#help" className="drop-content">Help Center</a>
+            </div>
+          </div>
+        </div>
         <a href="/">
-          <img src={logo} alt="Catabloc Logo" className="header_logo" />
+          <img src={logo} alt="Catabloc Logo" className="header-logo" />
         </a>
-        <span className="header_title">CATABLOC</span>
+        <span className="header-title">CATABLOC</span>
       </div>
       <nav className="header-middle">
-        <a href="/dashboard" className="header_text">
+        <a href="/dashboard" className="header-text">
           LEARN
         </a>
-        <a href="#about" className="header_text">
+        <a href="#about" className="header-text">
           ABOUT US
         </a>
-        <a href="#help" className="header_text">
+        <a href="#help" className="header-text">
           HELP CENTER
         </a>
       </nav>

@@ -3,8 +3,10 @@ import Btn from "../../component/ui/button";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
 import { login } from "../../services/authService";
+import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
+  const nav = useNavigate();
   const [errorMessage, setErrorMessage] = React.useState<{
     email: string | null;
     password: string | null;
@@ -17,8 +19,7 @@ const Login: React.FC = () => {
     const form = event.currentTarget;
     const res = await login(form);
     if (res && res.ok) {
-      console.log("Login successful");
-      console.log(res);
+      nav("/dashboard");
     } else {
       const data = JSON.parse(JSON.stringify(res));
       console.log("Error Data:", data);
@@ -58,6 +59,8 @@ const Login: React.FC = () => {
             gap: "30px",
             margin: "40px 0",
             alignItems: "center",
+            width: "30%",
+            minWidth: "300px",
           }}
         >
           <Input
