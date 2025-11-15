@@ -2,33 +2,48 @@
     position: sticky;
     top: 0;
     left: 0;
-    right: 0;
     z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 5%;
     height: 60px;
     background-color: #0a0909;
 }
+.burger{
+    display: none;
+}
+.line{
+    background-color: grey;
+    width:30px;
+    height:5px;
+    border-radius: 10px;
+    transform-origin: left;
+}
+.line-first{
+    transition: all ease 0.1s;
+}
+.line-third{
+    transition: all ease 0.1s;
+}
 .main-content {
     flex: 1;
-    padding: 20px;
-    margin-top: 60px; 
+    padding: 20px; 
 }
 .header-left,
-.header_title{
+.header-title{
     color : white;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     display: flex;
     align-items: center;
 }
-.header_logo {
-    width: 50px;
+.header-left{
+    gap:5px;
+}
+.header-logo {
+    width: 40px;
     height: auto;
-    margin-right: 10px;
-
 }
 .header-middle {
     padding: auto;
@@ -60,6 +75,53 @@
     &:hover {
         background-color: #afaed8;
         color: black;
+    }
+}
+@media (width < 768px){
+    .header-middle > a{
+        display: none;
+    }
+    .burger{
+        display: flex;
+        flex-direction: column;
+        gap:5px;
+    }
+    .burger:hover{
+        cursor: pointer;
+    }
+    .dropDown{
+        display: none;
+        position: absolute;
+        top:85%;
+    }
+    .dropDown-content{
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+    }
+    .drop-content{
+        border: 1px solid black;
+        padding: 10px;
+        text-decoration: none;
+        color:black;
+    }
+    .drop-content:hover{
+        background-color: hsl(0, 0%, 66%);
+    }
+    .dropDown-show{
+        display: flex;
+        flex-direction: column;
+    }
+    .burger-open > .line-first{
+        transform-origin: left;
+        transform: rotate(45deg);
+    }
+    .burger-open > .line-second{
+        visibility: hidden;
+    }
+    .burger-open > .line-third{
+        transform-origin:left;
+        transform: rotate(-45deg);
     }
 }
 

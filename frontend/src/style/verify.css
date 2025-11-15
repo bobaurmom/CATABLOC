@@ -68,3 +68,8 @@
 .verification-input::placeholder {
     color: transparent;
 }
+.verification-error{
+    color:red;
+    position: relative;
+    top:-20px;
+}

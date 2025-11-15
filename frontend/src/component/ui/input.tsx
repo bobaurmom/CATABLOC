@@ -4,7 +4,7 @@ interface input {
   label: string;
   placeHolder: string;
   name: string;
-  type: string;
+  type?: string;
   required?: require;
   error?: string | null;
   // value?:string,
