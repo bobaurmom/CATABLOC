@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const SignUp: React.FC = () => {
+  const [buttonState, setButtonState] = useState<"default" | "disabled" | "completed" | "warning">("default");
   const [errorMessage, setErrorMessage] = useState<{
     email: string | null;
     username: string | null;
@@ -14,15 +15,21 @@ const SignUp: React.FC = () => {
     confirmPassword: string | null;
   }>({ email: null, username: null, password: null, confirmPassword: null });
   const nav = useNavigate();
+  const change = () => {
+    setErrorMessage({ email: null, username: null, password: null, confirmPassword: null });
+    setButtonState("default");
+  };
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setButtonState("disabled");
     const form = e.currentTarget;
     const response = await signUp(form);
     if (response && response.ok) {
       // Handle successful signup (e.g., redirect to login page)
-      console.log("Signup successful!");
-      nav("/login");
+      setButtonState("completed");
+      nav("/verify", { state: { email: form.email.value } });
     } else {
+      setButtonState("default");
       const errorData = JSON.parse(JSON.stringify(response));
       if(errorData.errors){
         setErrorMessage({
@@ -56,6 +63,7 @@ const SignUp: React.FC = () => {
         <TalkingCat text="create an account now to save your progress and save your creation \( >v< )/" />
         <form
           onSubmit={submit}
+          onChange={change}
           id="reg"
           name="regForm"
           style={{
@@ -65,11 +73,11 @@ const SignUp: React.FC = () => {
             margin: "40px 0",
             alignItems: "center",
             width: "36%",
+            minWidth: "300px",
           }}
         >
           <Input
             label="Email:"
-            type="email"
             placeHolder="Email"
             name="email"
             error={errorMessage.email}
@@ -95,7 +103,7 @@ const SignUp: React.FC = () => {
             name="confirmPassword"
             error={errorMessage.confirmPassword}
           ></Input>
-          <Btn text="Sign Up" btnType="submit"></Btn>
+          <Btn text="Sign Up" btnType="submit" state={buttonState} disabled={buttonState === "disabled"}></Btn>
         </form>
         {/* <Footer/> */}
       </div>

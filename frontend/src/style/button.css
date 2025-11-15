@@ -1,0 +1,12 @@
+.default{
+    background-color: blue;
+}
+.disabled{
+    background-color: grey;
+}
+.warning{
+    background-color: red;
+}
+.completed{
+    background-color: rgb(10, 245, 10);
+}
