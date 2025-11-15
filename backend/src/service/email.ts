@@ -29,7 +29,6 @@ const createTransporter = (): Transporter => {
             pass: process.env.SMTP_PASS || ''
         }
     };
-
     return nodemailer.createTransport(emailConfig);
 };
 const getOTPTemplate = (otpCode: string, type: 'email_verification' | 'password_reset'): EmailTemplate => {
@@ -77,7 +76,6 @@ const getOTPTemplate = (otpCode: string, type: 'email_verification' | 'password_
 const createEmailService = () => {
     const fromEmail = process.env.EMAIL_USER ;
     const transporter = createTransporter();
-
     const sendEmail = async (to: string, template: EmailTemplate): Promise<boolean> => {
         try {
             const mailOptions: SendMailOptions = {
@@ -87,9 +85,8 @@ const createEmailService = () => {
                 html: template.html,
                 text: template.text
             };
-            
 
-            const result =await transporter.sendMail(mailOptions);
+            const result = await transporter.sendMail(mailOptions);
             console.log('Email sent:', result.messageId);
             return true;
         } catch (error) {
@@ -97,7 +94,6 @@ const createEmailService = () => {
             return false;
         }
     };
-
     const sendOTPEmail = async (userEmail: string, otpCode: string, type: 'email_verification' | 'password_reset'): Promise<boolean> => {
         const template = getOTPTemplate(otpCode, type);
         return await sendEmail(userEmail, template);
@@ -106,7 +102,6 @@ const createEmailService = () => {
         sendEmail,
         sendOTPEmail
     };
-
 };
 
 export default createEmailService;

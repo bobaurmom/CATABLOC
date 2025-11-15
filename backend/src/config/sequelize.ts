@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-import { tr } from "zod/locales";
 
 dotenv.config();
 const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
