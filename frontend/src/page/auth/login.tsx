@@ -2,11 +2,13 @@ import React from "react";
 import Btn from "../../component/ui/button";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
-import { login } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
+// import { login } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
   const nav = useNavigate();
+  const { login } = useAuth();
   const [errorMessage, setErrorMessage] = React.useState<{
     email: string | null;
     password: string | null;
@@ -14,17 +16,21 @@ const Login: React.FC = () => {
     email: null,
     password: null,
   });
+  const handleInput = () => {
+    setErrorMessage({ email: null, password: null });
+  }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const res = await login(form);
+    const formData = new FormData(form);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const res = await login(email,password);
     if (res && res.ok) {
       nav("/dashboard");
-    } else {
-      const data = JSON.parse(JSON.stringify(res));
-      console.log("Error Data:", data);
+    } else if(res && !res.ok){
+      const data = await res.json();
       if (data.errors) {
-        console.log("There are errors array");
         setErrorMessage({
           email: data.errors.find((error: any) => error.field === "email")?.message || null,
           password: data.errors.find((error: any) => error.field === "password")?.message || null,
@@ -53,6 +59,7 @@ const Login: React.FC = () => {
         <TalkingCat text="Login to resume your progress!"></TalkingCat>
         <form
           onSubmit={handleSubmit}
+          onInput={handleInput}
           style={{
             display: "flex",
             flexDirection: "column",
