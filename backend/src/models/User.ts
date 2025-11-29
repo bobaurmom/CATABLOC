@@ -20,11 +20,5 @@ export interface UserSignup {
     username: string;
 }
 
-//class UserModel {
-//    private pool: Pool;
-//    constructor(pool: Pool) {
-//        this.pool = pool;
-//    }
-
 
 export default User;
