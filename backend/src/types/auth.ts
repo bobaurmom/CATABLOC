@@ -17,7 +17,9 @@ export interface EmailVerificationRequest {
     email: string;
     status?: 'active' | 'pending';
     code?: string;
+    type?: 'email_verification' | 'password_reset';
 }
+
 export interface ResetPasswordRequest {
     email: string;
     resetToken: string;

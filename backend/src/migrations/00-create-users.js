@@ -1,11 +1,11 @@
 'use strict';
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable('Users', {
+        await queryInterface.createTable('users', {
             user_id: {
-                type: Sequelize.UUID,
-                defaultValue: Sequelize.UUIDV4,
+                type: Sequelize.INTEGER,
                 primaryKey: true,
+                autoIncrement: true,
                 allowNull: false
             },
             email: {
@@ -14,13 +14,30 @@ module.exports = {
                 unique: true
             },
             username: {
-                type: Sequelize.STRING(255),
+                type: Sequelize.STRING(50),
                 allowNull: false,
                 unique: true,
             },
             password_hash: {
                 type: Sequelize.STRING(255),
                 allowNull: false
+            },
+            status: {
+                type: Sequelize.ENUM('pending', 'active', 'suspended'),
+                allowNull: false,
+                defaultValue: 'pending'
+            },
+            total_exp: {
+                type: Sequelize.INTEGER,
+                defaultValue: 0
+            },
+            current_streak: {
+                type: Sequelize.INTEGER,
+                defaultValue: 0
+            },
+            profile_pic: {
+                type: Sequelize.STRING(255),
+                allowNull: true
             },
             created_at: {
                 type: Sequelize.DATE,
@@ -33,11 +50,11 @@ module.exports = {
                 defaultValue: Sequelize.NOW
             }
         });
-        await queryInterface.addIndex('Users', ['email']);
-        await queryInterface.addIndex('Users', ['username']);
+        await queryInterface.addIndex('users', ['email']);
+        await queryInterface.addIndex('users', ['username']);
     },
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('Users');
+        await queryInterface.dropTable('users');
     },
 
 };

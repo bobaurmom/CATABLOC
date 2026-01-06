@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-
+import swaggerDocs from '../config/swagger';
 dotenv.config();
 const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
     dialect: 'postgres',
@@ -42,5 +42,9 @@ export const closeDB = async (): Promise<void> => {
         console.error('Sequelize: Error closing database connection:', error);
     }       
 };
-
+if (swaggerDocs.paths) {
+    console.log("Swagger detected these routes:", Object.keys(swaggerDocs.paths));
+} else {
+    console.log("Swagger found NO routes!");
+}
 export default sequelize;

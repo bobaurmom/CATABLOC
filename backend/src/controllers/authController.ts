@@ -1,13 +1,12 @@
 import e, { Request, Response } from "express";
 import { comparePassword, hashPassword } from "../utils/hash";
-import { generateToken, generateRefreshToken, AuthenticatedRequest ,generateResetPasswordToken, verifyResetPasswordToken } from "../utils/jwt";
+import { generateToken, generateRefreshToken, AuthenticatedRequest ,generateResetPasswordToken, verifyResetPasswordToken, setAuthCookies, clearAuthCookies } from "../utils/jwt";
 import { RegisterRequest, LoginRequest, AuthResponse, ErrorResponse, EmailVerificationRequest, ResetPasswordRequest } from "../types/auth";
 import { sendOTP as sendOTPService , verifyOTP as verifyOTPService , resendOTP as resendOTPService, incrementOTPAttempts } from '../service/otpgenerator';
-
 import User from "../models/userModel";
 
 
-export const register = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, username, password }: RegisterRequest = req.body;
 
@@ -33,6 +32,7 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
         res.status(400).json(response);
         return;
     }
+    
   
     // Check if username is taken
     const existingUsernameUser = await User.findOne({ where: { username: username ,status: 'active'}});
@@ -44,16 +44,16 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
       res.status(400).json(response);
       return;
     }
-
-    // Hash password
     const hashed = await hashPassword(password);
 
     // Create new user in database
     const newUser = await User.create({
       email: normalizedEmail,
-      username: username,
+      username: normalizedUsername,
       password_hash: hashed,
-      status: 'pending'
+      status: 'pending',
+      total_exp: 0,
+      current_streak: 0
     });
     //send OTP after registration
     const otpResult = await sendOTPService({ email: normalizedEmail, type: 'email_verification' });
@@ -85,6 +85,7 @@ export const register = async (req: AuthenticatedRequest, res: Response): Promis
 // Login user
 export const login = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    clearAuthCookies(res); // Clear any existing auth cookies before login
     const { email, password ,status }: LoginRequest = req.body;
 
     const normalizedEmail = email.toLowerCase();
@@ -126,6 +127,8 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
       email: user.email,
       username: user.username
     });
+    // Set cookies
+    setAuthCookies(res, token, refreshToken);
 
     // Prepare response without password
     const userResponse = {
@@ -145,7 +148,6 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
         refreshToken
       }
     };
-
     res.status(200).json(response);
   } catch (error) {
     console.error('Login error:', error);
@@ -162,7 +164,6 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
 export const sendOTP = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { email, type } = req.body;
-
     if (!email || !type) {
       const response: ErrorResponse = {
         success: false,
@@ -209,11 +210,12 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
       res.status(400).json(response);
       return;
     }
+    if(type === 'email_verification' ){
     const result = await verifyOTPService({ email, hashedOTPCode: code, type });
     if (result.success) {
       //find user with pending
       const user = await User.findOne({
-        where: { email, status: 'pending' }
+        where: { email, status: 'pending', }
       });
       if (!user) {
         res.status(400).json({
@@ -224,7 +226,7 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
       }
       // Update user status to 'active'
       await User.update({ status: 'active' }, { where: { email } });
-
+      
     // Generate token 
     const token = await generateToken({
       userId: user.user_id,
@@ -246,8 +248,6 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
       created_at: user.created_at,
       updated_at: user.updated_at
     };
-
-
     const response: AuthResponse = {
       success: true,
       message: 'User registered successfully',
@@ -272,8 +272,36 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
         message: result.message
       });
     }
-    
+    }else{
+      const result = await verifyOTPService({ email, hashedOTPCode: code, type });
+    if (result.success) {
+      const user = await User.findOne({
+        where: { email, status: 'active' }
+      });
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: 'No active user found for this email'
+        });
+        return;
+      }
+      const token = await generateResetPasswordToken(user.email);
+      res.status(200).json({
+        success: true,
+        message: 'OTP verified successfully',
+        data: {
+          resetToken: token
+        }
+      });
+    } else {
 
+      await incrementOTPAttempts(email, code, type);
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+    }
   } catch (error) {
     console.error('Verify OTP error:', error);
     
@@ -329,6 +357,7 @@ export const resendOTP = async (req: AuthenticatedRequest, res: Response): Promi
 // Request password reset (sends OTP)
 export const requestPasswordReset = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    clearAuthCookies(res); // Clear any existing auth cookies before password reset request
     const { email }: { email: string } = req.body;
     const normalizedEmail = email.toLowerCase().trim();
 
@@ -340,7 +369,7 @@ export const requestPasswordReset = async (req: AuthenticatedRequest, res: Respo
     if (!user) {
       res.status(200).json({
         success: true,
-        message: 'If your email is registered, a reset code has been sent.'
+        message: 'A reset code has been sent.'
       });
       return;
     }
@@ -350,7 +379,6 @@ export const requestPasswordReset = async (req: AuthenticatedRequest, res: Respo
       email: normalizedEmail, 
       type: 'password_reset' 
     });
-    
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });
       return;
@@ -408,8 +436,8 @@ export const verifyResetCode = async (req: AuthenticatedRequest, res: Response):
 //Reset password (requires verified token)
 export const resetPassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
+      clearAuthCookies(res); // Clear any existing auth cookies before password reset
         const { resetToken, newPassword, confirmNewPassword } = req.body;
-
         if (!newPassword || !confirmNewPassword) {
             res.status(400).json({
                 success: false,
@@ -425,7 +453,6 @@ export const resetPassword = async (req: AuthenticatedRequest, res: Response): P
             });
             return;
         }
-
         // Verify reset token
         const decoded = await verifyResetPasswordToken(resetToken);
         const normalizedEmail = decoded.email.toLowerCase().trim();
@@ -446,6 +473,8 @@ export const resetPassword = async (req: AuthenticatedRequest, res: Response): P
             success: false,
             message: error instanceof Error ? error.message : 'Invalid or expired reset token'
         });
+        clearAuthCookies(res); // Clear any existing auth cookies on error
     }
+    
 };
 

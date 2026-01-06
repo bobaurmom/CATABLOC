@@ -1,15 +1,18 @@
 import { Router } from 'express';
-import { register, login, sendOTP as sendOTPController, verifyOTP as verifyOTPController, resendOTP as resendOTPController } from '../controllers/authController';
-import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput } from '../middleware/validation';
-import swaggerDocs from '../config/swagger';
+import { register, login, sendOTP as sendOTPController, verifyOTP as verifyOTPController, resendOTP as resendOTPController, requestPasswordReset as forgotPasswordController } from '../controllers/authController';
+import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput  } from '../middleware/validation';
 import { resetPassword as resetPasswordController } from '../controllers/authController';
+import { authenticateToken } from '../utils/jwt';
+
 const router = Router();
+
+router.get('/', authenticateToken);
 /**
  * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Register a new user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -34,7 +37,7 @@ router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddle
  * /api/auth/login:
  *   post:
  *     summary: Login a user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -59,7 +62,7 @@ router.post('/login', sanitizeInput, validateLogin, login); //login route
  * /api/auth/send-otp:
  *   post:
  *     summary: Send OTP for email verification
- *     tags: [Authentication]
+ *     tags: [otp]
  *     requestBody:
  *       required: true
  *       content:
@@ -100,7 +103,7 @@ router.post('/send-otp', sanitizeInput, sendOTPController);
  * /api/auth/verify-otp:
  *   post:
  *     summary: Verify OTP code
- *     tags: [Authentication]
+ *     tags: [otp]
  *     requestBody:
  *       required: true
  *       content:
@@ -148,7 +151,7 @@ router.post('/verify-otp', sanitizeInput, verifyOTPController);
  * /api/auth/resend-otp:
  *   post:
  *     summary: Resend OTP code
- *     tags: [Authentication]
+ *     tags: [otp]
  *     requestBody:
  *       required: true
  *       content:
@@ -187,41 +190,49 @@ router.post('/resend-otp', sanitizeInput, resendOTPController);
 /** 
  * @swagger
  * /api/auth/forgot-password:
- *  post:
- *    summary: Forgot password
- *    tags: [Auth]
- *    requestBody:
- *      required: true
- *      content:
- *        application/json:
- *          schema:
- *           $ref: '#/components/schemas/ForgotPasswordRequest'
- *    responses:
- *     '200':
- *       description: Password reset email sent successfully
+ *   post:
+ *     summary: Forgot password
+ *     tags: [otp]
+ *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               success:
- *                 type: boolean
- *               message:
+ *               email:
  *                 type: string
- *     '400':
- *       description: Invalid email
- *     '404':
- *       description: User not found
- *     '500':
- *       description: Internal server error
+ *                 format: email
+ *             required:
+ *               - email
+ *           example:
+ *             email: "user@example.com"
+ *     responses:
+ *       '200':
+ *         description: Password reset email sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       '400':
+ *         description: Invalid email
+ *       '404':
+ *         description: User not found
+ *       '500':
+ *         description: Internal server error
  */
-router.post('/email-verification', sanitizeInput); //email verification route
+router.post('/forgot-password', sanitizeInput, forgotPasswordController);
 /**
  * @swagger
  * /api/auth/reset-password:
  *   patch:
  *     summary: Reset password
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -248,5 +259,6 @@ router.post('/email-verification', sanitizeInput); //email verification route
  *         description: Internal server error
  */
 router.patch('/reset-password', sanitizeInput, resetPasswordController);
+
 
 export default router;

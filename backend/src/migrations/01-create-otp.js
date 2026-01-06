@@ -1,8 +1,5 @@
 'use strict';
 
-const { use } = require('react');
-
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('otp', {
@@ -19,10 +16,15 @@ module.exports = {
           isEmail: true
         },
       },
-        user_id: {
-          type: Sequelize.UUID,
-          allowNull: true
+      user_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'Users',
+          key: 'user_id'
         },
+        onDelete: 'CASCADE'
+      },
       code: {
         type: Sequelize.STRING(6),
         allowNull: false,
@@ -35,11 +37,11 @@ module.exports = {
         type: Sequelize.ENUM('email_verification', 'password_reset'),
         allowNull: false
       },
-      expiresAt: {
+      expired_at: {
         type: Sequelize.DATE,
         allowNull: false
       },
-      isUsed: {
+      expired: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
@@ -53,20 +55,24 @@ module.exports = {
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
       }
     });
 
     // Add indexes
     await queryInterface.addIndex('otp', ['email', 'otp_type']);
-    await queryInterface.addIndex('otp', ['expiresAt']);
+    await queryInterface.addIndex('otp', ['expired_at']);
+    await queryInterface.addIndex('otp', ['user_id']);
+    await queryInterface.addIndex('otp', ['expired']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('otps');
+    await queryInterface.dropTable('otp');
   }
 };

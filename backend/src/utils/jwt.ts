@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
+
 // Use different secrets for different token types
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret';
@@ -27,6 +28,8 @@ export interface ResetTokenPayload {
 // Extend request interface
 export interface AuthenticatedRequest extends Request {
     user?: JWTPayload;
+    fullUser?: any; // You can replace 'any' with your User model type
+    
 }
 
 // Generate access token
@@ -167,33 +170,33 @@ export const extractTokenFromHeader = (authHeader: string | undefined): string |
 
 // Middleware to REQUIRE authentication
 export const authenticateToken = async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
-    try {
-        const authHeader = req.headers.authorization;
-        const token = extractTokenFromHeader(authHeader);
-        
-        if (!token) {
-            res.status(401).json({
-                success: false,
-                message: 'Authentication required'
-            });
-            return;
-        }
-        
-        const decoded = await verifyToken(token);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({
-            success: false,
-            message: error instanceof Error ? error.message : 'Invalid token'
-        });
-    }
-};
+  try {
+    const token = req.cookies?.accessToken;
 
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+      return;
+    }else{
+        console.log("Token found in cookies");
+    }
+
+    const decoded = await verifyToken(token);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Invalid token'
+    });
+  }
+};
 // Middleware for OPTIONAL authentication
 export const optionalAuth = async (
     req: AuthenticatedRequest,
@@ -238,7 +241,7 @@ export const setAuthCookies = (res: Response, accessToken: string, refreshToken:
     res.cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
-        sameSite: 'strict',
+        sameSite: 'lax',//adjust based on frontend/backend deployment
         maxAge: 15 * 60 * 1000 // 15 minutes
     });
     
@@ -246,17 +249,23 @@ export const setAuthCookies = (res: Response, accessToken: string, refreshToken:
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
 };
 
 // Clear cookies on logout
 export const clearAuthCookies = (res: Response) => {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
-};
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/'
+  };
 
+  res.clearCookie('accessToken', cookieOptions);
+  res.clearCookie('refreshToken', cookieOptions);
+};
 // logout endpoint
 export const logout = (req: Request, res: Response) => {
     clearAuthCookies(res);
