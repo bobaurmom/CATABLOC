@@ -1,18 +1,31 @@
-import { Request, type Response } from 'express';
-import { authenticateToken } from '../utils/jwt';
-import { AuthenticatedRequest} from '../utils/jwt';
 
+import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../utils/jwt';
+import User from '../models/userModel';
 
-export const getDashboardData = (req: AuthenticatedRequest, res: Response) => {
-  // Implement the logic to retrieve dashboard data for the authenticated user
-  // You can access the authenticated user's information from req.user if you have set it in the authentication middleware
+export const getDashboardData = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // Fetch and return user-specific dashboard data using user_id
     const userId = req.user?.userId;
-    const username = req.user?.username;
-    const dashboardData = [];
-    // Use userId to fetch dashboard data]   = [];
-    res.status(200).json({ message: `Dashboard data for user ${username}` });
+
+    const userData = await User.findByPk(userId, {
+      attributes: ['username', 'total_exp', 'current_streak']
+    });
+
+
+    if (!userData) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const leaderboard = await User.findAll({
+      attributes: ['username', 'total_exp'],
+      order: [['total_exp', 'DESC']],
+      limit: 20
+    });
+
+    res.status(200).json({
+      user: userData,
+      leaderboard: leaderboard
+    });
     
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });

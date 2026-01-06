@@ -10,7 +10,9 @@
     "start:frontend": "cd ../frontend && npm run dev",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "seed": "ts-node src/seeder/levelseeder.ts",
+    "seed:levels": "ts-node src/seeder/levelseeder.ts"
   },
   "keywords": [],
   "author": "",
@@ -46,6 +48,7 @@
     "concurrently": "^9.2.1",
     "dotenv-cli": "^10.0.0",
     "nodemon": "^3.1.10",
+    "sequelize-cli": "^6.6.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

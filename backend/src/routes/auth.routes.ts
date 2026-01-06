@@ -8,6 +8,7 @@ const router = Router();
 
 router.get('/', authenticateToken);
 /**
+ * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Register a new user

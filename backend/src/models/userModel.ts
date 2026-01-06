@@ -9,6 +9,9 @@ interface UserAttributes {
   status:  'pending' | 'active' | 'suspended';
   created_at?: Date;
   updated_at?: Date;
+  total_exp: number;
+  current_streak: number;
+  profile_pic?: string
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'user_id'> {}
@@ -21,6 +24,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
   public status!: 'pending' | 'active' | 'suspended';
+  public total_exp!: number;
+  public current_streak!: number
+  public profile_pic?: string;
 }
 
 User.init(
@@ -58,6 +64,20 @@ User.init(
       type: DataTypes.ENUM('pending', 'active', 'suspended'),
       allowNull: false,
       defaultValue: 'pending',
+    },
+    total_exp: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    current_streak: {
+      type: DataTypes.INTEGER,
+      allowNull:true,
+      defaultValue: 0,
+    },
+    profile_pic: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
 
   },

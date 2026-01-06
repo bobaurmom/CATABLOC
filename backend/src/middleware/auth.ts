@@ -1,6 +1,6 @@
 //# JWT token verification
 import { NextFunction, Response ,Request} from "express";
-import { ErrorResponse } from "../types/auth";
+import { ErrorResponse , AuthenticatedRequest } from "../types/auth";
 
 export const errorHandler = (error:Error,req:Request,res:Response,next:NextFunction):void=>{
     console.error('error:',error);

@@ -51,7 +51,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       email: normalizedEmail,
       username: normalizedUsername,
       password_hash: hashed,
-      status: 'pending'
+      status: 'pending',
+      total_exp: 0,
+      current_streak: 0
     });
     //send OTP after registration
     const otpResult = await sendOTPService({ email: normalizedEmail, type: 'email_verification' });
@@ -146,7 +148,6 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
         refreshToken
       }
     };
-
     res.status(200).json(response);
   } catch (error) {
     console.error('Login error:', error);

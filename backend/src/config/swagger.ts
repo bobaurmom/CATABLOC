@@ -2,6 +2,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 import { Router } from "express";       
 import { stat } from "fs";
 import { hashPassword } from "../utils/hash";
+import path from "path/win32";
 
 const swaggerOptions = {
     definition: {
@@ -262,7 +263,11 @@ const swaggerOptions = {
         }
         
     },
-    apis: ["./src/routes/*.ts", "./src/controllers/*.ts", "./src/app.ts"],
+apis: [
+  path.join(__dirname, "../routes/*.ts"), 
+  path.join(__dirname, "../controllers/*.ts"),
+  path.join(__dirname, "../app.ts")
+],    applications: { Router  }
 };
 let swaggerDocs : any;
 try {

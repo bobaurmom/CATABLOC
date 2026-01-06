@@ -28,6 +28,8 @@ export interface ResetTokenPayload {
 // Extend request interface
 export interface AuthenticatedRequest extends Request {
     user?: JWTPayload;
+    fullUser?: any; // You can replace 'any' with your User model type
+    
 }
 
 // Generate access token
