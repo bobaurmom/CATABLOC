@@ -66,7 +66,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             confirmPassword: formData.get("confirmPassword"),
         };
         const jsonData = JSON.stringify(data);
-        console.log("Jason Data:", jsonData);
         try {
             const response = await fetch(`${url}/register`, {
                 method: "POST",
@@ -76,7 +75,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 body: jsonData,
             });
             if(response.ok){
-                const resData = await response.json();
+                console.log(response)
                 const user = {email: data.email as string,name: data.username as string};
                 sessionStorage.setItem("user",JSON.stringify(user));
                 setUser(user);

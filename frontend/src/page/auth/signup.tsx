@@ -30,17 +30,17 @@ const SignUp: React.FC = () => {
     try {
       const response = await register(form);
       if (response && response.ok) {
+        console.log("Signup successful");
         // Handle successful signup (e.g., redirect to login page)
         setButtonState("completed");
         const formData = new FormData(form);
         const emailValue = formData.get("email") as string;
         setEmail(emailValue);
-        // Navigate to verification page or show verification popup
+        //show verification popup
         setPopUp(true);
       } else{
         setButtonState("default");
         const errorData = await response?.json();
-        console.log("Signup error data:", errorData);
         if(errorData.errors){
           setErrorMessage({
             email: errorData.errors.find((error: any) => error.field === "email")?.message || null,
@@ -125,6 +125,7 @@ const SignUp: React.FC = () => {
           <Btn text="Sign Up" btnType="submit" state={buttonState} disabled={buttonState === "disabled"}></Btn>
         </form>
         {/* <Footer/> */}
+        <a href="/login">I already have an account</a>
       </div>
       {popUp && <Verification email={email} onClose={() => setPopUp(false)} />}
     </>
