@@ -2,7 +2,10 @@ import React from "react";
 import logo from "../../assets/logo.svg";
 import "../../style/header.css";
 import Btn from "../ui/button";
+import { useAuth } from "../../hooks/useAuth";
+import catImage from "../../assets/cat.png";
 const Header: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const dropDown = () => {
       setIsOpen(!isOpen);
@@ -38,10 +41,16 @@ const Header: React.FC = () => {
           HELP CENTER
         </a>
       </nav>
-
-      <a href="/register">
-        <Btn text="Sign Up"></Btn>
-      </a>
+      {isAuthenticated ? (
+        <div className="header-user">
+          <img src={catImage} alt="profile" className="profile-pic"/>
+          <span className="header-username">{user?.name}</span>
+        </div>
+      ) : (
+        <a href="/register">
+          <Btn text="Sign Up"></Btn>
+        </a>
+      )}
     </header>
   );
 };

@@ -2,11 +2,15 @@ import React, { useState } from "react";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
 import Btn from "../../component/ui/button";
-import { signUp } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import Verification from "../../component/ui/verification";
 
 
 const SignUp: React.FC = () => {
+  const { register } = useAuth();
+  const [popUp, setPopUp] = useState(false);
+  const [email, setEmail] = useState("");
   const [buttonState, setButtonState] = useState<"default" | "disabled" | "completed" | "warning">("default");
   const [errorMessage, setErrorMessage] = useState<{
     email: string | null;
@@ -23,29 +27,43 @@ const SignUp: React.FC = () => {
     e.preventDefault();
     setButtonState("disabled");
     const form = e.currentTarget;
-    const response = await signUp(form);
-    if (response && response.ok) {
-      // Handle successful signup (e.g., redirect to login page)
-      setButtonState("completed");
-      nav("/verify", { state: { email: form.email.value } });
-    } else {
-      setButtonState("default");
-      const errorData = JSON.parse(JSON.stringify(response));
-      if(errorData.errors){
-        setErrorMessage({
-          email: errorData.errors.find((error: any) => error.field === "email")?.message || null,
-          username: errorData.errors.find((error: any) => error.field === "username")?.message || null,
-          password: errorData.errors.find((error: any) => error.field === "password")?.message || null,
-          confirmPassword: errorData.errors.find((error: any) => error.field === "confirmPassword")?.message || null,
-        });
-      } else {
-        setErrorMessage({
-          email: errorData.message.includes("email") ? errorData.message : null,
-          username: errorData.message.includes("username") ? errorData.message : null,
-          password: errorData.message.includes("password") ? errorData.message : null,
-          confirmPassword: errorData.message.includes("Password") ? errorData.message : null,
-        });
+    try {
+      const response = await register(form);
+      if (response && response.ok) {
+        console.log("Signup successful");
+        // Handle successful signup (e.g., redirect to login page)
+        setButtonState("completed");
+        const formData = new FormData(form);
+        const emailValue = formData.get("email") as string;
+        setEmail(emailValue);
+        //show verification popup
+        setPopUp(true);
+      } else{
+        setButtonState("default");
+        const errorData = await response?.json();
+        if(errorData.errors){
+          setErrorMessage({
+            email: errorData.errors.find((error: any) => error.field === "email")?.message || null,
+            username: errorData.errors.find((error: any) => error.field === "username")?.message || null,
+            password: errorData.errors.find((error: any) => error.field === "password")?.message || null,
+            confirmPassword: errorData.errors.find((error: any) => error.field === "confirmPassword")?.message || null,
+          });
+        } else  if(errorData.message) {
+          const message = typeof errorData.message === "string" ? errorData.message : "";
+          setErrorMessage({
+            email: message.includes("email") ? message : null,
+            username: message.includes("Username") ? message : null,
+            password: message.includes("password") ? message : null,
+            confirmPassword: message.includes("Password") ? message : null,
+          });
+        } else {
+          window.alert("An unknown error occurred during signup. Please try again.");
+        }
       }
+    } catch (error) {
+      setButtonState("default");
+      console.error("Signup error:", error);
+      throw error;
     };
 }
   return (
@@ -80,6 +98,7 @@ const SignUp: React.FC = () => {
             label="Email:"
             placeHolder="Email"
             name="email"
+            type="email"
             error={errorMessage.email}
           ></Input>
           <Input
@@ -106,7 +125,9 @@ const SignUp: React.FC = () => {
           <Btn text="Sign Up" btnType="submit" state={buttonState} disabled={buttonState === "disabled"}></Btn>
         </form>
         {/* <Footer/> */}
+        <a href="/login">I already have an account</a>
       </div>
+      {popUp && <Verification email={email} onClose={() => setPopUp(false)} />}
     </>
   );
 };

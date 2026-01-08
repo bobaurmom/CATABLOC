@@ -3,21 +3,26 @@ import logo from "../../assets/logo.svg";
 import Btn from "./button";
 import "../../style/verify.css";
 import { verifycode } from "../../services/authService";
-import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { resendcode } from "../../services/authService";
 
 type borderColorType = 'black' | 'red';
 type errorMessage = string | null;
-const Verification: React.FC = () => {
+const Verification: React.FC<{email: string, onClose: () => void}> = ({ email, onClose }) => {
   // Create ref for each input
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [borderColor, setBorderColor] = useState<borderColorType>("black");
   const [errorMessage, setErrorMessage] = useState<errorMessage>(null);
   const nav = useNavigate();
-  const location = useLocation();
-  const email = location.state.email;
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    } 
+  }, []);
+  // Update border color based on state
   inputRefs.current.forEach((input) => {
     if (input) {
       input.style.borderColor = borderColor;
@@ -80,8 +85,8 @@ const Verification: React.FC = () => {
   }, []);
 
   return (
-<div className="verification-popUp">
-  <div className="verification-container">
+<div className="verification-popUp" onClick={onClose}>
+  <div className="verification-container" onClick={(e) => e.stopPropagation()}>
     <img src={logo} alt="Catabloc Logo" className="verification-logo" />
     <h1 style={{ fontSize: "30px",  marginBottom: "25px", color: "#333" }}>🐾Activation Code🐾</h1>
     <p className="verification-instruction">
