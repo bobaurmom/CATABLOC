@@ -40,12 +40,12 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ error: "Level not found" });
     }
 
-    // Parse level_layout if it's stored as a string
+    // Parse level_layout 
     const levelLayout = typeof level.level_layout === 'string' 
       ? JSON.parse(level.level_layout) 
       : level.level_layout;
 
-    // Parse available_codeblocks if it's stored as a string
+    // Parse available_codeblocks 
     const availableCodeblocks = typeof level.available_codeblocks === 'string'
       ? JSON.parse(level.available_codeblocks)
       : level.available_codeblocks;
@@ -112,7 +112,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
     const catStart = layout.catStart ?? { x: 0, y: 0 };
     const goal = layout.goal ;
     const walls = layout.walls ?? [];
-    console.log('🎯 Goal position:', goal);
+    console.log('Goal position:', goal);
 
     if (!goal) {
     throw new Error('Goal position not found in level layout');
@@ -370,8 +370,13 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
     let facing = 0; 
 
     for (const cmd of commands) {
-      if (cmd === 'TURN_RIGHT') { facing = (facing + 1) % 4; continue; }
-      if (cmd === 'TURN_LEFT') { facing = (facing + 3) % 4; continue; }
+      if (cmd === 'TURN_RIGHT') { 
+        facing = (facing + 1) % 4;
+         continue; }
+      if (cmd === 'TURN_LEFT') { 
+        facing = (facing + 3) % 4; 
+        continue; 
+      }
 
       if (cmd === 'MOVE_FORWARD') {
         if (facing === 0) currentPos.y -= 1;

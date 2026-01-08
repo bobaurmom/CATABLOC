@@ -6,16 +6,16 @@ import Header from './component/layout/header';
 import Home from './page/home';
 import Login from './page/auth/login';
 import SignUp from './page/auth/signup';
-import Verification from './component/ui/verification';
 import Dashboard from './page/dashboard';
 import ProtectedRoute from './component/protectedRoute';
 import { AuthProvider } from './contexts/authContext';
+import LevelPage from './page/level';
+
 function App() {
 
   return (
-  
+  <AuthProvider>
     <BrowserRouter>
-    <AuthProvider>
     <div className="app-container">
       <Header />
       <Routes> 
@@ -23,11 +23,12 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<SignUp />} />   
         <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+       <Route path='/level1' element={<LevelPage />} />
       </Routes>
       <Footer />
     </div>
-    </AuthProvider>
     </BrowserRouter>
+  </AuthProvider>
   )
 }
 

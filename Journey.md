@@ -22,6 +22,7 @@ Hello, I'm Nita, and I'd like to share my journey while working on this project.
 
 ### Challenges and Solutions
 * 
+* registration Optimization : -it was taking 3.2s just to register found the culprit it our SMTP Email sendin takes 2000-4000ms - our solutions is saving it in db and not waiting for email to send.
 
 ### Future Thoughts
 * No Redis yet: We are currently not using redis for OTP. 
