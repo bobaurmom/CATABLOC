@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import React from 'react';
 import { useAuth } from '../hooks/useAuth';
-
+// loading page while checking auth status
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }

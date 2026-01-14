@@ -1,29 +1,94 @@
 import React from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style/userProfile.css";
 import catImage from "../assets/cat.png";
 import starIcon from "../assets/star.svg";
 import fireIcon from "../assets/fire.svg";
 import Btn from "./ui/button";
+import apiFetch from "../services/profile";
+
+interface UserStats {
+  exp: number;
+  streak: number;
+  bio: string;
+}
 
 interface UserProfileProps {
   name: string;
-  bio: string;
-  exp?: number;      // optional and dynamic
-  streak?: number;   // optional and dynamic
+  onStatsLoad?: (stats: UserStats) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({
-  name,
-  bio,
-  exp = 67,
-  streak = 7,
-}) => {
+const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState<UserStats>({
+    exp: 0,
+    streak: 0,
+    bio: ""
+    });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleViewProfile = () => {
-    navigate('/profile');
-  };
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await apiFetch("/api/dashboard/dashboard");
+        
+        // Check content type to determine if response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType?.includes("application/json")) {
+          setError("Invalid response from server");
+          setIsLoading(false);
+          return;
+        }
+        
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log('Full response:', responseData);
+          
+          const userData = responseData.user;
+          if (!userData) {
+            setError("Invalid profile data received");
+            setIsLoading(false);
+            return;
+          }
+          
+          const newStats: UserStats = {
+            exp: userData.xp || 0,
+            streak: userData.streak || 0,
+            bio: userData.bio || "idk what to put here"
+          };
+          
+          setStats(newStats);
+          
+          if (onStatsLoad) {
+            onStatsLoad(newStats);
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({ message: "Failed to load profile" }));
+          setError(errorData.message || "Failed to load profile");
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile stats:", error);
+        setError("Unable to connect to server");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, [onStatsLoad]);
+
+  if (error) {
+    return (
+      <div className="userCard error-state" role="alert">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="userCard" role="region" aria-label={`Profile of ${name}`}>
@@ -37,39 +102,40 @@ const UserProfile: React.FC<UserProfileProps> = ({
         </div>
         <div className="text-user">
           <span className="name">{name}</span>
-          <span className="job">{bio}</span>
         </div>
       </div>
 
       <div className="stats">
         <StatCard
           label="EXP"
-          value={exp}
+          value={stats.exp}
           icon={starIcon}
           iconAlt="Experience points"
           gradientClass="stat-exp"
+          isLoading={isLoading}
         />
         <StatCard
           label="Streak"
-          value={streak}
+          value={stats.streak}
           icon={fireIcon}
           iconAlt="Current streak"
           gradientClass="stat-streak"
+          isLoading={isLoading}
         />
       </div>
 
-      <Btn text="VIEW PROFILE" onClick={handleViewProfile} bgColor="#1013C4" />
+      <Btn text="VIEW PROFILE" onClick={() => navigate('/profile')} />
     </div>
   );
 };
 
-// Extracted reusable stat card
 interface StatCardProps {
   label: string;
   value: number;
   icon: string;
   iconAlt: string;
   gradientClass: string;
+  isLoading?: boolean;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -78,13 +144,16 @@ const StatCard: React.FC<StatCardProps> = ({
   icon,
   iconAlt,
   gradientClass,
+  isLoading = false,
 }) => (
   <div className={`stat-card ${gradientClass}`}>
     <div className="stat-content">
       <span className="stat-label">{label}</span>
       <div className="stat-details">
         <img src={icon} alt={iconAlt} className="icon" />
-        <span className="stat-number">{value}</span>
+        <span className="stat-number">
+          {isLoading ? "..." : value}
+        </span>
       </div>
     </div>
   </div>

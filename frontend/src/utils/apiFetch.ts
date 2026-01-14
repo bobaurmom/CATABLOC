@@ -12,7 +12,6 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
   const response = await fetch(`${baseUrl}${endpoint}`, defaultOptions);
   
-  // Handle Automatic Silent Refresh on 401
   if (response.status === 401 && endpoint !== '/auth/refresh-token') {
     const refreshRes = await fetch(`${baseUrl}/auth/refresh-token`, {
       method: 'POST',
@@ -20,7 +19,6 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     });
     
     if (refreshRes.ok) {
-      // Retry the original request one time
       return fetch(`${baseUrl}${endpoint}`, defaultOptions);
     }
   }
