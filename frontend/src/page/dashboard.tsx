@@ -1,50 +1,73 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import TalkingCat from "../component/ui/talkingCat";
 import Leaderboard from "../component/leaderboard";
 import Card from "../component/gameCard";
 import Profile from "../component/userProfile";
-import catImage from "../assets/cat.png";
 import "../style/dashboard.css";
+import gameCover1 from "../assets/gamecover1.svg";
+
+interface UserStats {
+  exp: number;
+  streak: number;
+  bio: string;
+}
 
 function Dashboard() {
-    const [userName, setUserName] = useState<string>("Student");
+    const navigate = useNavigate();
+    const [userName, setUserName] = useState("student");
+    const [userStats, setUserStats] = useState<UserStats | null>(null);
 
-    // TODO: Replace with actual auth context when implemented
     useEffect(() => {
-        // Fetch user data from localStorage or API
-        const storedUser = localStorage.getItem("userName");
-        if (storedUser) {
-            setUserName(storedUser);
+        // Get username from localStorage
+        const storedName = localStorage.getItem("user");
+        if (storedName) {
+            try {
+                const user = JSON.parse(storedName);
+                setUserName(user.name || "student");
+            } catch (error) {
+                console.error("Failed to parse user data:", error);
+                setUserName("student");
+            }
         }
+    }, []);
+
+    // Callback to receive stats from Profile component
+    const handleStatsLoad = useCallback((stats: UserStats) => {
+        setUserStats(stats);
+    }, []);
+
+    const handlePlayGame = useCallback((gameName: string) => {
+        console.log(`Navigate to ${gameName} game`);
     }, []);
 
     return (
         <div className="dashboard-container">
             <div className="dashboard-wrapper">
-                {/* Left Column - Games Section */}
                 <div className="dashboard-left">
                     <TalkingCat text={`Welcome back ${userName} \\( >v< )/`} />
                     
                     <div className="dashboard-games-grid">
                         <Card 
                             text="Purfect_Pathing" 
-                            detail="Ready to be a cat catching a mouse?program a cat to catch a mouse. Use simple commands to set the cat's path. Plan your moves to outsmart the mouse. It's a fun way to learn basic coding logic."
-                            gameImage={catImage}
-                            onPlay={() => console.log("Navigate to Purfect Pathing game")}
-
+                            detail="Ready to be a cat catching a mouse?"
+                            gameImage={gameCover1}
+                            onPlay={() => handlePlayGame("Purfect_Pathing")}
                         />
                         <Card 
                             text="Coming Soon" 
                             detail="Coming Soon ..."
-                            gameImage={catImage}
+                            gameImage={gameCover1}
                             disabled={true}
                         />
                     </div>
                 </div>
 
-                {/* Right Column - Profile & Leaderboard */}
                 <div className="dashboard-right">
-                    <Profile name={userName} bio="Student" exp={67} streak={7} />
+                    <Profile 
+                        name={userName} 
+                        onStatsLoad={handleStatsLoad}
+                    />
                     <Leaderboard />
                 </div>
             </div>
