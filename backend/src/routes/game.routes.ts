@@ -1,7 +1,8 @@
 //# Routes for /api/games
 import { Router } from 'express';
-import { startSession, getLevel, completeLevel, verifyLevel } from '../controllers/gameController';
+import { startSession, getLevel, completeLevel, verifyLevel ,getAllCodeblocks} from '../controllers/gameController';
 import { authenticateToken } from '../utils/jwt';
+import { get } from 'http';
 
 const router = Router();
 /**
@@ -76,4 +77,5 @@ router.get('/level/:levelId', authenticateToken, getLevel);
  *         description: Internal server error
  */
 router.post('/complete', authenticateToken, completeLevel);
+router.get('/block', getAllCodeblocks);
 export default router;

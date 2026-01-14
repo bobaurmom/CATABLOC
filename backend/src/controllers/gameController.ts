@@ -1,11 +1,12 @@
 //# Validate answers, update scores
 import sequelize from "../config/sequelize";
-import { User, Session } from "../models";
+import { User, Session, Codeblock } from "../models";
 import Level, { LevelProgress } from "../models/Level";
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../utils/jwt";
 import BoardData from "../models/boardData";
 import { updateStreak } from "../utils/helpers";
+import { calculateFinalXP } from "../utils/calculatexp";
 
 export const startSession = async (req: AuthenticatedRequest, res: Response) => {
   const { levelId } = req.body;
@@ -73,14 +74,14 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
 
 
 export const completeLevel = async (req: AuthenticatedRequest, res: Response) => {
-  const { sessionId, levelId, score, commands } = req.body;
+  const { sessionId, levelId, blocksUsed, timeSpent, commands } = req.body;
   
   if (!req.user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   
-  if (!sessionId || !levelId || score === undefined || !commands) {
-    return res.status(400).json({ error: "Missing required fields" });
+  if (!sessionId || !levelId || blocksUsed === undefined || timeSpent === undefined || !commands) {
+    return res.status(400).json({ error: "Missing required fields: sessionId, levelId, blocksUsed, timeSpent, commands" });
   }
 
   const userId = req.user.userId;
@@ -265,6 +266,9 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
       });
     }
 
+    // Calculate score based on blocks used and time spent
+    const score = calculateFinalXP(level.difficulty, blocksUsed, level.blocks_limit, timeSpent, level.time_limit);
+
     // Update Session
     session.is_completed = true;
     session.ended_at = new Date();
@@ -403,4 +407,12 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to verify level" });
   }
+};
+export const getAllCodeblocks = async (req: Request, res: Response) => {
+    try {
+        const blocks = await Codeblock.findAll();
+        res.status(200).json(blocks);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching blocks', error });
+    }
 };

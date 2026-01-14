@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../utils/jwt';
-import { getDashboardData } from '../controllers/dashboardController';
+import  getDashboardData  from '../controllers/dashboardController';
 import { checkUserActive } from '../middleware/dash';
 const router = Router();
 
@@ -45,6 +45,9 @@ const router = Router();
  *       '500':
  *         description: Internal server error
  */
-router.get('/dashboard', authenticateToken , checkUserActive , getDashboardData );
+router.get('/dashboard', authenticateToken , checkUserActive , getDashboardData);
+
+
+
 
 export default router;
