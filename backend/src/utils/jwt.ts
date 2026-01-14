@@ -242,7 +242,8 @@ export const setAuthCookies = (res: Response, accessToken: string, refreshToken:
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
         sameSite: 'lax',//adjust based on frontend/backend deployment
-        maxAge: 15 * 60 * 1000 // 15 minutes
+        maxAge: 15 * 60 * 1000, // 15 minutes
+        path: '/'
     });
     
     // Refresh token - long lived
@@ -250,7 +251,8 @@ export const setAuthCookies = (res: Response, accessToken: string, refreshToken:
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/'
     });
 };
 
@@ -303,8 +305,9 @@ export const refreshAccessToken = async (
         res.cookie('accessToken', newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000,
+            path: '/'
         });
         
         res.json({

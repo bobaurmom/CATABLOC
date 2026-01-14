@@ -3,8 +3,8 @@ import sequelize from "../config/sequelize";
 
 export class Codeblock extends Model {
     public codeblock_id!: number;
-    public block_command!: 'forward' | 'backward' | 'turn_left' | 'turn_right' | 'light';
-    public block_type!: 'movement' | 'loop' | 'while' | 'condition' | 'procedure';
+    public block_command!: 'move_forward' | 'move_backward' | 'turn_left' | 'turn_right' ;
+    public block_type!: 'movement' | 'repeat' | 'while' | 'condition' | 'procedure';
 }
 
 Codeblock.init({
@@ -14,11 +14,11 @@ Codeblock.init({
         autoIncrement: true,
     },
     block_command: {
-        type: DataTypes.ENUM('forward', 'backward', 'turn_left', 'turn_right', 'light'),
+        type: DataTypes.ENUM('move_forward', 'move_backward', 'turn_left', 'turn_right'),
         allowNull: false,
     },
     block_type: {
-        type: DataTypes.ENUM('movement', 'loop', 'while', 'condition', 'procedure'),
+        type: DataTypes.ENUM('movement', 'repeat', 'while', 'condition', 'procedure'),
         allowNull: false,
     },
 }, {

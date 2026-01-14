@@ -1,12 +1,24 @@
-import { Router } from 'express';
-import { register, login, sendOTP as sendOTPController, verifyOTP as verifyOTPController, resendOTP as resendOTPController, requestPasswordReset as forgotPasswordController } from '../controllers/authController';
+import { Router, Request, Response } from 'express';
+import { register, login, sendOTP as sendOTPController, verifyOTP as verifyOTPController, resendOTP as resendOTPController, requestPasswordReset as forgotPasswordController, verifyAuth } from '../controllers/authController';
 import { validateRegister,validateLogin,validatePasswordMiddleware,sanitizeInput  } from '../middleware/validation';
 import { resetPassword as resetPasswordController } from '../controllers/authController';
 import { authenticateToken } from '../utils/jwt';
+import { profile } from '../controllers/authController';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 const router = Router();
 
 router.get('/', authenticateToken);
+
+router.get('/me', authenticateToken, verifyAuth , profile );
+
 /**
  * @swagger
  * /api/auth/register:
@@ -31,6 +43,7 @@ router.get('/', authenticateToken);
  *       '409':
  *         description: "User already exists"
  */
+
 router.post('/register', sanitizeInput, validateRegister, validatePasswordMiddleware, register); //register route
 /**
  * @swagger
@@ -260,5 +273,14 @@ router.post('/forgot-password', sanitizeInput, forgotPasswordController);
  */
 router.patch('/reset-password', sanitizeInput, resetPasswordController);
 
+router.get('/verify-token', authenticateToken, (req: Request, res: Response) => {
+    res.json({
+        success: true,
+        message: 'Token is valid',
+        user: req.user
+    });
+});
+
+router.get('/verify', authenticateToken, verifyAuth);
 
 export default router;

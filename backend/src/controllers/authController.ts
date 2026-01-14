@@ -52,8 +52,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       username: normalizedUsername,
       password_hash: hashed,
       status: 'pending',
+      levels_completed: 0,
       total_exp: 0,
       current_streak: 0
+
     });
     //send OTP after registration
     const otpResult = await sendOTPService({ email: normalizedEmail, type: 'email_verification' });
@@ -136,7 +138,11 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
       email: user.email,
       username: user.username,
       created_at: user.created_at,
-      updated_at: user.updated_at
+      updated_at: user.updated_at,
+      levels_completed: user.levels_completed,
+      total_exp: user.total_exp,
+      current_streak: user.current_streak,
+      profile_pic: user.profile_pic
     };
 
     const response: AuthResponse = {
@@ -477,4 +483,93 @@ export const resetPassword = async (req: AuthenticatedRequest, res: Response): P
     }
     
 };
+
+// Verify current authentication status
+export const verifyAuth = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // If we reach here, the authenticateToken middleware has verified the token
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: 'Not authenticated'
+      });
+      return;
+    }
+
+    // Get fresh user data from database
+    const user = await User.findOne({
+      where: { user_id: req.user.userId, status: 'active' }
+    });
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'User authenticated',
+      data: {
+        user: {
+          user_id: user.user_id,
+          email: user.email,
+          username: user.username
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Auth verification error:', error);
+    res.status(401).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to verify authentication'
+    });
+  }
+};
+
+export const profile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: 'Not authenticated'
+      });
+      return;
+    }
+
+    // Get fresh user data from database
+    const user = await
+
+      User.findOne({
+        where: { user_id: req.user.userId, status: 'active' }
+      });
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      message: 'User profile fetched successfully',
+      data: {
+        user: {
+          username: user.username,
+          xp: user.total_exp,
+          streak: user.current_streak,
+          bio: user.profile_pic || "Student Programmer"
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    res.status(500).json({  
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to fetch profile'
+    });
+  }
+}
 

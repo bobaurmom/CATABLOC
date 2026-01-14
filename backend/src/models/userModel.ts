@@ -10,6 +10,7 @@ interface UserAttributes {
   created_at?: Date;
   updated_at?: Date;
   total_exp: number;
+  levels_completed?: number;
   current_streak: number;
   profile_pic?: string
 }
@@ -25,6 +26,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public readonly updated_at!: Date;
   public status!: 'pending' | 'active' | 'suspended';
   public total_exp!: number;
+  public levels_completed!: number;
   public current_streak!: number
   public profile_pic?: string;
 }
@@ -65,19 +67,28 @@ User.init(
       allowNull: false,
       defaultValue: 'pending',
     },
+    levels_completed: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      validate: { min: 0 },
+    },
     total_exp: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
+      validate: { min: 0 },
     },
     current_streak: {
       type: DataTypes.INTEGER,
       allowNull:true,
       defaultValue: 0,
+      validate: { min: 0 },
     },
     profile_pic: {
       type: DataTypes.STRING(255),
       allowNull: true,
+      validate: { isUrl: true },
     },
 
   },

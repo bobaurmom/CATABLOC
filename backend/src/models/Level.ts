@@ -12,6 +12,8 @@ interface LevelAttributes {
     available_codeblocks: string; // JSON string representing available codeblocks
     difficulty: 'easy' | 'medium' | 'hard';
     level_layout: LevelLayout; // JSON object representing level level_layout
+    blocks_limit?: number;
+    time_limit?: number; // in seconds
     created_at?: Date;
     updated_at?: Date;
 }
@@ -44,6 +46,8 @@ export class Level extends Model<LevelAttributes, LevelCreationAttributes> imple
     public available_codeblocks!: string;
     public difficulty!: 'easy' | 'medium' | 'hard';
     public level_layout!: LevelLayout;
+    public blocks_limit?: number;
+    public time_limit?: number;
 }
 export class LevelProgress extends Model<levelProgress, LevelProgressCreationAttributes> implements levelProgress {
     public user_id!: number;
@@ -81,6 +85,14 @@ Level.init({
     difficulty: {
         type: DataTypes.ENUM('easy', 'medium', 'hard'),
         defaultValue: 'easy',
+    },
+    blocks_limit: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    time_limit: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
     },
     level_layout: {
         type: DataTypes.JSONB,
