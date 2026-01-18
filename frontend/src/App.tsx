@@ -14,21 +14,21 @@ import LevelPage from './page/level';
 function App() {
 
   return (
-  <AuthProvider>
-    <BrowserRouter>
-    <div className="app-container">
-      <Header />
-      <Routes> 
-        <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<SignUp />} />   
-        <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-       <Route path='/level1' element={<LevelPage />} />
-      </Routes>
-      <Footer />
-    </div>
-    </BrowserRouter>
-  </AuthProvider>
+  <BrowserRouter>
+    <AuthProvider>
+      <div className="app-container">
+        <Header />
+        <Routes> 
+          <Route path='/' element={<Home />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<SignUp />} />   
+          <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path='/level1' element={<LevelPage />} />
+        </Routes>
+        <Footer />
+      </div>
+    </AuthProvider>
+  </BrowserRouter>
   )
 }
 

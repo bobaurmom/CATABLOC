@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../../style/codebloc.css';
 import DropZone from './dropZone';
+import Draggable from './draggable';
 
 
 export type BlockType = 'while' | 'if' | 'else' | 'action'| 'repeat';
@@ -22,17 +23,15 @@ const CONDITION_OPTIONS = {
   while: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
   if: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
 };
-let idCounter: number = 0;
 const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [nestedBlocks, setNestedBlocks] = useState<CodeBlock[]>(block.nestedBlocks || []);
   const handleSelect = (option: string, e: React.MouseEvent) => {
     e.stopPropagation();
     block.condition = option; 
     setIsMenuOpen(false);     
   };
-  const generateDropZoneId = () => {
-    return `dropZone-${idCounter++}`;
+  const generateDropZoneId = (parentId : string) => {
+    return `dropZone-${parentId}`;
   }
   const isContainer = ['while', 'if', 'else', 'repeat'].includes(block.type);
   const options = CONDITION_OPTIONS[block.type as keyof typeof CONDITION_OPTIONS] || [];
@@ -75,10 +74,12 @@ const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick }
         <div className="block-children-area">
           <div className="indent-guide" />
           {isUserBlock ? (
-            <DropZone id={generateDropZoneId()}>
+            <DropZone id={generateDropZoneId(block.id)}>
               {block.nestedBlocks && block.nestedBlocks.length > 0 ? (
                 block.nestedBlocks.map((child) => (
-                  <CodeBloc key={child.id} block={child} isUserBlock={isUserBlock} onBlockClick={onBlockClick} />
+                  <Draggable key={child.id} id={child.id} data={{ type: child.type, label: child.label, condition: child.condition }}>
+                    <CodeBloc block={child} isUserBlock={isUserBlock} onBlockClick={onBlockClick} />
+                  </Draggable>
                 ))
               ) : (
                 <div className="empty-placeholder">drop blocks here</div>

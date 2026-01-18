@@ -39,6 +39,7 @@ function Dashboard() {
 
     const handlePlayGame = useCallback((gameName: string) => {
         console.log(`Navigate to ${gameName} game`);
+        navigate(`/level1`);
     }, []);
 
     return (

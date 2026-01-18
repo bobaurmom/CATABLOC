@@ -23,8 +23,8 @@ let provideCode = [
   { id: generateId(), type: 'while' as const ,condition: 'front_is_clear'},
   { id: generateId(), type: 'repeat' as const , condition: '1 times'},
 ]
-function generateId() {
-  return `block-${id++}`;
+function generateId(parentId?: string): string {
+  return `${parentId}-${id++}`;
 }
 const sampleLevel: LevelLayout = {
   width: 10,
@@ -45,14 +45,62 @@ const sampleLevel: LevelLayout = {
 // }
 
 const LevelPage: React.FC = () => {
-  const [userCode, setUserCode] = React.useState<CodeBlock[]>([]);
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
+  const findBlockById = (blocks: CodeBlock[], id: string): CodeBlock | null => {
+    for (const block of blocks) {
+      if (block.id === id) {
+        return block;
+      } else if(block.nestedBlocks) {
+        const found = findBlockById(block.nestedBlocks, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+const [userCode, setUserCode] = React.useState<CodeBlock[]>([]);
+const handleDragEnd = (event: any) => {
+  const { active, over } = event;
+  
+  setUserCode((prevUserCode) => {
+    const removeBlock = (blocks: CodeBlock[], blockId: string): CodeBlock[] => {
+      return blocks
+        .filter((block) => block.id !== blockId)
+        .map((block) => {
+          if (block.nestedBlocks) {
+            return {
+              ...block,
+              nestedBlocks: removeBlock(block.nestedBlocks, blockId),
+            };
+          }
+          return block;
+        });
+    };
+
+    const addToTopLevel = (blocks: CodeBlock[], block: CodeBlock): CodeBlock[] => {
+      return [...blocks, block];
+    };
+
+    const addToNested = (blocks: CodeBlock[], parentBlockId: string, block: CodeBlock): CodeBlock[] => {
+      return blocks.map((bloc) => {
+        if (bloc.id === parentBlockId) {
+          return {
+            ...bloc,
+            nestedBlocks: [...(bloc.nestedBlocks || []), block],
+          };
+        } else if (bloc.nestedBlocks) {
+          return {
+            ...bloc,
+            nestedBlocks: addToNested(bloc.nestedBlocks, parentBlockId, block),
+          };
+        }
+        return bloc;
+      });
+    };
+
     if (over?.id === 'dropZone' && active?.data?.current) {
-      // Check if the block already exists in userCode
-      const blockExists = userCode.some((block) => block.id === active.id);
+      const blockExists = findBlockById(prevUserCode, active.id);
       
       if (!blockExists) {
+        // New block from palette
         const newBlock: CodeBlock = {
           id: generateId(),
           type: active.data.current.type,
@@ -60,20 +108,42 @@ const LevelPage: React.FC = () => {
           condition: active.data.current.condition,
           nestedBlocks: [],
         };
-        setUserCode((prevUserCode) => [...prevUserCode, newBlock]);
+        return addToTopLevel(prevUserCode, newBlock);
+      } else {
+        // Existing nested block moved to top level
+        return addToTopLevel(removeBlock(prevUserCode, active.id), blockExists);
+      }
+    } else if (over?.id && over.id.startsWith("dropZone-") && active?.data?.current) {
+      const parentBlockId = over.id.replace("dropZone-", "");
+      const blockExists = findBlockById(prevUserCode, active.id);
+      
+      if (!blockExists) {
+        // New block from palette
+        const newBlock: CodeBlock = {
+          id: generateId(),
+          type: active.data.current.type,
+          label: active.data.current.label,
+          condition: active.data.current.condition,
+          nestedBlocks: [],
+        };
+        return addToNested(prevUserCode, parentBlockId, newBlock);
+      } else {
+        return addToNested(removeBlock(prevUserCode, active.id), parentBlockId, blockExists);
       }
     } else if (!over && active?.id?.startsWith('block-')) {
-        setUserCode((prevUserCode) => 
-          prevUserCode.filter((block) => block.id !== active.id)
-        );
+      return removeBlock(prevUserCode, active.id);
+    } else {
+      return prevUserCode;
     }
-  };
+  });
+};
+
   return (
     <div className="level-page p-4 margin-auto">
       <h1 style={{ textAlign: 'center' }}>Level 1: The Great  Chase</h1>
       <GameScene layout={sampleLevel} />
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="code-container flex w-full h-64 mt-4">
+        <div className="code-container flex w-full h-180 mt-4">
           <div className="provide-code-container bg-red-100 flex-1 scrollbar-hide overflow-y-auto p-2">
             {provideCode.map((block) => (
               <Draggable key={block.id} id={block.id} data={{ type: block.type, label: block.label, condition: block.condition }}>
@@ -85,7 +155,7 @@ const LevelPage: React.FC = () => {
             <DropZone id="dropZone">
               {userCode.map((block) => (
                 <Draggable key={block.id} id={block.id} data={{ type: block.type, label: block.label, condition: block.condition }}>
-                  <CodeBloc block={block} />
+                  <CodeBloc block={block} isUserBlock={true} />
                 </Draggable>
               ))}
             </DropZone>
@@ -93,17 +163,6 @@ const LevelPage: React.FC = () => {
         </div>
       </DndContext>
       <button onClick={() => console.log(userCode)}>Log User Code</button>
-            {/* <CodeBloc
-        block={{
-          id: '5',
-          type: 'repeat',
-          condition: '5 times',
-          nestedBlocks: [
-            { id: '6', type: 'action', label: 'Move Forward' },
-          ],
-        }}
-            /> */}
-
     </div>
   );
 };

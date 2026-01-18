@@ -3,7 +3,7 @@ import logo from "../../assets/logo.svg";
 import "../../style/header.css";
 import Btn from "../ui/button";
 import { useAuth } from "../../hooks/useAuth";
-import profilePic from "../../../public/asset/defaultProfile.png";
+import profilePic from "../../assets/defaultProfile.png";
 const Header: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);

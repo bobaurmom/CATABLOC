@@ -1,5 +1,6 @@
 import { createContext, createElement, useState,useEffect, type FC, type ReactNode } from "react";
 import type { User as user } from "../type/user";
+import { useNavigate } from "react-router-dom";
 export interface AuthContextType {
   user?: user | null;
   isAuthenticated: boolean;
@@ -15,45 +16,49 @@ const url = "http://localhost:8000/api/auth";
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<user | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    // useEffect(() => {
-    //     const checkAuthentication = () => {
-    //         return !!user;
-    //     }
-    //     checkAuthentication();
-    // }, []);
-    // Initialize auth state on app load
+    const [hasInitialized, setHasInitialized] = useState(false);
+    const nav = useNavigate();
     useEffect(() => {
         const initializeAuth = async () => {
             try {
+                // Check if user was previously logged in
                 const storedUser = localStorage.getItem("user");
                 if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                    
-                    // Verify token/cookies are still valid by making an authenticated request
+                    // Verify the session is still valid
                     try {
                         const response = await fetch(`${url}/verify`, {
                             method: "GET",
                             credentials: "include",
                         });
-                        if (!response.ok) {
-                            // If token is invalid, clear stored user
+                        if (response.ok) {
+                            // Session is valid
+                            const user = JSON.parse(storedUser);
+                            setUser(user);
+                            // Only navigate on first load
+                            if (!hasInitialized) {
+                                nav("/dashboard");
+                            }
+                        } else {
+                            // Session expired, clear stored data
                             localStorage.removeItem("user");
-                            localStorage.removeItem("token");
                             setUser(null);
                         }
                     } catch (error) {
                         console.error("Auth verification failed:", error);
+                        localStorage.removeItem("user");
+                        setUser(null);
                     }
                 }
             } catch (error) {
-                console.error("Failed to load user from localStorage:", error);
+                console.error("Failed to initialize auth:", error);
             } finally {
                 setIsLoading(false);
+                setHasInitialized(true);
             }
         };
         
         initializeAuth();
-    }, []);
+    }, [nav, hasInitialized]);
     const login = async (email:string,password:string): Promise<Response | undefined> => {
         setIsLoading(true);
         try {
@@ -70,7 +75,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 console.log("Login response data:", responseData);
                 const user = {email:responseData.data.user.email,name:responseData.data.user.username};
                 localStorage.setItem("user",JSON.stringify(user));
-                localStorage.setItem("token", responseData.data.token);
                 setUser(user);
             }
             return response;
@@ -112,7 +116,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
     }
     const logout = async () => {
-        localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
         try {
