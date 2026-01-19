@@ -3,7 +3,7 @@ import logo from "../../assets/logo.svg";
 import "../../style/header.css";
 import Btn from "../ui/button";
 import { useAuth } from "../../hooks/useAuth";
-import catImage from "../../assets/cat.png";
+import profilePic from "../../assets/defaultProfile.png";
 const Header: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -43,7 +43,7 @@ const Header: React.FC = () => {
       </nav>
       {isAuthenticated ? (
         <div className="header-user">
-          <img src={catImage} alt="profile" className="profile-pic"/>
+          <img src={profilePic} alt="profile" className="profile-pic"/>
           <span className="header-username">{user?.name}</span>
         </div>
       ) : (

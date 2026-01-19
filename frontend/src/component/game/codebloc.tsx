@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../../style/codebloc.css';
+import DropZone from './dropZone';
+import Draggable from './draggable';
 
 
 export type BlockType = 'while' | 'if' | 'else' | 'action'| 'repeat';
@@ -13,6 +15,7 @@ export interface CodeBlock {
 }
 interface CodeBlockProps {
   block: CodeBlock;
+  isUserBlock?: boolean;
   onBlockClick?: (id: string) => void;
 }
 const CONDITION_OPTIONS = {
@@ -20,14 +23,16 @@ const CONDITION_OPTIONS = {
   while: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
   if: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
 };
-
-const CodeBloc: React.FC<CodeBlockProps> = ({ block, onBlockClick }) => {
+const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const handleSelect = (option: string, e: React.MouseEvent) => {
     e.stopPropagation();
     block.condition = option; 
     setIsMenuOpen(false);     
   };
+  const generateDropZoneId = (parentId : string) => {
+    return `dropZone-${parentId}`;
+  }
   const isContainer = ['while', 'if', 'else', 'repeat'].includes(block.type);
   const options = CONDITION_OPTIONS[block.type as keyof typeof CONDITION_OPTIONS] || [];
 
@@ -68,15 +73,23 @@ const CodeBloc: React.FC<CodeBlockProps> = ({ block, onBlockClick }) => {
       {isContainer && (
         <div className="block-children-area">
           <div className="indent-guide" />
-          <div className="nested-blocks-container">
-            {block.nestedBlocks && block.nestedBlocks.length > 0 ? (
-              block.nestedBlocks.map((child) => (
-                <CodeBloc key={child.id} block={child} onBlockClick={onBlockClick} />
-              ))
-            ) : (
+          {isUserBlock ? (
+            <DropZone id={generateDropZoneId(block.id)}>
+              {block.nestedBlocks && block.nestedBlocks.length > 0 ? (
+                block.nestedBlocks.map((child) => (
+                  <Draggable key={child.id} id={child.id} data={{ type: child.type, label: child.label, condition: child.condition }}>
+                    <CodeBloc block={child} isUserBlock={isUserBlock} onBlockClick={onBlockClick} />
+                  </Draggable>
+                ))
+              ) : (
+                <div className="empty-placeholder">drop blocks here</div>
+              )}
+            </DropZone>
+          ) : (
+            <div className="nested-blocks-container">
               <div className="empty-placeholder">drop blocks here</div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -3,10 +3,10 @@ import Btn from "../component/ui/button";
 
 function Home() {
   return (
-    <main className="main-content">
-      <div style={{ textAlign: "center", padding: "100px" }}>
+    <main className="main-content flex justify-center items-center h-screen">
+      <div className="home-container flex flex-col items-center gap-6 text-center">
         <img src={logo} style={{ width: "100px", height: "auto" }} />
-        <h1>
+        <h1 className="font-bold text-4xl">
           Start <br /> Your Learning Now
         </h1>
         <p>Explore the most fun game while learning algorithms</p>
