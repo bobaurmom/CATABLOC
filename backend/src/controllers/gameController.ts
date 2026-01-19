@@ -9,13 +9,13 @@ import { updateStreak } from "../utils/helpers";
 import { calculateFinalXP } from "../utils/calculatexp";
 
 export const startSession = async (req: AuthenticatedRequest, res: Response) => {
-  const { levelId } = req.body;
-  const userId = req.user?.userId;
+  const { level_id} = req.body;
+  const user_id = req.user?.userId;
 
   try {
     const session = await Session.create({
-      user_id: userId!,
-      level_id: levelId,
+      user_id: user_id!,
+      level_id: level_id!,
       started_at: new Date(),
       is_completed: false
     });
@@ -27,27 +27,27 @@ export const startSession = async (req: AuthenticatedRequest, res: Response) => 
 };
 export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { levelId } = req.params;
+    const { level_id } = req.params;
 
     // Validate levelId
-    if (!levelId || isNaN(Number(levelId))) {
+    if (!level_id || isNaN(Number(level_id))) {
       return res.status(400).json({ error: "Invalid level ID" });
     }
 
     // Fetch the level from database
-    const level = await Level.findByPk(levelId);
+    const level = await Level.findByPk(level_id);
 
     if (!level) {
       return res.status(404).json({ error: "Level not found" });
     }
 
     // Parse level_layout 
-    const levelLayout = typeof level.level_layout === 'string' 
+    const level_layout = typeof level.level_layout === 'string' 
       ? JSON.parse(level.level_layout) 
       : level.level_layout;
 
     // Parse available_codeblocks 
-    const availableCodeblocks = typeof level.available_codeblocks === 'string'
+    const available_codeblocks  = typeof level.available_codeblocks === 'string'
       ? JSON.parse(level.available_codeblocks)
       : level.available_codeblocks;
 
@@ -59,8 +59,10 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
       title: level.title,
       description: level.description,
       difficulty: level.difficulty,
-      available_codeblocks: availableCodeblocks,
-      level_layout: levelLayout
+      available_codeblocks: available_codeblocks,
+      level_layout: level_layout,
+      blocks_limit: level.blocks_limit,
+      time_limit: level.time_limit
     });
 
   } catch (error: any) {
@@ -74,23 +76,23 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
 
 
 export const completeLevel = async (req: AuthenticatedRequest, res: Response) => {
-  const { sessionId, levelId, blocksUsed, timeSpent, commands } = req.body;
+  const { session_id, level_id, blocks_used, time_spent, commands } = req.body;
   
   if (!req.user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   
-  if (!sessionId || !levelId || blocksUsed === undefined || timeSpent === undefined || !commands) {
-    return res.status(400).json({ error: "Missing required fields: sessionId, levelId, blocksUsed, timeSpent, commands" });
+  if (!session_id || !level_id || blocks_used === undefined || time_spent === undefined || !commands) {
+    return res.status(400).json({ error: "Missing required fields: session_id, level_id, blocks_used, time_spent, commands" });
   }
 
-  const userId = req.user.userId;
+  const user_id = req.user.userId;
   
   // Declare transaction ONCE at the top level
   let t = await sequelize.transaction();
   
   try {
-    const session = await Session.findByPk(sessionId);
+    const session = await Session.findByPk(session_id);
     
     if (!session) {
       await t.rollback();
@@ -98,7 +100,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
     }
 
     // Fetch the level based on the levelId from the request body
-    const level = await Level.findByPk(levelId);
+    const level = await Level.findByPk(level_id);
     
     if (!level) {
       await t.rollback();
@@ -112,7 +114,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
     const height = layout.height ?? 5;
     const catStart = layout.catStart ?? { x: 0, y: 0 };
     const goal = layout.goal ;
-    const walls = layout.walls ?? [];
+    const obstacles = layout.obstacles ?? [];
     console.log('Goal position:', goal);
 
     if (!goal) {
@@ -149,7 +151,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
         return true; // Treat out of bounds as a wall
       }
       
-      return walls.some((w: any) => 
+      return obstacles.some((w: any) => 
         w && w.x === checkPos.x && w.y === checkPos.y
       );
     };
@@ -195,8 +197,8 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
             throw new Error(`Invalid path: Out of bounds at position (${nextPos.x}, ${nextPos.y})`);
           }
           
-          // Check walls
-          const hitWall = walls.some((w: any) => 
+          // Check obstacles
+          const hitWall = obstacles.some((w: any) => 
             w && w.x === nextPos.x && w.y === nextPos.y
           );
           
@@ -267,7 +269,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
     }
 
     // Calculate score based on blocks used and time spent
-    const score = calculateFinalXP(level.difficulty, blocksUsed, level.blocks_limit, timeSpent, level.time_limit);
+    const score = calculateFinalXP(level.difficulty, blocks_used, level.blocks_limit, time_spent, level.time_limit);
 
     // Update Session
     session.is_completed = true;
@@ -276,10 +278,10 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
 
     // Update Progress and check if it's a first-time win
     const [progress, created] = await LevelProgress.findOrCreate({
-      where: { user_id: userId, level_id: levelId },
+      where: { user_id: user_id, level_id: level.level_id },
       defaults: {
-        user_id: userId,
-        level_id: levelId,
+        user_id: user_id,
+        level_id: level.level_id, 
         best_score: score,
         attempts: 1,
         completed: 'completed',
@@ -300,13 +302,13 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
       // First time completion bonus
       await User.increment('total_exp', {
         by: 100,
-        where: { user_id: userId },
+        where: { user_id: user_id },
         transaction: t
       });
     }
 
     // Update user streak
-    await updateStreak(userId, t);
+    await updateStreak(user_id, t);
 
     // Commit transaction
     await t.commit();
@@ -353,10 +355,10 @@ export const getSessionDetails = async (req: AuthenticatedRequest, res: Response
   });
 };
 export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
-  const { sessionId, commands } = req.body;
+  const { session_id, commands } = req.body;
 
   try {
-    const session = await Session.findByPk(sessionId, {
+    const session = await Session.findByPk(session_id, {
       include: [{
         model: Level,
         include: [{ model: BoardData, as: 'layout' }]
@@ -394,7 +396,7 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
         return res.json({ success: false, message: "Out of bounds!" });
       }
 
-      const isWall = layout.walls.some(w => w.x === currentPos.x && w.y === currentPos.y);
+      const isWall = layout.obstacles.some(w => w.x === currentPos.x && w.y === currentPos.y);
       if (isWall) return res.json({ success: false, message: "Hit a wall!" });
     }
 

@@ -5,12 +5,13 @@ interface GridProps {
   height: number;
   obstacles: Position[];
   tileSize: number;
+  items?: { type: string; x: number; y: number }[];
 }
 interface Position {
   x: number;
   y: number;
 }
-const Grid: React.FC<GridProps> = ({ width, height, obstacles, tileSize }) => {
+const Grid: React.FC<GridProps> = ({ width, height, obstacles, tileSize, items }) => {
   const cells = [];
 
   // Loop through every Y and X to create a physical tile for every spot
@@ -36,6 +37,17 @@ const Grid: React.FC<GridProps> = ({ width, height, obstacles, tileSize }) => {
             <img 
               src={bush} 
               alt="Bush Obstacle" 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'contain' 
+              }} 
+            />
+          )}
+          {items?.some(item => item.x === x && item.y === y) && (
+            <img 
+              src={"https://files.nc.gov/deq/styles/article_card/public/images/2021-10/atlantic-bonito.jpg?VersionId=9QEVa4aBWw5AhgQt6Y5lrmKitWoetlw5&itok=7yNIlyIm"} 
+              alt="Fish Item" 
               style={{ 
                 width: '100%', 
                 height: '100%', 

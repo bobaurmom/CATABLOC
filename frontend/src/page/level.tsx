@@ -13,6 +13,7 @@ interface LevelLayout {
   facing?: 'left' | 'right' | 'up' | 'down';
   goal: { x: number; y: number };
   obstacles: { x: number; y: number }[];
+  items: { type: string; x: number; y: number }[];  
 }
 let id = 0;
 let provideCode = [
@@ -27,17 +28,19 @@ function generateId(): string {
   return `block-${id++}`;
 }
 const sampleLevel: LevelLayout = {
-  width: 10,
-  height: 8,
-  catStart: { x: 1, y: 1 },
+  width: 8,
+  height: 4,
+  catStart: { x: 0, y: 0 },
   facing: 'right',
-  goal: { x: 8, y: 6 },
+  goal: { x: 2, y: 3 },
   obstacles: [
-    { x: 3, y: 3 },
-    { x: 4, y: 3 },
-    { x: 5, y: 3 },
-    { x: 6, y: 5 },
-    { x: 2, y: 6 },
+    { x: 2, y: 1 },
+    { x: 2, y: 2 },
+    { x: 0, y: 2 },
+    { x: 0, y: 3 },
+  ],
+  items: [
+    { type: 'fish', x: 2, y: 0 },
   ],
 }; 
 

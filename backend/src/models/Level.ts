@@ -32,7 +32,7 @@ interface LevelLayout {
   catStart: { x: number; y: number };
   facing: 'up' | 'down' | 'left' | 'right';
   goal: { x: number; y: number };
-  walls: Array<{ x: number; y: number }>;
+  obstacles: Array<{ x: number; y: number }>;
 }
 interface LevelCreationAttributes extends Optional<LevelAttributes, 'level_id' | 'created_at' | 'updated_at'> {}
 interface LevelProgressCreationAttributes extends Optional<levelProgress, 'last_played_at'> {}
@@ -52,6 +52,7 @@ export class Level extends Model<LevelAttributes, LevelCreationAttributes> imple
 export class LevelProgress extends Model<levelProgress, LevelProgressCreationAttributes> implements levelProgress {
     public user_id!: number;
     public level_id!: number;
+    
     public best_score!: number;
     public attempts!: number;
     public completed!: 'completed' | 'in_progress' | 'not_started';

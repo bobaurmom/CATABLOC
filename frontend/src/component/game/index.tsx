@@ -16,6 +16,7 @@ interface LevelLayout {
   facing?: Facing;
   goal: Position;
   obstacles: Position[];
+  items: { type: string; x: number; y: number }[];
 }
 
 interface GameSceneProps {
@@ -48,6 +49,7 @@ useEffect(() => {
           width={layout.width} 
           height={layout.height} 
           obstacles={layout.obstacles} 
+          items={layout.items}
           tileSize={TILE_SIZE} 
         />
         
