@@ -23,8 +23,8 @@ let provideCode = [
   { id: generateId(), type: 'while' as const ,condition: 'front_is_clear'},
   { id: generateId(), type: 'repeat' as const , condition: '1 times'},
 ]
-function generateId(parentId?: string): string {
-  return `${parentId}-${id++}`;
+function generateId(): string {
+  return `block-${id++}`;
 }
 const sampleLevel: LevelLayout = {
   width: 10,
@@ -40,9 +40,6 @@ const sampleLevel: LevelLayout = {
     { x: 2, y: 6 },
   ],
 }; 
-// const handleBlockClick = (block:{id: string}) => {
-//   return <Draggable id={`${block.id}`}></Draggable>
-// }
 
 const LevelPage: React.FC = () => {
   const findBlockById = (blocks: CodeBlock[], id: string): CodeBlock | null => {
@@ -130,7 +127,7 @@ const handleDragEnd = (event: any) => {
       } else {
         return addToNested(removeBlock(prevUserCode, active.id), parentBlockId, blockExists);
       }
-    } else if (!over && active?.id?.startsWith('block-')) {
+    } else if (!over && active.id.startsWith("block-")) {
       return removeBlock(prevUserCode, active.id);
     } else {
       return prevUserCode;
