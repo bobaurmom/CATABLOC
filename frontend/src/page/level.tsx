@@ -6,6 +6,8 @@ import { DndContext } from '@dnd-kit/core';
 import Draggable from '../component/game/draggable';
 import DropZone from '../component/game/dropZone';
 import type { CodeBlock } from '../component/game/codebloc';
+import {fetchLayout} from '../services/gameService';
+import { useGameSelection } from '../hooks/useGameSelection';
 interface LevelLayout {
   width: number;
   height: number;
@@ -15,36 +17,55 @@ interface LevelLayout {
   obstacles: { x: number; y: number }[];
   items: { type: string; x: number; y: number }[];  
 }
+interface LevelData {
+  levelId: number;
+  gameId: number;
+  levelNumber: number;
+  title: string;
+  description: string;
+  availableBlocksStr: string[];
+  availableBlocks: CodeBlock[];
+  layout: LevelLayout;
+  blockLimit: number;
+  timeLimit: number;
+}
 let id = 0;
-let provideCode = [
-  { id: generateId(), type: 'action' as const, label: 'Move Forward' },
-  { id: generateId(), type: 'action' as const, label: 'Turn Left' },
-  { id: generateId(), type: 'action' as const, label: 'Turn Right' },
-  { id: generateId(), type: 'if' as const ,condition: 'front_is_clear'},
-  { id: generateId(), type: 'while' as const ,condition: 'front_is_clear'},
-  { id: generateId(), type: 'repeat' as const , condition: '1 times'},
-]
 function generateId(): string {
   return `block-${id++}`;
-}
-const sampleLevel: LevelLayout = {
-  width: 8,
-  height: 4,
-  catStart: { x: 0, y: 0 },
-  facing: 'right',
-  goal: { x: 2, y: 3 },
-  obstacles: [
-    { x: 2, y: 1 },
-    { x: 2, y: 2 },
-    { x: 0, y: 2 },
-    { x: 0, y: 3 },
-  ],
-  items: [
-    { type: 'fish', x: 2, y: 0 },
-  ],
-}; 
+} 
 
 const LevelPage: React.FC = () => {
+  const [levelLayout, setLevelLayout] = React.useState<LevelData | null>(null);
+  const { currentLevel } = useGameSelection();
+  const handleProvideCode = (provideCode: string[]): CodeBlock[] => {
+    let newProvideCode: CodeBlock[] = [];
+    for (const blockType of provideCode) {
+      if(blockType === 'Move Forward' || blockType === 'Turn Left' || blockType === 'Turn Right') {
+        newProvideCode.push({ id: generateId(), type: 'action' as const, label: blockType });
+      } else if (blockType === 'if') {
+        newProvideCode.push({ id: generateId(), type: 'if' as const ,condition: 'front_is_clear'});
+      } else if (blockType === 'while') { 
+        newProvideCode.push({ id: generateId(), type: 'while' as const ,condition: 'front_is_clear'});
+      } else if (blockType === 'repeat') {
+        newProvideCode.push({ id: generateId(), type: 'repeat' as const , condition: '2 times'});
+      }
+    }
+    return newProvideCode;
+
+  }
+  React.useEffect(() => {
+    const loadLayout = async () => {
+      const layout = await fetchLayout(currentLevel);
+      if(layout && Array.isArray(layout.availableBlocksStr)){
+        layout.availableBlocks = handleProvideCode(layout.availableBlocksStr);
+      }
+      setLevelLayout(layout);
+      console.log(layout);
+      console.log("Level layout loaded:", layout.layout);
+    };
+    loadLayout();
+  }, []);
+
   const findBlockById = (blocks: CodeBlock[], id: string): CodeBlock | null => {
     for (const block of blocks) {
       if (block.id === id) {
@@ -140,12 +161,12 @@ const handleDragEnd = (event: any) => {
 
   return (
     <div className="level-page p-4 margin-auto">
-      <h1 style={{ textAlign: 'center' }}>Level 1: The Great  Chase</h1>
-      <GameScene layout={sampleLevel} />
+      <h1 style={{ textAlign: 'center' }}>{`Level ${levelLayout?.levelNumber}: ${levelLayout?.title}`}</h1>
+      {levelLayout && <GameScene layout={levelLayout.layout} />}  
       <DndContext onDragEnd={handleDragEnd}>
         <div className="code-container flex w-full h-180 mt-4">
           <div className="provide-code-container bg-red-100 flex-1 scrollbar-hide overflow-y-auto p-2">
-            {provideCode.map((block) => (
+            {levelLayout?.availableBlocks?.map((block) => (
               <Draggable key={block.id} id={block.id} data={{ type: block.type, label: block.label, condition: block.condition }}>
                 <CodeBloc block={block} />
               </Draggable>

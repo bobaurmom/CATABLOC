@@ -6,6 +6,8 @@ import Card from "../component/gameCard";
 import Profile from "../component/userProfile";
 import "../style/dashboard.css";
 import gameCover1 from "../assets/gamecover1.svg";
+import LevelPanel from "../component/game/gameSelectionPanel";
+import { useGameSelection } from "../hooks/useGameSelection";
 
 interface UserStats {
   exp: number;
@@ -16,7 +18,9 @@ interface UserStats {
 function Dashboard() {
     const navigate = useNavigate();
     const [userName, setUserName] = useState("student");
+    const [ popUpVisible, setPopupVisible ] = useState(false);
     const [userStats, setUserStats] = useState<UserStats | null>(null);
+    const { gameId, setGameId, totalLevels, setTotalLevels, gameName, setGameName } = useGameSelection();
 
     useEffect(() => {
         // Get username from localStorage
@@ -37,23 +41,28 @@ function Dashboard() {
         setUserStats(stats);
     }, []);
 
-    const handlePlayGame = useCallback((gameName: string) => {
-        console.log(`Navigate to ${gameName} game`);
-        navigate(`/level1`);
-    }, []);
+    const handlePlayGame = useCallback((gameName: string, gameId: number) => {
+        if (setGameId && setGameName && setTotalLevels) {
+            setGameId(gameId);
+            setGameName(gameName);
+            setTotalLevels(3);  
+            setPopupVisible(true);
+        }
+    }, [setGameId, setGameName, setTotalLevels]);
 
     return (
         <div className="dashboard-container">
+            {(popUpVisible && gameName && totalLevels) ? <LevelPanel totalLevels={totalLevels} gameName={gameName} handleClose={() => setPopupVisible(false)}></LevelPanel>  : (popUpVisible && <div><h3>Failed to load game levels</h3></div>)}
             <div className="dashboard-wrapper">
                 <div className="dashboard-left">
                     <TalkingCat text={`Welcome back ${userName} \\( >v< )/`} />
                     
                     <div className="dashboard-games-grid">
                         <Card 
-                            text="Purfect_Pathing" 
+                            text="Purfect Pathing" 
                             detail="Ready to be a cat catching a mouse?"
                             gameImage={gameCover1}
-                            onPlay={() => handlePlayGame("Purfect_Pathing")}
+                            onPlay={() => handlePlayGame("Purfect Pathing", 1)}
                         />
                         <Card 
                             text="Coming Soon" 

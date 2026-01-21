@@ -51,6 +51,7 @@ const Header: React.FC = () => {
           <Btn text="Sign Up"></Btn>
         </a>
       )}
+      <div className=""></div>
     </header>
   );
 };
