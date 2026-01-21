@@ -1,4 +1,3 @@
-//# Validate answers, update scores
 import sequelize from "../config/sequelize";
 import { User, Session, Codeblock } from "../models";
 import Level, { LevelProgress } from "../models/Level";
@@ -8,28 +7,47 @@ import BoardData from "../models/boardData";
 import { updateStreak } from "../utils/helpers";
 import { calculateFinalXP } from "../utils/calculatexp";
 
-export const startSession = async (req: AuthenticatedRequest, res: Response) => {
-  const { level_id} = req.body;
-  const user_id = req.user?.userId;
+type Direction = 'up' | 'right' | 'down' | 'left';
 
+// convert direction string to normalized Direction type
+const normalizeDirection = (dir: string): Direction => {
+  const dirMap: Record<string, Direction> = {
+    'up': 'up',
+    'right': 'right', 
+    'down': 'down',
+    'left': 'left'
+  };
+  return dirMap[dir.toLowerCase()] || 'right';
+};
+
+export const startSession = async (req: AuthenticatedRequest, res: Response) => {
+  const { level_id } = req.body;
+  const user_id = req.user?.user_id;
+  if (!level_id) {
+    return res.status(400).json({ error: "level_id is required" });
+  }
+
+  if (!user_id) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
   try {
     const session = await Session.create({
-      user_id: user_id!,
-      level_id: level_id!,
+      user_id: user_id,
+      level_id: level_id,
       started_at: new Date(),
       is_completed: false
     });
 
-    res.status(201).json({ sessionId: session.session_id });
+    res.status(201).json({ session_id: session.session_id });
   } catch (error) {
+    console.error("START SESSION ERROR:", error);
     res.status(500).json({ error: "Failed to start session" });
   }
 };
+
 export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { level_id } = req.params;
-
-    // Validate levelId
     if (!level_id || isNaN(Number(level_id))) {
       return res.status(400).json({ error: "Invalid level ID" });
     }
@@ -47,11 +65,10 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
       : level.level_layout;
 
     // Parse available_codeblocks 
-    const available_codeblocks  = typeof level.available_codeblocks === 'string'
+    const available_codeblocks = typeof level.available_codeblocks === 'string'
       ? JSON.parse(level.available_codeblocks)
       : level.available_codeblocks;
 
-    // Return the level data
     res.status(200).json({
       level_id: level.level_id,
       game_id: level.game_id,
@@ -74,7 +91,6 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-
 export const completeLevel = async (req: AuthenticatedRequest, res: Response) => {
   const { session_id, level_id, blocks_used, time_spent, commands } = req.body;
   
@@ -83,24 +99,48 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
   }
   
   if (!session_id || !level_id || blocks_used === undefined || time_spent === undefined || !commands) {
-    return res.status(400).json({ error: "Missing required fields: session_id, level_id, blocks_used, time_spent, commands" });
+    return res.status(400).json({ 
+      error: "Missing required fields: session_id, level_id, blocks_used, time_spent, commands" 
+    });
   }
 
-  const user_id = req.user.userId;
+  if (!Array.isArray(commands)) {
+    return res.status(400).json({ error: "commands must be an array" });
+  }
+
+  if (typeof blocks_used !== 'number' || blocks_used < 0) {
+    return res.status(400).json({ error: "blocks_used must be a non-negative number" });
+  }
+
+  if (typeof time_spent !== 'number' || time_spent < 0) {
+    return res.status(400).json({ error: "time_spent must be a non-negative number" });
+  }
+
+  const user_id = req.user.user_id;
   
-  // Declare transaction ONCE at the top level
-  let t = await sequelize.transaction();
+  let t;
   
   try {
-    const session = await Session.findByPk(session_id);
+    t = await sequelize.transaction();
+    
+    const session = await Session.findByPk(session_id, { transaction: t });
     
     if (!session) {
       await t.rollback();
       return res.status(404).json({ error: "Session not found" });
     }
 
-    // Fetch the level based on the levelId from the request body
-    const level = await Level.findByPk(level_id);
+    if (session.user_id !== user_id) {
+      await t.rollback();
+      return res.status(403).json({ error: "Session does not belong to user" });
+    }
+
+    if (session.level_id !== level_id) {
+      await t.rollback();
+      return res.status(400).json({ error: "Session level_id does not match request level_id" });
+    }
+
+    const level = await Level.findByPk(level_id, { transaction: t });
     
     if (!level) {
       await t.rollback();
@@ -109,65 +149,59 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
 
     const layout = level.level_layout;
     
-    // Provide defaults using Nullish Coalescing operator
-    const width = layout.width ?? 5;
-    const height = layout.height ?? 5;
-    const catStart = layout.catStart ?? { x: 0, y: 0 };
-    const goal = layout.goal ;
-    const obstacles = layout.obstacles ?? [];
+    // Validate layout has required fields
+    if (!layout.width || !layout.height || !layout.cat_start || !layout.goal) {
+      await t.rollback();
+      return res.status(500).json({ error: "Invalid level layout configuration" });
+    }
+
+    const width = layout.width;
+    const height = layout.height;
+    const cat_start = layout.cat_start;
+    const goal = layout.goal;
+    const obstacles = layout.obstacles || [];
+    
     console.log('Goal position:', goal);
 
-    if (!goal) {
-    throw new Error('Goal position not found in level layout');
-  }
-
-    let currentPos = { ...catStart };
-    const directionMap: Record<string, 'up' | 'right' | 'down' | 'left'> = {
-      "up": "up",
-      "right": "right",
-      "down": "down",
-      "left": "left"
-    };
-
-// Start facing the direction defined in the level layout
-  let facing = directionMap[layout.facing] ?? 'right';
+    let current_pos = { ...cat_start };
+    let facing: Direction = normalizeDirection(layout.facing || 'right');
     
-    // Maximum iterations to prevent infinite loops
+    // prevent infinite loops
     const MAX_ITERATIONS = 10000;
-    let totalIterations = 0;
+    let total_iterations = 0;
 
-    // Helper function to check if there's a wall in front
-    const isWallAhead = () => {
-      let checkPos = { ...currentPos };
+    // check if there's a wall in front
+    const is_wall_ahead = (): boolean => {
+      let check_pos = { ...current_pos };
       
-      if (facing === 'up') checkPos.y -= 1;
-      else if (facing === 'right') checkPos.x += 1;
-      else if (facing === 'down') checkPos.y += 1;
-      else if (facing === 'left') checkPos.x -= 1;
+      if (facing === 'up') check_pos.y -= 1;
+      else if (facing === 'right') check_pos.x += 1;
+      else if (facing === 'down') check_pos.y += 1;
+      else if (facing === 'left') check_pos.x -= 1;
       
       // Check if out of bounds
-      if (checkPos.x < 0 || checkPos.x >= width || 
-          checkPos.y < 0 || checkPos.y >= height) {
-        return true; // Treat out of bounds as a wall
+      if (check_pos.x < 0 || check_pos.x >= width || 
+          check_pos.y < 0 || check_pos.y >= height) {
+        return true;
       }
       
       return obstacles.some((w: any) => 
-        w && w.x === checkPos.x && w.y === checkPos.y
+        w && w.x === check_pos.x && w.y === check_pos.y
       );
     };
 
     // Recursive function to execute commands
-    const executeCommands = async (commandList: any[]): Promise<void> => {
+    const execute_commands = async (command_list: any[]): Promise<void> => {
       let i = 0;
       
-      while (i < commandList.length) {
-        totalIterations++;
+      while (i < command_list.length) {
+        total_iterations++;
         
-        if (totalIterations > MAX_ITERATIONS) {
+        if (total_iterations > MAX_ITERATIONS) {
           throw new Error("Maximum iterations exceeded - possible infinite loop");
         }
         
-        const cmd = commandList[i];
+        const cmd = command_list[i];
         
         if (cmd === 'TURN_RIGHT') {
           if (facing === 'up') facing = 'right';
@@ -184,99 +218,124 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
           i++;
           
         } else if (cmd === 'MOVE_FORWARD') {
-          let nextPos = { ...currentPos };
+          let next_pos = { ...current_pos };
           
-          if (facing === 'up') nextPos.y -= 1;
-          else if (facing === 'right') nextPos.x += 1;
-          else if (facing === 'down') nextPos.y += 1;
-          else if (facing === 'left') nextPos.x -= 1;
+          if (facing === 'up') next_pos.y -= 1;
+          else if (facing === 'right') next_pos.x += 1;
+          else if (facing === 'down') next_pos.y += 1;
+          else if (facing === 'left') next_pos.x -= 1;
           
           // Check bounds
-          if (nextPos.x < 0 || nextPos.x >= width || 
-              nextPos.y < 0 || nextPos.y >= height) {
-            throw new Error(`Invalid path: Out of bounds at position (${nextPos.x}, ${nextPos.y})`);
+          if (next_pos.x < 0 || next_pos.x >= width || 
+              next_pos.y < 0 || next_pos.y >= height) {
+            throw new Error(`Invalid path: Out of bounds at position (${next_pos.x}, ${next_pos.y})`);
           }
           
           // Check obstacles
-          const hitWall = obstacles.some((w: any) => 
-            w && w.x === nextPos.x && w.y === nextPos.y
+          const hit_wall = obstacles.some((w: any) => 
+            w && w.x === next_pos.x && w.y === next_pos.y
           );
           
-          if (hitWall) {
-            throw new Error(`Invalid path: Hit a wall at position (${nextPos.x}, ${nextPos.y})`);
+          if (hit_wall) {
+            throw new Error(`Invalid path: Hit a wall at position (${next_pos.x}, ${next_pos.y})`);
           }
           
-          currentPos = nextPos;
+          current_pos = next_pos;
           i++;
           
-        } else if (cmd.type === 'REPEAT') {
-          // REPEAT structure: { type: 'REPEAT', count: 3, commands: [...] }
-          const repeatCount = cmd.count || 0;
-          const repeatCommands = cmd.commands || [];
+        } else if (cmd?.type === 'REPEAT') {
+          // Validate REPEAT command
+          if (!cmd.count || cmd.count < 1) {
+            throw new Error("REPEAT command must have a count >= 1");
+          }
           
-          for (let r = 0; r < repeatCount; r++) {
-            await executeCommands(repeatCommands);
+          if (!Array.isArray(cmd.commands)) {
+            throw new Error("REPEAT command must have a commands array");
+          }
+          
+          const repeat_count = cmd.count;
+          const repeat_commands = cmd.commands;
+          
+          for (let r = 0; r < repeat_count; r++) {
+            await execute_commands(repeat_commands);
           }
           i++;
           
-        } else if (cmd.type === 'WHILE') {
-          // WHILE structure: { type: 'WHILE', condition: 'wallAhead', commands: [...] }
+        } else if (cmd?.type === 'WHILE') {
+          // Validate WHILE command
+          if (!cmd.condition) {
+            throw new Error("WHILE command must have a condition");
+          }
+          
+          if (!Array.isArray(cmd.commands)) {
+            throw new Error("WHILE command must have a commands array");
+          }
+          
           const condition = cmd.condition;
-          const whileCommands = cmd.commands || [];
+          const while_commands = cmd.commands;
           
           while (true) {
-            totalIterations++;
+            total_iterations++;
             
-            if (totalIterations > MAX_ITERATIONS) {
+            if (total_iterations > MAX_ITERATIONS) {
               throw new Error("Maximum iterations exceeded in WHILE loop");
             }
             
-            let conditionMet = false;
+            let condition_met = false;
             
-            if (condition === 'wallAhead') {
-              conditionMet = isWallAhead();
-            } else if (condition === 'notWallAhead') {
-              conditionMet = !isWallAhead();
-            } else if (condition === 'notAtGoal') {
-              conditionMet = !(currentPos.x === goal.x && currentPos.y === goal.y);
+            if (condition === 'wall_ahead') {
+              condition_met = is_wall_ahead();
+            } else if (condition === 'not_wall_ahead') {
+              condition_met = !is_wall_ahead();
+            } else if (condition === 'not_at_goal') {
+              condition_met = !(current_pos.x === goal.x && current_pos.y === goal.y);
+            } else {
+              throw new Error(`Unknown WHILE condition: ${condition}`);
             }
             
-            if (!conditionMet) break;
+            if (!condition_met) break;
             
-            await executeCommands(whileCommands);
+            await execute_commands(while_commands);
           }
           i++;
           
+        } else if (cmd) {
+          throw new Error(`Unknown command: ${JSON.stringify(cmd)}`);
         } else {
-          i++; // Skip unknown commands
+          i++; // Skip undefined commands
         }
       }
     };
-
     // Execute all commands
-    await executeCommands(commands);
+    await execute_commands(commands);
 
     // Check if goal was reached
-    const reachedGoal = currentPos.x === goal.x && currentPos.y === goal.y;
+    const reached_goal = current_pos.x === goal.x && current_pos.y === goal.y;
     
-    if (!reachedGoal) {
+    if (!reached_goal) {
       await t.rollback();
       return res.status(400).json({ 
         error: "Level not completed: Goal not reached",
-        finalPosition: currentPos,
-        goalPosition: goal
+        final_position: current_pos,
+        goal_position: goal
       });
     }
 
     // Calculate score based on blocks used and time spent
-    const score = calculateFinalXP(level.difficulty, blocks_used, level.blocks_limit, time_spent, level.time_limit);
+    const score = calculateFinalXP(
+      level.difficulty, 
+      blocks_used, 
+      level.blocks_limit, 
+      time_spent, 
+      level.time_limit
+    );
 
     // Update Session
     session.is_completed = true;
     session.ended_at = new Date();
     await session.save({ transaction: t });
 
-    // Update Progress and check if it's a first-time win
+    // Update Progress and check if it's a first-time completion
     const [progress, created] = await LevelProgress.findOrCreate({
       where: { user_id: user_id, level_id: level.level_id },
       defaults: {
@@ -289,23 +348,35 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
       },
       transaction: t
     });
-
+    
+    let xp_earned = score;
+    
     if (!created) {
       // Update existing progress
-      const newBest = Math.max(progress.best_score, score);
+      const new_best = Math.max(progress.best_score, score);
       await progress.update({
-        best_score: newBest,
+        best_score: new_best,
         attempts: progress.attempts + 1,
         last_played_at: new Date()
       }, { transaction: t });
     } else {
-      // First time completion bonus
-      await User.increment('total_exp', {
-        by: 100,
+      // First time completion - add bonus XP
+      xp_earned += 100;
+      
+      // Increment level completion count
+      await User.increment('levels_completed', {
+        by: 1,
         where: { user_id: user_id },
         transaction: t
       });
     }
+
+    // Always add XP to user (score + potential first-time bonus)
+    await User.increment('total_exp', {
+      by: xp_earned,
+      where: { user_id: user_id },
+      transaction: t
+    });
 
     // Update user streak
     await updateStreak(user_id, t);
@@ -315,15 +386,22 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
 
     res.status(200).json({
       message: "Level verified and recorded!",
-      newLevelUnlocked: created,
-      finalPosition: currentPos,
-      score: score
+      first_time_completion: created,
+      final_position: current_pos,
+      goal_position: goal,
+      score: score,
+      xp_earned: xp_earned,
+      bonus_xp: created ? 100 : 0
     });
 
   } catch (error: any) {
-    // Rollback transaction if it exists
+    // Rollback transaction if it exists and hasn't been committed
     if (t) {
-      await t.rollback();
+      try {
+        await t.rollback();
+      } catch (rollbackError) {
+        console.error("ROLLBACK ERROR:", rollbackError);
+      }
     }
     console.error("COMPLETION ERROR:", error);
     res.status(500).json({
@@ -334,28 +412,51 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
 };
 
 export const getSessionDetails = async (req: AuthenticatedRequest, res: Response) => {
-  const { sessionId } = req.params;
+  const { session_id } = req.params;
 
-  const session = await Session.findByPk(sessionId, {
-    include: [{
-      model: Level,
-      attributes: ['title', 'level_layout'] 
-    }]
-  });
-
-  if (!session || !session.Level) {
-    return res.status(404).json({ error: "Session not found" });
+  if (!session_id || isNaN(Number(session_id))) {
+    return res.status(400).json({ error: "Invalid session ID" });
   }
 
-  const catStartingGrid = session.Level.level_layout.catStart;
-  res.status(200).json({
-    sessionId: session.session_id,
-    levelTitle: session.Level.title,
-    catStartingGrid
-  });
+  try {
+    const session = await Session.findByPk(session_id, {
+      include: [{
+        model: Level,
+        attributes: ['title', 'level_layout'] 
+      }]
+    });
+
+    if (!session || !session.Level) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const cat_starting_grid = session.Level.level_layout.cat_start;
+    
+    res.status(200).json({
+      session_id: session.session_id,
+      level_title: session.Level.title,
+      cat_starting_grid
+    });
+  } catch (error: any) {
+    console.error("GET SESSION DETAILS ERROR:", error);
+    res.status(500).json({ 
+      error: "Failed to fetch session details",
+      detail: error.message
+    });
+  }
 };
+
 export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
   const { session_id, commands } = req.body;
+
+  // Validation
+  if (!session_id) {
+    return res.status(400).json({ error: "session_id is required" });
+  }
+
+  if (!Array.isArray(commands)) {
+    return res.status(400).json({ error: "commands must be an array" });
+  }
 
   try {
     const session = await Session.findByPk(session_id, {
@@ -365,56 +466,102 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
       }]
     });
 
-    if (!session?.Level) return res.status(404).json({ error: "Session or Level not found" });
+    if (!session?.Level) {
+      return res.status(404).json({ error: "Session or Level not found" });
+    }
 
-    // GET DYNAMIC DIMENSIONS FROM DATABASE
+    // Get layout from database
     const layout = session.Level.level_layout;
+    
+    // Validate layout
+    if (!layout.width || !layout.height || !layout.cat_start || !layout.goal) {
+      return res.status(500).json({ error: "Invalid level layout configuration" });
+    }
+
     const width = layout.width;   
     const height = layout.height;
+    const obstacles = layout.obstacles || [];
 
-    let currentPos = { ...layout.catStart };
-    let facing = 0; 
+    let current_pos = { ...layout.cat_start };
+    let facing: Direction = normalizeDirection(layout.facing || 'right');
 
+    // Execute commands
     for (const cmd of commands) {
       if (cmd === 'TURN_RIGHT') { 
-        facing = (facing + 1) % 4;
-         continue; }
+        if (facing === 'up') facing = 'right';
+        else if (facing === 'right') facing = 'down';
+        else if (facing === 'down') facing = 'left';
+        else if (facing === 'left') facing = 'up';
+        continue;
+      }
+      
       if (cmd === 'TURN_LEFT') { 
-        facing = (facing + 3) % 4; 
-        continue; 
+        if (facing === 'up') facing = 'left';
+        else if (facing === 'left') facing = 'down';
+        else if (facing === 'down') facing = 'right';
+        else if (facing === 'right') facing = 'up';
+        continue;
       }
 
       if (cmd === 'MOVE_FORWARD') {
-        if (facing === 0) currentPos.y -= 1;
-        if (facing === 1) currentPos.x += 1;
-        if (facing === 2) currentPos.y += 1;
-        if (facing === 3) currentPos.x -= 1;
+        if (facing === 'up') current_pos.y -= 1;
+        else if (facing === 'right') current_pos.x += 1;
+        else if (facing === 'down') current_pos.y += 1;
+        else if (facing === 'left') current_pos.x -= 1;
       }
 
-      // uses the actual width/height of the specific level
-      if (currentPos.x < 0 || currentPos.x >= width || currentPos.y < 0 || currentPos.y >= height) {
-        return res.json({ success: false, message: "Out of bounds!" });
+      // Check bounds
+      if (current_pos.x < 0 || current_pos.x >= width || 
+          current_pos.y < 0 || current_pos.y >= height) {
+        return res.json({ 
+          success: false, 
+          message: "Out of bounds!",
+          position: current_pos
+        });
       }
 
-      const isWall = layout.obstacles.some(w => w.x === currentPos.x && w.y === currentPos.y);
-      if (isWall) return res.json({ success: false, message: "Hit a wall!" });
+      // Check walls
+      const is_wall = obstacles.some((w: any) => 
+        w && w.x === current_pos.x && w.y === current_pos.y
+      );
+      
+      if (is_wall) {
+        return res.json({ 
+          success: false, 
+          message: "Hit a wall!",
+          position: current_pos
+        });
+      }
     }
 
-    const reachedGoal = currentPos.x === layout.goal.x && currentPos.y === layout.goal.y;
+    // Check if goal reached
+    const reached_goal = current_pos.x === layout.goal.x && current_pos.y === layout.goal.y;
+    
     res.json({ 
-      success: reachedGoal, 
-      message: reachedGoal ? "Correct!" : "Failed to reach goal" 
+      success: reached_goal, 
+      message: reached_goal ? "Correct!" : "Failed to reach goal",
+      final_position: current_pos,
+      goal_position: layout.goal
     });
 
-  } catch (error) {
-    res.status(500).json({ error: "Failed to verify level" });
+  } catch (error: any) {
+    console.error("VERIFY LEVEL ERROR:", error);
+    res.status(500).json({ 
+      error: "Failed to verify level",
+      detail: error.message
+    });
   }
 };
+
 export const getAllCodeblocks = async (req: Request, res: Response) => {
-    try {
-        const blocks = await Codeblock.findAll();
-        res.status(200).json(blocks);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching blocks', error });
-    }
+  try {
+    const blocks = await Codeblock.findAll();
+    res.status(200).json(blocks);
+  } catch (error: any) {
+    console.error("GET ALL CODEBLOCKS ERROR:", error);
+    res.status(500).json({ 
+      message: 'Error fetching blocks', 
+      error: error.message 
+    });
+  }
 };

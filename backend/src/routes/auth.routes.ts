@@ -272,7 +272,6 @@ router.post('/forgot-password', sanitizeInput, forgotPasswordController);
  *         description: Internal server error
  */
 router.patch('/reset-password', sanitizeInput, resetPasswordController);
-
 router.get('/verify-token', authenticateToken, (req: Request, res: Response) => {
     res.json({
         success: true,
@@ -280,7 +279,17 @@ router.get('/verify-token', authenticateToken, (req: Request, res: Response) => 
         user: req.user
     });
 });
-
 router.get('/verify', authenticateToken, verifyAuth);
-
+router.post('/logout', authenticateToken, (req: Request, res: Response) => {
+    res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'development',
+        sameSite: 'lax',
+    }
+    );
+    res.json({
+        success: true,
+        message: 'Logged out successfully'
+    });
+});
 export default router;

@@ -29,7 +29,7 @@ interface levelProgress{
 interface LevelLayout {
   width: number;
   height: number;
-  catStart: { x: number; y: number };
+  cat_start: { x: number; y: number };
   facing: 'up' | 'down' | 'left' | 'right';
   goal: { x: number; y: number };
   obstacles: Array<{ x: number; y: number }>;
