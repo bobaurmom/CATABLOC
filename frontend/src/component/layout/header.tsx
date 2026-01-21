@@ -5,11 +5,16 @@ import Btn from "../ui/button";
 import { useAuth } from "../../hooks/useAuth";
 import profilePic from "../../assets/defaultProfile.png";
 const Header: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
+  const { user, isAuthenticated , logout} = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const dropDown = () => {
       setIsOpen(!isOpen);
     }
+  const handleLogout = () => {
+    logout();
+    setProfileMenuOpen(false);
+  }
   return (
     <header className="header">
       <div className="header-left">
@@ -42,16 +47,22 @@ const Header: React.FC = () => {
         </a>
       </nav>
       {isAuthenticated ? (
-        <div className="header-user">
+        <div className="header-user" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
           <img src={profilePic} alt="profile" className="profile-pic"/>
           <span className="header-username">{user?.name}</span>
         </div>
       ) : (
         <a href="/register">
-          <Btn text="Sign Up"></Btn>
+          <Btn text="Sign Up" state="default"></Btn>
         </a>
       )}
-      <div className=""></div>
+      {profileMenuOpen && (
+        <div className="profile-menu fixed top-15 right-13 z-50 bg-white border border-gray-300 rounded shadow-lg p-4 flex flex-col">
+          <div className="view-profile border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">View Profile</div>
+          <div className="help-center border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">Help Center</div>
+          <Btn text="Log out" state="warning" onClick={handleLogout}/>
+        </div>
+      )}
     </header>
   );
 };

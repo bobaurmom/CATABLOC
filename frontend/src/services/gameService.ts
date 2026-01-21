@@ -36,6 +36,7 @@ export const fetchLayout = async (levelId: number): Promise<any> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const layoutData = await response.json();
+    console.log("Layout data from backend:", layoutData);
     
     // Map snake_case to camelCase
     return {
@@ -44,7 +45,7 @@ export const fetchLayout = async (levelId: number): Promise<any> => {
       levelNumber: layoutData.level_number,
       title: layoutData.title,
       description: layoutData.description,
-      availableBlocksStr: layoutData.available_blocks_str,
+      availableBlocksStr: layoutData.available_codeblocks,
       layout: layoutData.level_layout,
       blockLimit: layoutData.block_limit,
       timeLimit: layoutData.time_limit,
@@ -54,5 +55,56 @@ export const fetchLayout = async (levelId: number): Promise<any> => {
     return null; 
   }
 };
-
+export const startSession = async (levelId: number): Promise<number | null> => {
+  try {
+    const response = await apiFetch(`/api/games/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({"level_id": levelId }),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+    }
+    const data = await response.json();
+    return data.session_id;
+  } catch (error) {
+    return null;
+  }
+};
+export const completeGame = async (sessionId: number, levelId: number, blockUsed: number, time_spent: number, userCode: CodeBlock[]): Promise<Response | null> => {
+  const body = {
+    "session_id": sessionId,
+    "level_id": levelId,
+    "blocks_used": blockUsed,
+    "time_spent": time_spent,
+    "commands": userCode
+  };
+  console.log("Complete Game Request Body:", JSON.stringify(body));
+  try {
+    const response = await apiFetch(`/api/games/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "session_id": sessionId,
+        "level_id": levelId,
+        "blocks_used": blockUsed,
+        "time_spent": time_spent,
+        "commands": userCode
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    console.error("Failed to complete game session:", error);
+    return null;
+  }
+};
 export default fetchBloc;

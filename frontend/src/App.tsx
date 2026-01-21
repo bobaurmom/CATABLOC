@@ -10,8 +10,8 @@ import Dashboard from './page/dashboard';
 import ProtectedRoute from './component/protectedRoute';
 import { AuthProvider } from './contexts/authContext';
 import LevelPage from './page/level';
-import GameSelectionPanel from './component/game/gameSelectionPanel';
 import { GameProvider } from './contexts/gameContext';
+import PublicRoute from './component/publicRoute';
 
 function App() {
 
@@ -22,11 +22,11 @@ function App() {
           <div className="app-container min-h-screen flex flex-col justify-between">
             <Header />
             <Routes> 
-              <Route path='/' element={<Home />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/register' element={<SignUp />} />  
+              <Route path='/' element={<PublicRoute><Home /></PublicRoute>} />
+              <Route path='/login' element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path='/register' element={<PublicRoute><SignUp /></PublicRoute>} />  
               <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path='/level' element={<LevelPage />} />
+              <Route path='/level' element={<ProtectedRoute><LevelPage /></ProtectedRoute>} />
             </Routes>
             <Footer />
           </div>

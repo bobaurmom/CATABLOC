@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "../style/gameCard.css";
-import catImage from "../assets/cat.png";
-import Btn from "./ui/button";
+import "../../style/gameCard.css";
+import catImage from "../../assets/cat.png";
+import Btn from "../ui/button";
 
 interface GameCardProps {
   text: string;

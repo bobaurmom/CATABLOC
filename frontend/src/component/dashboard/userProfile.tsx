@@ -1,12 +1,12 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../style/userProfile.css";
-import catImage from "../assets/cat.png";
-import starIcon from "../assets/star.svg";
-import fireIcon from "../assets/fire.svg";
-import Btn from "./ui/button";
-import apiFetch from "../services/profile";
+import "../../style/userProfile.css";
+import catImage from "../../assets/cat.png";
+import starIcon from "../../assets/star.svg";
+import fireIcon from "../../assets/fire.svg";
+import Btn from "../ui/button";
+import apiFetch from "../../services/profile";
 
 interface UserStats {
   exp: number;
@@ -91,7 +91,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
   }
 
   return (
-    <div className="userCard" role="region" aria-label={`Profile of ${name}`}>
+    <div className="userCard w-full" role="region" aria-label={`Profile of ${name}`}>
       <div className="profile">
         <div className="profile-image" aria-hidden="true">
           <img
@@ -105,7 +105,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
         </div>
       </div>
 
-      <div className="stats">
+      <div className="stats grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 w-full">
         <StatCard
           label="EXP"
           value={stats.exp}
@@ -146,7 +146,7 @@ const StatCard: React.FC<StatCardProps> = ({
   gradientClass,
   isLoading = false,
 }) => (
-  <div className={`stat-card ${gradientClass}`}>
+  <div className={`stat-card ${gradientClass} w-full`}>
     <div className="stat-content">
       <span className="stat-label">{label}</span>
       <div className="stat-details">

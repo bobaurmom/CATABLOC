@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import TalkingCat from "../component/ui/talkingCat";
-import Leaderboard from "../component/leaderboard";
-import Card from "../component/gameCard";
-import Profile from "../component/userProfile";
+import Leaderboard from "../component/dashboard/leaderboard";
+import Card from "../component/dashboard/gameCard";
+import Profile from "../component/dashboard/userProfile";
 import "../style/dashboard.css";
 import gameCover1 from "../assets/gamecover1.svg";
-import LevelPanel from "../component/game/gameSelectionPanel";
+import LevelPanel from "../component/dashboard/gameSelectionPanel";
 import { useGameSelection } from "../hooks/useGameSelection";
 
 interface UserStats {

@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import Cat from './cat';
 import Mouse from './mouse';
 import Grid from './grid';
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }
 
-type Facing = 'left' | 'right' | 'up' | 'down';
+export type Facing = 'left' | 'right' | 'up' | 'down';
 
-interface LevelLayout {
+export type LevelLayout = {
   width: number;
   height: number;
-  catStart: Position;
+  cat_start: Position;
   facing?: Facing;
   goal: Position;
   obstacles: Position[];
@@ -25,11 +25,11 @@ interface GameSceneProps {
 
 const GameScene: React.FC<GameSceneProps> = ({ layout }) => {
   const TILE_SIZE = 64;
-  const [currentPos, setCurrentPos] = useState<Position>(layout.catStart);
+  const [currentPos, setCurrentPos] = useState<Position>(layout.cat_start);
   const [facing, setFacing] = useState<Facing>(layout.facing || 'right');
 useEffect(() => {
-    console.log("New layout detected, resetting cat to:", layout.catStart);
-    setCurrentPos(layout.catStart);
+    console.log("New layout detected, resetting cat to:", layout.cat_start);
+    setCurrentPos(layout.cat_start);
     setFacing(layout.facing || 'right');
   }, [layout]);
   return (

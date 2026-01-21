@@ -5,13 +5,9 @@
 }
 
 .dashboard-wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    gap: 100px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
 }
 
 .dashboard-left {
@@ -33,12 +29,8 @@
 }
 
 .dashboard-right {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    flex: 0 1 380px;
-    min-width: 300px;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 25px;
     position: sticky;
     top: 80px;
@@ -47,7 +39,7 @@
 /* Responsive Design */
 @media screen and (max-width: 1200px) {
     .dashboard-wrapper {
-        flex-wrap: wrap;
+        grid-template-columns: 1fr;
     }
     
     .dashboard-right {
@@ -62,6 +54,7 @@
     
     .dashboard-wrapper {
         gap: 25px;
+        padding: min(17%,10rem);
     }
     
     .dashboard-left,
