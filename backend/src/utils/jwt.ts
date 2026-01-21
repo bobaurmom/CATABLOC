@@ -11,7 +11,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m'; // Shorter for acces
 
 // Payload interfaces
 export interface JWTPayload {
-    userId: number;
+    user_id: number;
     email: string;
     username: string;
 }
@@ -296,7 +296,7 @@ export const refreshAccessToken = async (
         
         // Generate new access token
         const newAccessToken = await generateToken({
-            userId: decoded.userId,
+            user_id: decoded.user_id,
             email: decoded.email,
             username: decoded.username
         });

@@ -8,16 +8,16 @@ export interface UserType {
   role: 'student' | 'teacher' | 'admin';
   username: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface LevelSession {
   id: string;
-  userId: number;
-  levelId: number;
+  user_id: number;
+  level_id: number;
   score: number;
-  startTime: Date;
-  endTime?: Date;
+  start_time: Date;
+  end_time?: Date;
   completed: boolean;
 }

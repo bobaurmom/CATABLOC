@@ -21,7 +21,7 @@ const router = Router();
  *             schema:
  *               type: object
  *               properties:
- *                 sessionId:
+ *                 session_id:
  *                   type: integer
  *               description: ID of the started session
  *       '400':
@@ -57,7 +57,7 @@ router.post('/start', authenticateToken, startSession);
  *       '500':
  *         description: Internal server error
  */
-router.get('/level/:levelId', authenticateToken, getLevel);
+router.get('/level/:level_id', authenticateToken, getLevel);
 /**
  * @swagger
  * /api/games/complete:

@@ -4,14 +4,14 @@ import User from '../models/userModel';
 
 const getDashboardData = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const user_id = req.user?.user_id;
 
-    if (!userId) {
+    if (!user_id) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
     // Fetch user data
-    const userData = await User.findByPk(userId, {
+    const userData = await User.findByPk(user_id, {
       attributes: ['user_id', 'username', 'total_exp', 'current_streak']
     });
 

@@ -2,63 +2,83 @@
   {
     "game_id": 1,
     "level_number": 1,
-    "title": "The First walk",
+    "title": "The First Step",
+    "description": "Welcome! Move da damn cat",
     "difficulty": "easy",
-    "blocks_limit": 10,
-    "layout": {
-      "width": 5,
-      "height": 5,
-      "catStart": { "x": 0, "y": 0 },
+    "blocks_limit": 5,
+    "time_limit": 60,
+    "available_codeblocks": "[\"move_forward\",\"turn_left\",\"turn_right\"]",
+    "level_layout": {
+      "width": 3,
+      "height": 3,
+      "cat_start": { "x": 0, "y": 1 },
       "facing": "right",
-      "goal": { "x": 1, "y": 0 },
-      "obstacles": [],
-      "items": []
+      "goal": { "x": 2, "y": 1 },
+      "obstacles": []
     }
   },
   {
     "game_id": 1,
     "level_number": 2,
-    "title": "The bush",
-    "difficulty": "medium",
-    "blocks_limit": 15,
-    "layout": {
-      "width": 3,
-      "height": 4,
-      "catStart": { "x": 0, "y": 0 },
-      "facing": "right",
-      "goal": { "x": 2, "y": 3 },
+    "title": "Turning Corners",
+    "description": "",
+    "difficulty": "easy",
+    "blocks_limit": 8,
+    "time_limit": 60,
+    "available_codeblocks": "[\"move_forward\",\"turn_left\",\"turn_right\"]",
+    "level_layout": {
+      "width": 5,
+      "height": 5,
+      "cat_start": { "x": 1, "y": 4 },
+      "facing": "up",
+      "goal": { "x": 3, "y": 2 },
       "obstacles": [
-            { "x": 2, "y": 1 },
-            { "x": 2, "y": 2 },
-            { "x": 0, "y": 2 },
-            { "x": 0, "y": 3 }
-      ],
-      "items": [
-        { "type": "fish", "x": 2, "y": 0 }
+        { "x": 1, "y": 2 },
+        { "x": 2, "y": 2 }
       ]
     }
   },
   {
     "game_id": 1,
     "level_number": 3,
-    "title": "Collector",
-    "difficulty": "medium",
-    "blocks_limit": 20,
-    "layout": {
+    "title": "The Narrow Path",
+    "description": "",
+    "difficulty": "easy",
+    "blocks_limit": 10,
+    "time_limit": 90,
+    "available_codeblocks": "[\"move_forward\",\"turn_left\",\"turn_right\",\"repeat\"]",
+    "level_layout": {
       "width": 5,
       "height": 5,
-      "catStart": { "x": 0, "y": 0 },
+      "cat_start": { "x": 0, "y": 0 },
       "facing": "right",
       "goal": { "x": 4, "y": 4 },
       "obstacles": [
-        { "x": 2, "y": 0 },
-        { "x": 2, "y": 1 },
-        { "x": 2, "y": 2 },
-        { "x": 0, "y": 3 },
-        { "x": 1, "y": 3 },
-        { "x": 2, "y": 3 }
-      ],
-      "items": []
+        { "x": 1, "y": 0 },{ "x": 1, "y": 1 },
+        { "x": 3, "y": 3 },{ "x": 3, "y": 4 }
+      ]
+    }
+  },
+  {
+    "game_id": 1,
+    "level_number": 4,
+    "title": "The Zig-Zag",
+    "description": "Precision is key. Can you navigate the snake-like path?",
+    "difficulty": "medium",
+    "blocks_limit": 12,
+    "time_limit": 120,
+    "available_codeblocks": "[\"move_forward\",\"turn_left\",\"turn_right\",\"repeat\"]",
+    "level_layout": {
+      "width": 6,
+      "height": 6,
+      "cat_start": { "x": 0, "y": 5 },
+      "facing": "up",
+      "goal": { "x": 5, "y": 0 },
+      "obstacles": [
+        { "x": 0, "y": 3 }, { "x": 1, "y": 3 }, { "x": 2, "y": 3 },
+        { "x": 3, "y": 1 }, { "x": 4, "y": 1 }, { "x": 5, "y": 1 }
+      ]
     }
   }
+
 ]
