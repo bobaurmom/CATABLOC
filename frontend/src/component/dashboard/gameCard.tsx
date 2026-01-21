@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "../style/gameCard.css";
-import catImage from "../assets/cat.png";
-import Btn from "./ui/button";
+import "../../style/gameCard.css";
+import catImage from "../../assets/cat.png";
+import Btn from "../ui/button";
 
 interface GameCardProps {
   text: string;
@@ -34,7 +34,7 @@ const GameCard: React.FC<GameCardProps> = ({
 
   return (
     <div 
-      className="card"
+      className="card transition-transform duration-300 ease-in-out hover:scale-105"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
@@ -59,7 +59,8 @@ const GameCard: React.FC<GameCardProps> = ({
             e.stopPropagation();
             handlePlay();
           }}
-          bgColor={disabled ? "#999" : isHovered ? "#393CFF" : "#1013C4"}
+          disabled={disabled}
+          state={disabled ? "disabled" : "default"}
         />
       </div>
     </div>

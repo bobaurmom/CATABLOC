@@ -10,25 +10,29 @@ import Dashboard from './page/dashboard';
 import ProtectedRoute from './component/protectedRoute';
 import { AuthProvider } from './contexts/authContext';
 import LevelPage from './page/level';
+import { GameProvider } from './contexts/gameContext';
+import PublicRoute from './component/publicRoute';
 
 function App() {
 
   return (
-  <BrowserRouter>
-    <AuthProvider>
-      <div className="app-container">
-        <Header />
-        <Routes> 
-          <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<SignUp />} />   
-          <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path='/level1' element={<LevelPage />} />
-        </Routes>
-        <Footer />
-      </div>
-    </AuthProvider>
-  </BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <GameProvider>
+          <div className="app-container min-h-screen flex flex-col justify-between">
+            <Header />
+            <Routes> 
+              <Route path='/' element={<PublicRoute><Home /></PublicRoute>} />
+              <Route path='/login' element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path='/register' element={<PublicRoute><SignUp /></PublicRoute>} />  
+              <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path='/level' element={<ProtectedRoute><LevelPage /></ProtectedRoute>} />
+            </Routes>
+            <Footer />
+          </div>
+        </GameProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 

@@ -16,7 +16,6 @@ const url = "http://localhost:8000/api/auth";
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<user | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [hasInitialized, setHasInitialized] = useState(false);
     const nav = useNavigate();
     useEffect(() => {
         const initializeAuth = async () => {
@@ -34,10 +33,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                             // Session is valid
                             const user = JSON.parse(storedUser);
                             setUser(user);
-                            // Only navigate on first load
-                            if (!hasInitialized) {
-                                nav("/dashboard");
-                            }
                         } else {
                             // Session expired, clear stored data
                             localStorage.removeItem("user");
@@ -53,12 +48,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 console.error("Failed to initialize auth:", error);
             } finally {
                 setIsLoading(false);
-                setHasInitialized(true);
             }
         };
         
         initializeAuth();
-    }, [nav, hasInitialized]);
+    }, [nav]);
     const login = async (email:string,password:string): Promise<Response | undefined> => {
         setIsLoading(true);
         try {
@@ -85,6 +79,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
     }
     const register = async (form: HTMLElement): Promise<Response | undefined> => {
+        setIsLoading(true);
         const formData = new FormData(form as HTMLFormElement);
         const data = {
             email: formData.get("email"),

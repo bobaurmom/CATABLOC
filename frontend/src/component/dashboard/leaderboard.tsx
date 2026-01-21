@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import "../style/leaderboard.css";
-import medalIcon from "../assets/medal.svg";
-import catImage from "../assets/cat.png";
-import apiFetch from "../services/profile";
+import "../../style/leaderboard.css";
+import medalIcon from "../../assets/medal.svg";
+import catImage from "../../assets/cat.png";
+import apiFetch from "../../services/profile";
 
 interface LeaderboardProfile {
   rank?: number;
@@ -61,7 +61,7 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <section className="leaderboard-card">
+    <section className="leaderboard-card w-full">
       <header className="title">
         <img src={medalIcon} alt="medal" className="medal" />
         <h1>Leaderboard</h1>

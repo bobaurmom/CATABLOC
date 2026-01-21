@@ -6,48 +6,70 @@ import { DndContext } from '@dnd-kit/core';
 import Draggable from '../component/game/draggable';
 import DropZone from '../component/game/dropZone';
 import type { CodeBlock } from '../component/game/codebloc';
-interface LevelLayout {
-  width: number;
-  height: number;
-  catStart: { x: number; y: number };
-  facing?: 'left' | 'right' | 'up' | 'down';
-  goal: { x: number; y: number };
-  obstacles: { x: number; y: number }[];
-  items: { type: string; x: number; y: number }[];  
+import {fetchLayout} from '../services/gameService';
+import { useGameSelection } from '../hooks/useGameSelection';
+import type { LevelLayout } from '../component/game/index';
+import { GameEngine } from '../services/gameEngine';
+import type { Facing, Position } from '../component/game/index';
+import { completeGame } from '../services/gameService';
+interface LevelData {
+  levelId: number;
+  gameId: number;
+  levelNumber: number;
+  title: string;
+  description: string;
+  availableBlocksStr: string[];
+  availableBlocks: CodeBlock[];
+  layout: LevelLayout;
+  blockLimit: number;
+  timeLimit: number;
 }
 let id = 0;
-let provideCode = [
-  { id: generateId(), type: 'action' as const, label: 'Move Forward' },
-  { id: generateId(), type: 'action' as const, label: 'Turn Left' },
-  { id: generateId(), type: 'action' as const, label: 'Turn Right' },
-  { id: generateId(), type: 'if' as const ,condition: 'front_is_clear'},
-  { id: generateId(), type: 'while' as const ,condition: 'front_is_clear'},
-  { id: generateId(), type: 'repeat' as const , condition: '1 times'},
-]
-function generateId(parentId?: string): string {
-  return `${parentId}-${id++}`;
-}
-const sampleLevel: LevelLayout = {
-  width: 8,
-  height: 4,
-  catStart: { x: 0, y: 0 },
-  facing: 'right',
-  goal: { x: 2, y: 3 },
-  obstacles: [
-    { x: 2, y: 1 },
-    { x: 2, y: 2 },
-    { x: 0, y: 2 },
-    { x: 0, y: 3 },
-  ],
-  items: [
-    { type: 'fish', x: 2, y: 0 },
-  ],
-}; 
-// const handleBlockClick = (block:{id: string}) => {
-//   return <Draggable id={`${block.id}`}></Draggable>
-// }
+function generateId(): string {
+  return `block-${id++}`;
+} 
+let catStart: Position = { x: 0, y: 0 };
+let catFace: Facing = 'right';
 
 const LevelPage: React.FC = () => {
+  const [levelLayout, setLevelLayout] = React.useState<LevelData | null>(null);
+  const { currentLevel, sessionId, gameId } = useGameSelection();
+  const [catPos, setCatPos] = React.useState({ x: 0, y: 0 });
+  const [catFacing, setCatFacing] = React.useState<'left' | 'right' | 'up' | 'down'>('right');
+  const [gameEngine, setGameEngine] = React.useState<GameEngine | null>(null);
+  const handleProvideCode = (provideCode: string[]): CodeBlock[] => {
+    let newProvideCode: CodeBlock[] = [];
+    for (const blockType of provideCode) {
+      if(blockType === 'move_forward' || blockType === 'turn_left' || blockType === 'turn_right') {
+        newProvideCode.push({ id: generateId(), type: 'action' as const, label: blockType });
+      } else if (blockType === 'if') {
+        newProvideCode.push({ id: generateId(), type: 'if' as const ,condition: 'front_is_clear'});
+      } else if (blockType === 'while') { 
+        newProvideCode.push({ id: generateId(), type: 'while' as const ,condition: 'front_is_clear'});
+      } else if (blockType === 'repeat') {
+        newProvideCode.push({ id: generateId(), type: 'repeat' as const , condition: '2 times'});
+      }
+    }
+    return newProvideCode;
+
+  }
+  React.useEffect(() => {
+    const loadLayout = async () => {
+      const layout = await fetchLayout(currentLevel);
+      if(layout && Array.isArray(layout.availableBlocksStr)){
+        layout.availableBlocks = handleProvideCode(layout.availableBlocksStr);
+      }
+      setLevelLayout(layout);
+      // Initialize cat position
+      setCatPos(layout.layout.cat_start);
+      setCatFacing(layout.layout.facing || 'right');
+      setGameEngine(new GameEngine(layout.layout));
+      catStart = layout.layout.cat_start;
+      catFace = layout.layout.facing || 'right';
+    };
+    loadLayout();
+  }, []);
+
   const findBlockById = (blocks: CodeBlock[], id: string): CodeBlock | null => {
     for (const block of blocks) {
       if (block.id === id) {
@@ -133,22 +155,110 @@ const handleDragEnd = (event: any) => {
       } else {
         return addToNested(removeBlock(prevUserCode, active.id), parentBlockId, blockExists);
       }
-    } else if (!over && active?.id?.startsWith('block-')) {
+    } else if (!over && active.id.startsWith("block-")) {
       return removeBlock(prevUserCode, active.id);
     } else {
       return prevUserCode;
     }
   });
 };
+const organizeBlocks = (blocks: CodeBlock[]): [] => {
+  let organizeArray: any = [];
+  for(const block of blocks) {
+    if(block.type === "action"){
+      organizeArray.push(block.label);
+    } else if(block.type === "if") {
+      let ifBlocks = {type: "if", condition: block.condition, nested: organizeBlocks(block.nestedBlocks || [])};
+      organizeArray.push(ifBlocks);
+    } else if(block.type === "while") {
+      let whileBlocks = {type: "while", condition: block.condition, nested: organizeBlocks(block.nestedBlocks || [])};
+      organizeArray.push(whileBlocks);
+    } else if(block.type === "repeat") {
+      let repeatBlocks = {type: "repeat", repeat: block.condition, nested: organizeBlocks(block.nestedBlocks || [])};
+      organizeArray.push(repeatBlocks);
+    }
+  }
+  return organizeArray;
+}
+const executeBlocksSequentially = async (blocks: CodeBlock[]): Promise<void> => {
+  for (const block of blocks) {
+    if(block.type === 'action') {
+      if(block.label === 'move_forward') {
+        gameEngine?.moveForward();
+      } else if(block.label === 'turn_left') {
+        gameEngine?.turnLeft();
+      } else if(block.label === 'turn_right') {
+        gameEngine?.turnRight();
+      }
+      const catState = gameEngine?.getCatState();
+      if(catState) {
+        setCatPos(catState.cat_start);
+        setCatFacing(catState.facing || 'right');
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } else if(block.type === 'if' && block.condition === 'front_is_clear') {
+      if(gameEngine?.isFrontClear()) {
+        await executeBlocksSequentially(block.nestedBlocks || []);
+      }
+    } else if(block.type === 'while' && block.condition === 'front_is_clear') {
+      while(gameEngine?.isFrontClear()) {
+        await executeBlocksSequentially(block.nestedBlocks || []);
+      }
+    } else if(block.type === 'repeat' && block.nestedBlocks) {
+      const times = parseInt((block.condition || '1 times').split(' ')[0]) || 1;
+      for(let i = 0; i < times; i++) {
+        await executeBlocksSequentially(block.nestedBlocks);
+      }
+    }
+  }
+};
+
+const handleRunCode = async () => {
+  if(gameEngine && levelLayout) {
+    // Reset to start position
+    gameEngine.reset();
+    setCatPos(levelLayout.layout.cat_start);
+    setCatFacing(levelLayout.layout.facing || 'right');
+    
+    setTimeout(async () => {
+      await executeBlocksSequentially(userCode);
+      
+      
+
+      const organized = organizeBlocks(userCode);
+  
+      if(sessionId && currentLevel && gameId) {
+        const response = await completeGame(sessionId, currentLevel, userCode.length, 0, organized);
+        if(response && response.ok) {
+          console.log("Level completed successfully!");
+        } else {
+          console.error("Failed to complete level.");
+        }
+      } else {
+        console.error("Missing required values for completeGame:", { sessionId, currentLevel, gameId });
+      }
+    }, 500);
+  }
+};
+      
+
 
   return (
     <div className="level-page p-4 margin-auto">
-      <h1 style={{ textAlign: 'center' }}>Level 1: The Great  Chase</h1>
-      <GameScene layout={sampleLevel} />
+      <h1 style={{ textAlign: 'center' }}>{`Level ${levelLayout?.levelNumber}: ${levelLayout?.title}`}</h1>
+      {levelLayout && (
+        <GameScene 
+          layout={{
+            ...levelLayout.layout,
+            cat_start: catPos,
+            facing: catFacing
+          }} 
+        />
+      )}  
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="code-container flex w-full h-180 mt-4">
+        <div className="code-container flex w-full h-100 mt-4">
           <div className="provide-code-container bg-red-100 flex-1 scrollbar-hide overflow-y-auto p-2">
-            {provideCode.map((block) => (
+            {levelLayout?.availableBlocks?.map((block) => (
               <Draggable key={block.id} id={block.id} data={{ type: block.type, label: block.label, condition: block.condition }}>
                 <CodeBloc block={block} />
               </Draggable>
@@ -165,8 +275,16 @@ const handleDragEnd = (event: any) => {
           </div>
         </div>
       </DndContext>
-      <button onClick={() => console.log(userCode)}>Log User Code</button>
+      <button onClick={() => {
+        setCatPos(catStart);
+        setCatFacing(catFace);
+        setGameEngine(new GameEngine(levelLayout!.layout));
+        handleRunCode();
+      }} style={{ padding: '10px 20px', marginTop: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
+        Run Code
+      </button>
     </div>
   );
 };
+
 export default LevelPage;
