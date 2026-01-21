@@ -2,12 +2,12 @@
 import { User, Session } from "../models";
 
 //streak updater
-export const updateStreak = async (userId: number, transaction: any) => {
-  const user = await User.findByPk(userId, { transaction });
+export const updateStreak = async (user_id: number, transaction: any) => {
+  const user = await User.findByPk(user_id, { transaction });
   if (!user) return;
 
   const lastPlayed = await Session.findOne({
-    where: { user_id: userId, is_completed: true },
+    where: { user_id: user_id, is_completed: true },
     order: [['ended_at', 'DESC']],
     offset: 1, // Get the PREVIOUS completed session
     transaction

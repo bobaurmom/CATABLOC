@@ -119,13 +119,13 @@ export const login = async (req: AuthenticatedRequest, res: Response): Promise<v
 
     // Generate tokens
     const token = await generateToken({
-      userId: user.user_id,
+      user_id: user.user_id,
       email: user.email,
       username: user.username
     });
 
     const refreshToken = await generateRefreshToken({
-      userId: user.user_id,
+      user_id: user.user_id,
       email: user.email,
       username: user.username
     });
@@ -235,13 +235,13 @@ export const verifyOTP = async (req: AuthenticatedRequest, res: Response): Promi
       
     // Generate token 
     const token = await generateToken({
-      userId: user.user_id,
+      user_id: user.user_id,
       email: user.email,
       username: user.username
     });
 
     const refreshToken = await generateRefreshToken({
-      userId: user.user_id,
+      user_id: user.user_id,
       email: user.email,
       username: user.username
     });
@@ -498,7 +498,7 @@ export const verifyAuth = async (req: AuthenticatedRequest, res: Response): Prom
 
     // Get fresh user data from database
     const user = await User.findOne({
-      where: { user_id: req.user.userId, status: 'active' }
+      where: { user_id: req.user.user_id, status: 'active' }
     });
 
     if (!user) {
@@ -543,7 +543,7 @@ export const profile = async (req: AuthenticatedRequest, res: Response): Promise
     const user = await
 
       User.findOne({
-        where: { user_id: req.user.userId, status: 'active' }
+        where: { user_id: req.user.user_id, status: 'active' }
       });
     if (!user) {
       res.status(401).json({

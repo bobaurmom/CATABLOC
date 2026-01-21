@@ -5,9 +5,9 @@ import { User} from "../models/userModel";
 
 export const checkUserActive = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.userId;
+    const user_id = req.user?.user_id;
 
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(user_id);
     
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
