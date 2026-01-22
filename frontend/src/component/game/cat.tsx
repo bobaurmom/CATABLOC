@@ -6,11 +6,11 @@ interface Position {
 }
 export type Facing = 'up' | 'right' | 'down' | 'left';
 interface CatProps extends Position {
-  facing: Facing;
+  rotateDegrees: number;
   tileSize: number;
 }
 
-const Cat: React.FC<CatProps> = ({ x, y, facing, tileSize }) => {
+const Cat: React.FC<CatProps> = ({ x, y, rotateDegrees, tileSize }) => {
 const rotationMap: Record<Facing, number> = { 
   up: -90, 
   right: 0, 
@@ -22,7 +22,7 @@ const rotationMap: Record<Facing, number> = {
     width: `${tileSize}px`,
     height: `${tileSize}px`,
     position: 'absolute',
-    transform: `translate(${x * tileSize}px, ${y * tileSize}px) rotate(${rotationMap[facing]}deg)`,
+    transform: `translate(${x * tileSize}px, ${y * tileSize}px) rotate(${rotateDegrees}deg)`,
     transition: 'transform 0.3s ease-in-out', 
     display: 'flex',
     alignItems: 'center',

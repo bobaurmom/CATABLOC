@@ -29,7 +29,10 @@ const Draggable = (prop: { id: string; children: React.ReactNode; data?: any}) =
                 border: '1px solid #ddd',
                 borderRadius: '4px',
                 width: 'fit-content',
+                maxWidth: '100%',
                 height: 'fit-content',
+                boxSizing: 'border-box',
+                pointerEvents: isDragging ? 'none' : 'auto',
             }}
         >
             {prop.children}

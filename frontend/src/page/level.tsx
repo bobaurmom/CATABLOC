@@ -12,6 +12,7 @@ import type { LevelLayout } from '../component/game/index';
 import { GameEngine } from '../services/gameEngine';
 import type { Facing, Position } from '../component/game/index';
 import { completeGame } from '../services/gameService';
+import Btn from '../component/ui/button';
 interface LevelData {
   levelId: number;
   gameId: number;
@@ -28,15 +29,23 @@ let id = 0;
 function generateId(): string {
   return `block-${id++}`;
 } 
+const rotationMap: Record<Facing, number> = { 
+  up: -90, 
+  right: 0, 
+  down: 90, 
+  left: 180 
+};
 let catStart: Position = { x: 0, y: 0 };
 let catFace: Facing = 'right';
+let initialDeg: number = 0;
 
 const LevelPage: React.FC = () => {
   const [levelLayout, setLevelLayout] = React.useState<LevelData | null>(null);
   const { currentLevel, sessionId, gameId } = useGameSelection();
   const [catPos, setCatPos] = React.useState({ x: 0, y: 0 });
-  const [catFacing, setCatFacing] = React.useState<'left' | 'right' | 'up' | 'down'>('right');
+  const [catDeg, setCatFacing] = React.useState(0);
   const [gameEngine, setGameEngine] = React.useState<GameEngine | null>(null);
+  const [disabledRun, setDisabledRun] = React.useState(false);
   const handleProvideCode = (provideCode: string[]): CodeBlock[] => {
     let newProvideCode: CodeBlock[] = [];
     for (const blockType of provideCode) {
@@ -51,7 +60,6 @@ const LevelPage: React.FC = () => {
       }
     }
     return newProvideCode;
-
   }
   React.useEffect(() => {
     const loadLayout = async () => {
@@ -61,11 +69,12 @@ const LevelPage: React.FC = () => {
       }
       setLevelLayout(layout);
       // Initialize cat position
-      setCatPos(layout.layout.cat_start);
-      setCatFacing(layout.layout.facing || 'right');
-      setGameEngine(new GameEngine(layout.layout));
-      catStart = layout.layout.cat_start;
       catFace = layout.layout.facing || 'right';
+      initialDeg = rotationMap[catFace];
+      setCatFacing(initialDeg);
+      setCatPos(layout.layout.cat_start);
+      setGameEngine(new GameEngine(layout.layout, initialDeg));
+      catStart = layout.layout.cat_start;
     };
     loadLayout();
   }, []);
@@ -193,7 +202,7 @@ const executeBlocksSequentially = async (blocks: CodeBlock[]): Promise<void> => 
       const catState = gameEngine?.getCatState();
       if(catState) {
         setCatPos(catState.cat_start);
-        setCatFacing(catState.facing || 'right');
+        setCatFacing(catState.deg);
       }
       await new Promise(resolve => setTimeout(resolve, 500));
     } else if(block.type === 'if' && block.condition === 'front_is_clear') {
@@ -216,9 +225,10 @@ const executeBlocksSequentially = async (blocks: CodeBlock[]): Promise<void> => 
 const handleRunCode = async () => {
   if(gameEngine && levelLayout) {
     // Reset to start position
+    setDisabledRun(true);
     gameEngine.reset();
     setCatPos(levelLayout.layout.cat_start);
-    setCatFacing(levelLayout.layout.facing || 'right');
+    setCatFacing(rotationMap[levelLayout.layout.facing || 'right']);
     
     setTimeout(async () => {
       await executeBlocksSequentially(userCode);
@@ -237,6 +247,7 @@ const handleRunCode = async () => {
       } else {
         console.error("Missing required values for completeGame:", { sessionId, currentLevel, gameId });
       }
+      setDisabledRun(false);
     }, 500);
   }
 };
@@ -244,27 +255,27 @@ const handleRunCode = async () => {
 
 
   return (
-    <div className="level-page p-4 margin-auto">
+    <div className="level-page p-4 margin-auto flex flex-col w-full gap-4">
       <h1 style={{ textAlign: 'center' }}>{`Level ${levelLayout?.levelNumber}: ${levelLayout?.title}`}</h1>
       {levelLayout && (
         <GameScene 
           layout={{
             ...levelLayout.layout,
             cat_start: catPos,
-            facing: catFacing
           }} 
+          deg={catDeg}
         />
       )}  
       <DndContext onDragEnd={handleDragEnd}>
         <div className="code-container flex w-full h-100 mt-4">
-          <div className="provide-code-container bg-red-100 flex-1 scrollbar-hide overflow-y-auto p-2">
+          <div className="provide-code-container flex-1 scrollbar-hide overflow-y-auto overflow-x-hidden p-2 bg-gray-100 gap-0.5 shadow-md border">
             {levelLayout?.availableBlocks?.map((block) => (
               <Draggable key={block.id} id={block.id} data={{ type: block.type, label: block.label, condition: block.condition }}>
                 <CodeBloc block={block} />
               </Draggable>
             ))}
           </div>
-          <div className="user-code-container bg-blue-100 flex-1 gap-0.5 scrollbar-hide overflow-y-auto p-2">
+          <div className="user-code-container bg-blue-100 flex-1 gap-0.5 scrollbar-hide overflow-y-auto overflow-x-hidden p-2">
             <DropZone id="dropZone">
               {userCode.map((block) => (
                 <Draggable key={block.id} id={block.id} data={{ type: block.type, label: block.label, condition: block.condition }}>
@@ -275,14 +286,13 @@ const handleRunCode = async () => {
           </div>
         </div>
       </DndContext>
-      <button onClick={() => {
-        setCatPos(catStart);
-        setCatFacing(catFace);
-        setGameEngine(new GameEngine(levelLayout!.layout));
-        handleRunCode();
-      }} style={{ padding: '10px 20px', marginTop: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
-        Run Code
-      </button>
+      <div className="btn-container">
+        <Btn onClick={() => {
+          setGameEngine(new GameEngine(levelLayout!.layout, 0));
+          handleRunCode();
+        }} text="Run Code" disabled={disabledRun} state={disabledRun ? "disabled" : "completed"} >
+        </Btn>
+      </div>
     </div>
   );
 };

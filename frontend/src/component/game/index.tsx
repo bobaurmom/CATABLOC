@@ -23,14 +23,12 @@ interface GameSceneProps {
   layout: LevelLayout;
 }
 
-const GameScene: React.FC<GameSceneProps> = ({ layout }) => {
+const GameScene: React.FC<GameSceneProps & { deg: number }> = ({ layout, deg }) => {
   const TILE_SIZE = 64;
   const [currentPos, setCurrentPos] = useState<Position>(layout.cat_start);
-  const [facing, setFacing] = useState<Facing>(layout.facing || 'right');
 useEffect(() => {
     console.log("New layout detected, resetting cat to:", layout.cat_start);
     setCurrentPos(layout.cat_start);
-    setFacing(layout.facing || 'right');
   }, [layout]);
   return (
       <div 
@@ -55,7 +53,7 @@ useEffect(() => {
         
         {/* Cat and Mouse are absolutely positioned over the grid */}
         <Mouse x={layout.goal.x} y={layout.goal.y} tileSize={TILE_SIZE} />
-        <Cat x={currentPos.x} y={currentPos.y} facing={facing} tileSize={TILE_SIZE} />
+        <Cat x={currentPos.x} y={currentPos.y} rotateDegrees={deg} tileSize={TILE_SIZE} />
       </div>
   );
 };

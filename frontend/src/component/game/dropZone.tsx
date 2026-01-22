@@ -7,7 +7,8 @@ const DropZone = (prop: { id: string; children: React.ReactNode}) => {
       border: '2px dashed #ccc',
       borderColor: isOver ? '#4caf50' : '#ccc',
       padding: '20px',
-      minHeight: '100px',
+      minHeight: '100%',
+      height: 'fit-content',
       borderRadius: '8px',
       transition: 'all 0.3s ease',
     };

@@ -2,9 +2,30 @@ import type { LevelLayout, Position } from '../component/game/index';
 export class GameEngine {
     private layout: LevelLayout;
     private initialLayout: LevelLayout;
-    constructor(layout: LevelLayout) {
+    private deg: number;
+    private initialDeg: number;
+    constructor(layout: LevelLayout, deg: number) {
         this.layout = layout;
         this.initialLayout = JSON.parse(JSON.stringify(layout)); // Deep copy
+        this.deg = deg;
+        this.initialDeg = deg;
+        this.layout.facing = this.degToFacing(deg);
+    }
+    private degToFacing(deg: number): 'up' | 'down' | 'left' | 'right' {
+        // Normalize deg to 0-360
+        const normalizedDeg = ((deg % 360) + 360) % 360;
+        switch(normalizedDeg) {
+            case 0:
+                return 'right';
+            case 90:
+                return 'down';
+            case 180:
+                return 'left';
+            case 270:
+                return 'up';
+            default:
+                return 'right';
+        }
     }
     private moveIsValid(pos: Position): boolean {
         if(pos.x < 0 || pos.x >= this.layout.width || pos.y < 0 || pos.y >= this.layout.height) {
@@ -38,45 +59,23 @@ export class GameEngine {
         return false;
     }
     turnLeft(): void {
-        switch(this.layout.facing) {
-            case 'up':
-                this.layout.facing = 'left';
-                break;
-            case 'down':
-                this.layout.facing = 'right';
-                break;
-            case 'left':
-                this.layout.facing = 'down';
-                break;
-            case 'right':
-                this.layout.facing = 'up';
-                break;
-        }
+        this.deg -= 90;
+        this.layout.facing = this.degToFacing(this.deg);
     }
     turnRight(): void {
-        switch(this.layout.facing) {
-            case 'up':
-                this.layout.facing = 'right';
-                break;
-            case 'down':
-                this.layout.facing = 'left';
-                break;
-            case 'left':
-                this.layout.facing = 'up';
-                break;
-            case 'right':
-                this.layout.facing = 'down';
-                break;
-        }   
+        this.deg += 90;
+        this.layout.facing = this.degToFacing(this.deg);
     }
     getCatState() {
-        return { cat_start: this.layout.cat_start, facing: this.layout.facing };
+        return { cat_start: this.layout.cat_start, deg: this.deg };
     }
     isFrontClear(): boolean {
         const { pos } = this.getNextPosition();
         return this.moveIsValid(pos);
     }
     reset(): void {
-        this.layout = JSON.parse(JSON.stringify(this.initialLayout)); // Deep copy
+        this.layout = JSON.parse(JSON.stringify(this.initialLayout));
+        this.deg = this.initialDeg;
+        this.layout.facing = this.degToFacing(this.deg);
     }
 }
