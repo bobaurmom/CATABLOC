@@ -14,7 +14,6 @@ import { GameProvider } from './contexts/gameContext';
 import PublicRoute from './component/publicRoute';
 
 function App() {
-
   return (
     <BrowserRouter>
       <AuthProvider>

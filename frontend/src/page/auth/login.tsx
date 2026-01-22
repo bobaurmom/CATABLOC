@@ -16,33 +16,41 @@ const Login: React.FC = () => {
     email: null,
     password: null,
   });
-  const handleInput = () => {
-    setErrorMessage({ email: null, password: null });
-  }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const res = await login(email,password);
-    if (res && res.ok) {
-      nav("/dashboard");
-    } else if(res && !res.ok){
-      const data = await res.json();
-      if (data.errors) {
+    const result = await login(email, password);
+    console.log("response:", result.response);
+    
+    if (result.response && result.response.ok) {
+      // nav("/dashboard");
+    } else if (result.response && !result.response.ok) {
+      const data = result.data;
+      
+      if (data.errors && Array.isArray(data.errors)) {
+        const emailError = data.errors.find((error: any) => error.field === "email")?.message;
+        const passwordError = data.errors.find((error: any) => error.field === "password")?.message;
+        
         setErrorMessage({
-          email: data.errors.find((error: any) => error.field === "email")?.message || null,
-          password: data.errors.find((error: any) => error.field === "password")?.message || null,
+          email: emailError || null,
+          password: passwordError || null,
         });
-        console.log(errorMessage);
       } else {
         setErrorMessage({
-          email:data.message || null,
-          password:data.message || null,
+          email: data.message || null,
+          password: data.message || null,
         });
       }
     }
+  }
+  const handleInputChange = (fieldName: "email" | "password") => {
+    setErrorMessage((prev) => ({
+      ...prev,
+      [fieldName]: null,
+    }));
   }
   return (
     <>
@@ -59,7 +67,6 @@ const Login: React.FC = () => {
         <TalkingCat text="Login to resume your progress!"></TalkingCat>
         <form
           onSubmit={handleSubmit}
-          onInput={handleInput}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -76,6 +83,7 @@ const Login: React.FC = () => {
             name="email"
             placeHolder="Email"
             error={errorMessage.email}
+            onChange={() => handleInputChange("email")}
           ></Input>
           <Input
             label="Password:"
@@ -83,6 +91,7 @@ const Login: React.FC = () => {
             name="password"
             placeHolder="Password"
             error={errorMessage.password}
+            onChange={() => handleInputChange("password")}
           ></Input>
           <Btn text="Login" btnType="submit" width="30"></Btn>
         </form>

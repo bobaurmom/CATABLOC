@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export interface AuthContextType {
   user?: user | null;
   isAuthenticated: boolean;
-  login: (email:string,password:string) => Promise<Response | undefined>;
+  login: (email:string,password:string) => Promise<{response: Response, data?: any}>;
   register: (form: HTMLElement) => Promise<Response | undefined>;
   logout: () => void;
   getToken: () => string | null;
@@ -53,7 +53,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         
         initializeAuth();
     }, [nav]);
-    const login = async (email:string,password:string): Promise<Response | undefined> => {
+    const login = async (email:string,password:string): Promise<{response: Response, data?: any}> => {
         setIsLoading(true);
         try {
             const response = await fetch(`${url}/login`, {
@@ -64,14 +64,17 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 credentials: "include",
                 body: JSON.stringify({ email, password }),
             });
+            
+            const responseData = await response.json();
+            
             if(response.ok){
-                const responseData = await response.json();
                 console.log("Login response data:", responseData);
                 const user = {email:responseData.data.user.email,name:responseData.data.user.username};
                 localStorage.setItem("user",JSON.stringify(user));
                 setUser(user);
             }
-            return response;
+            console.log("Login response:", response);
+            return { response, data: responseData };
         } catch (error) {
             throw error;
         } finally {

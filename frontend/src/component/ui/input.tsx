@@ -7,8 +7,7 @@ interface input {
   type?: string;
   required?: require;
   error?: string | null;
-  // value?:string,
-  // onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onChange?: () => void;
 }
 const Input: React.FC<input> = ({
   label,
@@ -17,6 +16,7 @@ const Input: React.FC<input> = ({
   placeHolder,
   required,
   error,
+  onChange,
 }) => {
   return (
     <div style={{width: "100%"}}>
@@ -35,8 +35,7 @@ const Input: React.FC<input> = ({
         required={required === "required"}
         name={name}
         id={name}
-        // value={value}
-        // onChange={onChange}
+        onChange={onChange}
       />
       {error && <p style={{ color: "red", fontSize: "12px" ,margin:"0"}}>{error}</p>}
     </div>
