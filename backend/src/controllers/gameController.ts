@@ -203,21 +203,21 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
         
         const cmd = command_list[i];
         
-        if (cmd === 'TURN_RIGHT') {
+        if (cmd === 'turn_right') {
           if (facing === 'up') facing = 'right';
           else if (facing === 'right') facing = 'down';
           else if (facing === 'down') facing = 'left';
           else if (facing === 'left') facing = 'up';
           i++;
           
-        } else if (cmd === 'TURN_LEFT') {
+        } else if (cmd === 'turn_left') {
           if (facing === 'up') facing = 'left';
           else if (facing === 'left') facing = 'down';
           else if (facing === 'down') facing = 'right';
           else if (facing === 'right') facing = 'up';
           i++;
           
-        } else if (cmd === 'MOVE_FORWARD') {
+        } else if (cmd === 'move_forward') {
           let next_pos = { ...current_pos };
           
           if (facing === 'up') next_pos.y -= 1;
@@ -243,7 +243,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
           current_pos = next_pos;
           i++;
           
-        } else if (cmd?.type === 'REPEAT') {
+        } else if (cmd?.type === 'repeat') {
           // Validate REPEAT command
           if (!cmd.count || cmd.count < 1) {
             throw new Error("REPEAT command must have a count >= 1");
@@ -261,7 +261,7 @@ export const completeLevel = async (req: AuthenticatedRequest, res: Response) =>
           }
           i++;
           
-        } else if (cmd?.type === 'WHILE') {
+        } else if (cmd?.type === 'while') {
           // Validate WHILE command
           if (!cmd.condition) {
             throw new Error("WHILE command must have a condition");
@@ -487,7 +487,7 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
 
     // Execute commands
     for (const cmd of commands) {
-      if (cmd === 'TURN_RIGHT') { 
+      if (cmd === 'turn_right') { 
         if (facing === 'up') facing = 'right';
         else if (facing === 'right') facing = 'down';
         else if (facing === 'down') facing = 'left';
@@ -495,7 +495,7 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
         continue;
       }
       
-      if (cmd === 'TURN_LEFT') { 
+      if (cmd === 'turn_left') { 
         if (facing === 'up') facing = 'left';
         else if (facing === 'left') facing = 'down';
         else if (facing === 'down') facing = 'right';
@@ -503,7 +503,7 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
         continue;
       }
 
-      if (cmd === 'MOVE_FORWARD') {
+      if (cmd === 'move_forward') {
         if (facing === 'up') current_pos.y -= 1;
         else if (facing === 'right') current_pos.x += 1;
         else if (facing === 'down') current_pos.y += 1;
