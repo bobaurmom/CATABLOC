@@ -12,13 +12,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const normalizedEmail = email.toLowerCase().trim();
     const normalizedUsername = username.toLowerCase().trim();
-    const pendingUsers = await User.findAll({
-      where: { email: normalizedEmail, status: 'pending' }
-    });
     // Delete pending users with the same email.
-    if(pendingUsers){
-      await User.destroy({ where: { email: normalizedEmail, status: 'pending' } });
-    }
+    await User.destroy({ where: { email: normalizedEmail, status: 'pending' } });
     // Check if user already exists by email
     const existingEmailUser = await User.findOne({
       where: { email: normalizedEmail, status: 'active' }
@@ -35,7 +30,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     
   
     // Check if username is taken
-    const existingUsernameUser = await User.findOne({ where: { username: username ,status: 'active'}});
+    const existingUsernameUser = await User.findOne({ where: { username: normalizedUsername ,status: 'active'}});
     if (existingUsernameUser) {
       const response: ErrorResponse = {
         success: false,
@@ -63,7 +58,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       await User.destroy({ where: { user_id: newUser.user_id } });
       res.status(500).json({
         success: false,
-        message: 'Failed to send OTP.hehhe '
+        message: 'Failed to send OTP'
       });
       return;
     }
@@ -88,16 +83,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     clearAuthCookies(res); // Clear any existing auth cookies before login
-    const { email, password ,status }: LoginRequest = req.body;
+    const { email, password }: LoginRequest = req.body;
 
     const normalizedEmail = email.toLowerCase();
 
-    // Find user by email
+    // Find active user by email
     const user = await User.findOne({
-      where: { email: normalizedEmail ,status:"active"}
+      where: { email: normalizedEmail, status: 'active' }
     });
 
-    if (!user || user.status !== 'active') {
+    if (!user) {
       const response: ErrorResponse = {
         success: false,
         message: 'Invalid email or password'
@@ -372,22 +367,16 @@ export const requestPasswordReset = async (req: AuthenticatedRequest, res: Respo
     });
 
     // Always return success to prevent email enumeration
-    if (!user) {
-      res.status(200).json({
-        success: true,
-        message: 'A reset code has been sent.'
+    if (user) {
+      // Send OTP for password reset only if user exists
+      const result = await sendOTPService({ 
+        email: normalizedEmail, 
+        type: 'password_reset' 
       });
-      return;
-    }
-
-    // Send OTP for password reset
-    const result = await sendOTPService({ 
-      email: normalizedEmail, 
-      type: 'password_reset' 
-    });
-    if (!result.success) {
-      res.status(400).json({ success: false, message: result.message });
-      return;
+      if (!result.success) {
+        res.status(400).json({ success: false, message: result.message });
+        return;
+      }
     }
 
     res.status(200).json({
@@ -560,7 +549,7 @@ export const profile = async (req: AuthenticatedRequest, res: Response): Promise
           username: user.username,
           xp: user.total_exp,
           streak: user.current_streak,
-          bio: user.profile_pic || "Student Programmer"
+          bio: 'Student Programmer'
         }
       }
     });

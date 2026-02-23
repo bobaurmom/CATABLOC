@@ -9,11 +9,8 @@ interface LevelAttributes {
     level_number: number;
     title: string;
     description: string;
-    available_codeblocks: string; // JSON string representing available codeblocks
     difficulty: 'easy' | 'medium' | 'hard';
-    level_layout: LevelLayout; // JSON object representing level level_layout
-    blocks_limit?: number;
-    time_limit?: number; // in seconds
+    time_limit?: number; 
     created_at?: Date;
     updated_at?: Date;
 }
@@ -26,33 +23,21 @@ interface levelProgress{
     completed: 'completed' | 'in_progress' | 'not_started';
     last_played_at?: Date;
 }
-interface LevelLayout {
-  width: number;
-  height: number;
-  cat_start: { x: number; y: number };
-  facing: 'up' | 'down' | 'left' | 'right';
-  goal: { x: number; y: number };
-  obstacles: Array<{ x: number; y: number }>;
-}
+
 interface LevelCreationAttributes extends Optional<LevelAttributes, 'level_id' | 'created_at' | 'updated_at'> {}
 interface LevelProgressCreationAttributes extends Optional<levelProgress, 'last_played_at'> {}
 export class Level extends Model<LevelAttributes, LevelCreationAttributes> implements LevelAttributes {
-
     public level_id!: number;
     public game_id!: number;
     public level_number!: number;
     public title!: string;
     public description!: string;
-    public available_codeblocks!: string;
     public difficulty!: 'easy' | 'medium' | 'hard';
-    public level_layout!: LevelLayout;
-    public blocks_limit?: number;
     public time_limit?: number;
 }
 export class LevelProgress extends Model<levelProgress, LevelProgressCreationAttributes> implements levelProgress {
     public user_id!: number;
     public level_id!: number;
-    
     public best_score!: number;
     public attempts!: number;
     public completed!: 'completed' | 'in_progress' | 'not_started';
@@ -68,6 +53,10 @@ Level.init({
     game_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'games',
+            key: 'game_id',
+        },
     },
     level_number: {
         type: DataTypes.INTEGER,
@@ -80,30 +69,21 @@ Level.init({
     description: {
         type: DataTypes.TEXT,
     },
-    available_codeblocks: {
-        type: DataTypes.TEXT, // Stores the JSON string of allowed blocks
-    },
+
     difficulty: {
         type: DataTypes.ENUM('easy', 'medium', 'hard'),
         defaultValue: 'easy',
-    },
-    blocks_limit: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
     },
     time_limit: {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-    level_layout: {
-        type: DataTypes.JSONB,
-        allowNull: false,
-    }, 
     }, 
     {
     sequelize,
     tableName: 'levels',
     underscored: true,
+    timestamps: true,
     });
 
 LevelProgress.init({

@@ -37,6 +37,16 @@ module.exports = {
                 type: Sequelize.TEXT,
                 allowNull: false
             },
+            level_layout: {
+                type: Sequelize.JSONB,
+                allowNull: true,
+                comment: 'Board layout configuration: dimensions, cat start position, goal, obstacles'
+            },
+            block_limit: {
+                type: Sequelize.INTEGER,
+                allowNull: true,
+                comment: 'Maximum number of code blocks allowed for this level'
+            },
             created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,

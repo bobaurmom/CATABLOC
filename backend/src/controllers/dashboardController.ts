@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../utils/jwt';
 import User from '../models/userModel';
+import { Op } from 'sequelize';
 
+// Controller for fetching dashboard data (user stats and leaderboard)
 const getDashboardData = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const user_id = req.user?.user_id;
@@ -21,26 +23,29 @@ const getDashboardData = async (req: AuthenticatedRequest, res: Response) => {
 
     // Fetch leaderboard
     const leaderboard = await User.findAll({
-      attributes: ['username', 'total_exp'],
+      where: { status: 'active' },
+      attributes: ['username', 'total_exp','status'],
       order: [['total_exp', 'DESC']],
-      limit: 20
+      limit: 10
     });
-
     // Calculate user's rank
-    const userRank = leaderboard.findIndex(
-      (user) => user.get('username') === userData.get('username')
-    ) + 1;
+    const userRank = await User.count({
+      where: {
+        status: 'active',
+        total_exp: { [Op.gt]: userData.get('total_exp') }
+      }
+    }) + 1;
 
     res.status(200).json({
       user: {
         username: userData.get('username'),
-        xp: userData.get('total_exp') || 0,
-        streak: userData.get('current_streak') || 0,
-        rank: userRank || null
+        xp: userData.get('total_exp'),
+        streak: userData.get('current_streak') ?? 0,
+        rank: userRank
       },
       leaderboard: leaderboard.map((user) => ({
         username: user.get('username'),
-        total_exp: user.get('total_exp') || 0
+        total_exp: user.get('total_exp') 
       }))
     });
     

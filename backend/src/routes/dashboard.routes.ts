@@ -45,7 +45,7 @@ const router = Router();
  *       '500':
  *         description: Internal server error
  */
-router.get('/dashboard', authenticateToken , checkUserActive , getDashboardData);
+router.get('/dashboard', authenticateToken  , getDashboardData);
 
 
 

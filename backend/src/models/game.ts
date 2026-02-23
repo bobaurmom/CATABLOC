@@ -1,33 +1,44 @@
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config/sequelize";
+
 interface game {
     game_id: number;
     title: string;
     description: string;
+    game_type: 'puzzle' | 'kibble' | 'quiz';
     created_at?: Date;
     updated_at?: Date;
 }
-
-interface codeblock{
-    codeblock_id: number;
-    block_command: 'forward' | 'backward' | 'turn_left' | 'turn_right';   
-    block_type: 'movement' | 'loop' | 'while' | 'condition';
-    created_at?: Date;
-    updated_at?: Date;
+interface gameCreationAttributes extends Optional<game, 'game_id' | 'created_at' | 'updated_at'> {}
+export class Game extends Model<game, gameCreationAttributes> implements game {
+    public game_id!: number;
+    public title!: string;
+    public description!: string;
+    public game_type!: 'puzzle' | 'kibble' | 'quiz';
 }
 
-interface action{
-    action_id: number;
-    session_id: number;
-    codeblock_id: number;
-    current_step: number;
-    action_type: 'execute' | 'next' | 'undo'| 'fast_forward'| 'reset'| 'delete'| 'check';
-    timestamp: Date;
-    action_result: 'success' | 'failure';
-}
-
-interface userSolution{
-    solution_id: number;
-    session_id: number;
-    code_sequence: string; // JSON string representing the sequence of codeblocks used
-    submitted_at: Date;
-    is_correct: boolean;
-}
+Game.init({
+    game_id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    },
+    game_type: {
+        type: DataTypes.ENUM('puzzle', 'kibble'),
+        allowNull: false,
+    },
+}, {
+    sequelize,
+    tableName: 'games',
+    underscored: true,
+    timestamps: false,
+});
+export default Game;

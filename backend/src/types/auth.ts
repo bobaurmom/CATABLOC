@@ -11,7 +11,6 @@ export interface LoginRequest {
     email: string;
     password: string;
     username?: string;
-    status?: 'active' | 'pending';
 }
 export interface EmailVerificationRequest {
     email: string;

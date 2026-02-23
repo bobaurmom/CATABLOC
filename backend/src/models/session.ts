@@ -6,6 +6,7 @@ import { Level } from "./Level";
 interface SessionAttributes {
     session_id: number;
     level_id: number;
+    game_id: number;
     user_id: number;
     started_at: Date;
     ended_at?: Date;
@@ -17,6 +18,7 @@ interface SessionCreationAttributes extends Optional<SessionAttributes, 'session
 export class Session extends Model<SessionAttributes, SessionCreationAttributes> implements SessionAttributes {
     public session_id!: number;
     public level_id!: number;
+    public game_id!: number;
     public user_id!: number;
     public started_at!: Date;
     public ended_at?: Date;
@@ -31,6 +33,10 @@ Session.init({
         autoIncrement: true,
     },
     level_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    game_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
