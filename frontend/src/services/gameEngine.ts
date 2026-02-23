@@ -1,4 +1,5 @@
-import type { LevelLayout, Position } from '../component/game/index';
+import type { LevelLayout } from '../component/game/index';
+import type { Position } from '../type/gameType';
 export class GameEngine {
     private layout: LevelLayout;
     private initialLayout: LevelLayout;

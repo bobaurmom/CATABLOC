@@ -5,8 +5,6 @@ const levelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, 
     const { setCurrentLevel, setSessionId, gameId } = useGameSelection();
     const navigate = useNavigate();
     const handleLevelSelect = (levelNumber: number) => {
-        console.log("Selected level:", levelNumber);
-        console.log("Current gameId before nav:", gameId);
         setCurrentLevel(levelNumber);
     
         startSession(levelNumber).then(session => {

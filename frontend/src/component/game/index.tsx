@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Cat from './cat';
 import Mouse from './mouse';
 import Grid from './grid';
-export interface Position {
-  x: number;
-  y: number;
-}
+import type { Position } from '../../type/gameType';
 
 export type Facing = 'left' | 'right' | 'up' | 'down';
 
@@ -27,7 +24,6 @@ const GameScene: React.FC<GameSceneProps & { deg: number }> = ({ layout, deg }) 
   const TILE_SIZE = 64;
   const [currentPos, setCurrentPos] = useState<Position>(layout.cat_start);
 useEffect(() => {
-    console.log("New layout detected, resetting cat to:", layout.cat_start);
     setCurrentPos(layout.cat_start);
   }, [layout]);
   return (

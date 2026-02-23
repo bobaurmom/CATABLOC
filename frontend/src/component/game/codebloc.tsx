@@ -2,17 +2,8 @@ import React, { useState } from 'react';
 import '../../style/codebloc.css';
 import DropZone from './dropZone';
 import Draggable from './draggable';
+import type { CodeBlock } from '../../type/gameType';
 
-
-export type BlockType = 'while' | 'if' | 'else' | 'action'| 'repeat';
-
-export interface CodeBlock {
-  id: string;
-  type: BlockType;
-  condition?: string;
-  label?: string;
-  nestedBlocks?: CodeBlock[]; 
-}
 interface CodeBlockProps {
   block: CodeBlock;
   isUserBlock?: boolean;
@@ -23,7 +14,7 @@ const CONDITION_OPTIONS = {
   while: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
   if: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
 };
-const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick }) => {
+const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const handleSelect = (option: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -37,11 +28,11 @@ const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick }
   const options = CONDITION_OPTIONS[block.type as keyof typeof CONDITION_OPTIONS] || [];
 
   return (
-    <div className={`block-node ${block.type}`} onClick={(e) => {
+    <div className={`block-node ${block.type} ${block.classList || ''}`} onClick={(e) => {
       e.stopPropagation(); 
       onBlockClick?.(block.id);
     }}>
-      <div className="block-control">
+      <div className={`block-control ${block.classList || ''}`}>
         <span className="keyword">{block.type}</span>
         
             {block.condition && (

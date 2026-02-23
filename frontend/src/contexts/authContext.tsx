@@ -82,7 +82,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
     }
     const register = async (form: HTMLElement): Promise<Response | undefined> => {
-        setIsLoading(true);
         const formData = new FormData(form as HTMLFormElement);
         const data = {
             email: formData.get("email"),
@@ -109,8 +108,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             return response;
         } catch (error) {
             throw error;
-        } finally {
-            setIsLoading(false);
         }
     }
     const logout = async () => {

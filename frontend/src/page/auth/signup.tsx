@@ -41,6 +41,7 @@ const SignUp: React.FC = () => {
       } else{
         setButtonState("default");
         const errorData = await response?.json();
+        console.log("Signup failed:", errorData);
         if(errorData.errors){
           setErrorMessage({
             email: errorData.errors.find((error: any) => error.field === "email")?.message || null,
@@ -50,12 +51,21 @@ const SignUp: React.FC = () => {
           });
         } else  if(errorData.message) {
           const message = typeof errorData.message === "string" ? errorData.message : "";
-          setErrorMessage({
-            email: message.includes("email") ? message : null,
-            username: message.includes("Username") ? message : null,
-            password: message.includes("password") ? message : null,
-            confirmPassword: message.includes("Password") ? message : null,
-          });
+          if(message.includes("email") || message.includes("username") || message.includes("password") || message.includes("confirmPassword")){
+            setErrorMessage({
+              email: message.includes("email") ? message : null,
+              username: message.includes("Username") ? message : null,
+              password: message.includes("password") ? message : null,
+              confirmPassword: message.includes("Password") ? message : null,
+            });
+          } else {
+            setErrorMessage({
+              email: message,
+              username: message,
+              password: message,
+              confirmPassword: message,
+            });
+          };
         } else {
           window.alert("An unknown error occurred during signup. Please try again.");
         }
