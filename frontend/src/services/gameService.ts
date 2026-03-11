@@ -1,5 +1,5 @@
 import apiFetch from "./profile"; 
-import type { CodeBlock, BlockType } from "../component/game/codebloc";
+import type { CodeBlock, BlockType } from "../type/gameType";
 
 const fetchBloc = async (): Promise<CodeBlock[]> => {
   try {

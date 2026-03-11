@@ -12,6 +12,7 @@ import { AuthProvider } from './contexts/authContext';
 import LevelPage from './page/level';
 import { GameProvider } from './contexts/gameContext';
 import PublicRoute from './component/publicRoute';
+import ErrorPage from './page/Error';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path='/register' element={<PublicRoute><SignUp /></PublicRoute>} />  
               <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path='/level' element={<ProtectedRoute><LevelPage /></ProtectedRoute>} />
+              <Route path='*' element={<ErrorPage />} />
             </Routes>
             <Footer />
           </div>

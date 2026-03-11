@@ -14,6 +14,7 @@ import type { Facing } from '../component/game/index';
 import { completeGame } from '../services/gameService';
 import Btn from '../component/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useTimer } from '../hooks/useTimer';
 import WrapDropZone from '../component/game/wrapDropZone';
 import organizeBlocks from '../utils/gameHelperFunc/purfectpath/organizeBlock' // Update path if needed
 import clearAllBlockClasses from '../utils/gameHelperFunc/purfectpath/clearBlockClasses';
@@ -35,11 +36,7 @@ let idCounter = 0;
 function generateId(): string {
   return `block-${idCounter++}`;
 } 
-type timeFormat = {
-  hour: number,
-  minute: number,
-  second: number
-}
+
 const rotationMap: Record<Facing, number> = { 
   up: -90, 
   right: 0, 
@@ -54,12 +51,13 @@ let startTime: number = 0;
 const LevelPage: React.FC = () => {
   const navigate = useNavigate();
   const [levelLayout, setLevelLayout] = React.useState<LevelData | null>(null);
-  const [time, setTime] = React.useState<timeFormat>({hour: 0, minute: 0, second: 0});
   const { currentLevel, sessionId, gameId } = useGameSelection();
   const [catPos, setCatPos] = React.useState<Position>({ x: 0, y: 0 });
   const [catDeg, setCatFacing] = React.useState(0);
   const [gameEngine, setGameEngine] = React.useState<GameEngine | null>(null);
   const [disabledRun, setDisabledRun] = React.useState(false);
+
+  const { currentTime, startTimer, stopTimer, resumeTimer, resetTimer } = useTimer(true);
   const handleProvideCode = (provideCode: string[]): CodeBlock[] => {
     let newProvideCode: CodeBlock[] = [];
     for (const blockType of provideCode) {
@@ -94,21 +92,6 @@ const LevelPage: React.FC = () => {
     loadLayout();
   }, []);
 
-  React.useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
-    
-    const updateTime = () => {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const hours = Math.floor(elapsed / 3600);
-      const minutes = Math.floor((elapsed % 3600) / 60);
-      const seconds = elapsed % 60;
-      
-      setTime({ hour: hours, minute: minutes, second: seconds });
-    };
-
-    intervalId = setInterval(updateTime, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
 
 const findBlockById = (blocks: CodeBlock[], id: string): CodeBlock | null => {
   for (const block of blocks) {
@@ -252,21 +235,28 @@ const executeBlocksSequentially = async (blocks: CodeBlock[], currentPos: Positi
   }
 };
 const handleRunCode = async () => {
+  stopTimer();
   clearAllBlockClasses(userCode);
-  if(gameEngine && levelLayout) {
-    // Reset to start position
-    setDisabledRun(true);
-    gameEngine.reset();
-    const startPos = levelLayout.layout.cat_start;
-    const startDeg = rotationMap[levelLayout.layout.facing || 'right'];
-    setCatPos(startPos);
-    setCatFacing(startDeg);
-    
-    setTimeout(async () => {
+
+  if (!gameEngine || !levelLayout) {
+    resumeTimer();
+    console.error("Game engine or level layout not initialized.");
+    return;
+  }
+
+  // Reset to start position
+  setDisabledRun(true);
+  gameEngine.reset();
+  const startPos = levelLayout.layout.cat_start;
+  const startDeg = rotationMap[levelLayout.layout.facing || 'right'];
+  setCatPos(startPos);
+  setCatFacing(startDeg);
+  
+  setTimeout(async () => {
+    try {
       await executeBlocksSequentially(userCode, startPos, startDeg);
       
       
-
       const organized = organizeBlocks(userCode);
   
       if(sessionId && currentLevel && gameId) {
@@ -279,20 +269,25 @@ const handleRunCode = async () => {
       } else {
         console.error("Missing required values for completeGame:", { sessionId, currentLevel, gameId });
       }
+    } catch (error) {
+      console.error("Error during code execution:", error);
+    } finally {
       setDisabledRun(false);
-    }, 500);
-  }
+      resumeTimer();
+    }
+  }, 500);
 };
       
 
 
   return (
-    <div className="level-page p-4 margin-auto flex flex-col w-full gap-4">
-    <div className="title-container flex justify-between items-center">
-      <Btn text="Back" onClick={() => navigate('/dashboard')}></Btn>
-      <h1 style={{ textAlign: 'center' }}>{`Level ${levelLayout?.levelNumber}: ${levelLayout?.title}`}</h1>
-      <div className="time-container">{`${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}:${time.second.toString().padStart(2, '0')}`}</div>
-    </div>
+
+      <div className="level-page p-4 margin-auto flex flex-col w-full gap-4">
+        <div className="title-container flex justify-between items-center">
+          <Btn text="Back" onClick={() => navigate('/dashboard')}></Btn>
+          <h1 style={{ textAlign: 'center' }}>{`Level ${levelLayout?.levelNumber}: ${levelLayout?.title}`}</h1>
+          <div className="time-container">{`${currentTime.hour.toString().padStart(2, '0')}:${currentTime.minute.toString().padStart(2, '0')}:${currentTime.second.toString().padStart(2, '0')}`}</div>
+        </div>
       {levelLayout && (
         <GameScene 
           layout={{
@@ -332,6 +327,7 @@ const handleRunCode = async () => {
         </Btn>
       </div>
     </div>
+    
   );
 };
 
