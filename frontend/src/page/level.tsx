@@ -32,7 +32,7 @@ interface LevelData {
   blockLimit: number;
   timeLimit: number;
 };
-let idCounter = 0;
+let idCounter: number = 0;
 function generateId(): string {
   return `block-${idCounter++}`;
 } 

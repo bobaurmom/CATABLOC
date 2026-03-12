@@ -26,7 +26,7 @@ function App() {
               <Route path='/login' element={<PublicRoute><Login /></PublicRoute>} />
               <Route path='/register' element={<PublicRoute><SignUp /></PublicRoute>} />  
               <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path='/level' element={<ProtectedRoute><LevelPage /></ProtectedRoute>} />
+              <Route path='/games/:gameId/level/:levelId' element={<ProtectedRoute><LevelPage /></ProtectedRoute>} />
               <Route path='*' element={<ErrorPage />} />
             </Routes>
             <Footer />
