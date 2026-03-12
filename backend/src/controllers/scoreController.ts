@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import User from "../models/userModel";
 import score from "../models/score";
 import Level from "../models/Level";
+import BoardData from "../models/boardData";
 import sequelize from "../config/sequelize";
 import { calculateFinalXP } from "../utils/calculatexp";
 
@@ -36,6 +37,16 @@ export const submitLevelScore = async (req: AuthenticatedRequest, res: Response)
       return res.status(404).json({ message: 'Level not found' });
     }
 
+    // Fetch board data to get blocks_limit (board configuration)
+    const boardData = await BoardData.findOne({
+      where: { level_id: level_id },
+      transaction
+    });
+    if (!boardData) {
+      await transaction.rollback();
+      return res.status(404).json({ message: 'Level configuration not found' });
+    }
+
     // Check if user already completed this level
     const existingScore = await score.findOne({
       where: {
@@ -57,8 +68,9 @@ export const submitLevelScore = async (req: AuthenticatedRequest, res: Response)
       });
     }
 
-    // Calculate experience
-    const exp_gained = calculateFinalXP(levelData.difficulty, blocks_used, levelData.blocks_limit, time_spent, levelData.time_limit);
+    // Calculate experience using blocks_limit from board_data
+    const blocks_limit = boardData.block_limit || 10; // Default fallback
+    const exp_gained = calculateFinalXP(levelData.difficulty, blocks_used, blocks_limit, time_spent, levelData.time_limit);
 
     // Update user stats
     const user = await User.findByPk(user_id, { transaction });
@@ -75,6 +87,7 @@ export const submitLevelScore = async (req: AuthenticatedRequest, res: Response)
     // Create score record
     await score.create({
       user_id: user_id,
+      game_id: levelData.game_id,
       level_id: level_id,
       exp_gained: exp_gained,
       blocks_used: blocks_used,

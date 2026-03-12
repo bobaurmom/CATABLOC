@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
 import Btn from "../../component/ui/button";
@@ -19,26 +19,54 @@ const SignUp: React.FC = () => {
     confirmPassword: string | null;
   }>({ email: null, username: null, password: null, confirmPassword: null });
   const nav = useNavigate();
-  const change = () => {
+  const [formData, setFormData] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    console.log("popUp state changed to:", popUp, "email:", email);
+  }, [popUp, email]);
+  const change = (e: React.FormEvent<HTMLFormElement>) => {
     setErrorMessage({ email: null, username: null, password: null, confirmPassword: null });
     setButtonState("default");
+    const form = e.currentTarget;
+    const data: { [key: string]: string } = {};
+    const inputs = form.querySelectorAll("input");
+    inputs.forEach((input) => {
+      data[input.name] = input.value;
+    });
+    setFormData(data);
   };
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setButtonState("disabled");
     const form = e.currentTarget;
     try {
-      const response = await register(form);
-      if (response && response.ok) {
+      // Create a custom fetch call that doesn't trigger auth update
+      const formData = new FormData(form);
+      const data = {
+        email: formData.get("email"),
+        username: formData.get("username"),
+        password: formData.get("password"),
+        confirmPassword: formData.get("confirmPassword"),
+      };
+      
+      const response = await fetch("http://localhost:8000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+
+      console.log("Direct register response:", response);
+      if (response.ok) {
         console.log("Signup successful");
-        // Handle successful signup (e.g., redirect to login page)
+        setEmail(data.email as string);
         setButtonState("completed");
-        const formData = new FormData(form);
-        const emailValue = formData.get("email") as string;
-        setEmail(emailValue);
-        //show verification popup
+        // Show popup BEFORE registering with auth context
         setPopUp(true);
-      } else{
+        console.log("WHERE TF IS THE POPUP");
+      } else {
         setButtonState("default");
         const errorData = await response?.json();
         console.log("Signup failed:", errorData);

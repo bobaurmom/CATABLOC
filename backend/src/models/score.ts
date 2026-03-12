@@ -4,6 +4,7 @@ import sequelize from '../config/sequelize';
 interface scoreAttributes {
     score_id: number;
     user_id: number;
+    game_id: number;
     level_id: number;
     exp_gained: number;
     blocks_used: number;
@@ -16,6 +17,7 @@ interface scoreCreationAttributes extends Optional<scoreAttributes, 'score_id' |
 export class score extends Model<scoreAttributes, scoreCreationAttributes> implements scoreAttributes {
     public score_id!: number;
     public user_id!: number;
+    public game_id!: number;
     public level_id!: number;
     public exp_gained!: number;
     public blocks_used!: number;
@@ -30,6 +32,10 @@ score.init({
         autoIncrement: true,
     },
     user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    game_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
