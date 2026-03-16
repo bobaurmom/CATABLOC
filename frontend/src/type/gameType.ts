@@ -15,4 +15,5 @@ export interface CodeBlock {
   label?: string;
   nestedBlocks?: CodeBlock[];
   classList?: string; 
+  parentId?: string;
 }

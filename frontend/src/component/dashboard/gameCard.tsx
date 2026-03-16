@@ -53,7 +53,7 @@ const GameCard: React.FC<GameCardProps> = ({
         </div>
         <p>{detail}</p>
         <Btn 
-          text={disabled ? "COMING SOON" : "PLAY"} 
+          text={disabled ? "SOON..." : "PLAY"} 
           btnType="button"
           onClick={(e) => {
             e.stopPropagation();

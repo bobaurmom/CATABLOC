@@ -1,7 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import {CSS} from '@dnd-kit/utilities';
 const Draggable = (prop: { id: string; children: React.ReactNode; data?: any}) => {
-    const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
       id: prop.id,
       data: prop.data
     });
@@ -11,7 +11,7 @@ const Draggable = (prop: { id: string; children: React.ReactNode; data?: any}) =
         const target = e.target as HTMLElement;
         if (!target.closest('.condition-box')) {
             listeners?.onPointerDown?.(e as any);
-            }
+        }
     };
 
     return (
@@ -20,7 +20,6 @@ const Draggable = (prop: { id: string; children: React.ReactNode; data?: any}) =
             {...attributes}
             onPointerDown={handleMouseDown}
             style={{
-                transform: CSS.Translate.toString(transform),
                 cursor: isDragging ? 'grabbing' : 'grab',
                 opacity: isDragging ? 0.5 : 1,
                 padding: '10px',

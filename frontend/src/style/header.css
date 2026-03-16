@@ -109,8 +109,9 @@
     }
     .dropDown{
         display: none;
-        position: absolute;
-        top:85%;
+        position: fixed;
+        top:60px;
+        left: 0;
     }
     .dropDown-content{
         display: flex;

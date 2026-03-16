@@ -20,6 +20,9 @@
     text-align: center;
     max-width: 90%;
     width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     
 }
 
@@ -69,8 +72,13 @@
 .verification-input::placeholder {
     color: transparent;
 }
-.verification-error{
-    color:red;
+.verification-message{
     position: relative;
     top:-20px;
+}
+.verification-message.error{
+    color: red;
+}
+.verification-message.success{
+    color: green;
 }

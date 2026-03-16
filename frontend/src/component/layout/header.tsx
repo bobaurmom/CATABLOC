@@ -4,6 +4,7 @@ import "../../style/header.css";
 import Btn from "../ui/button";
 import { useAuth } from "../../hooks/useAuth";
 import profilePic from "../../assets/defaultProfile.png";
+import { Link } from "react-router-dom";
 const Header: React.FC = () => {
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
   const { user, isAuthenticated , logout} = useAuth();
@@ -24,40 +25,40 @@ const Header: React.FC = () => {
             <div className="line line-third"></div>
           <div className={`dropDown ${isOpen ? "dropDown-show" : ""}`}>
           <div className="dropDown-content">
-            <a href="/dashboard" className="drop-content">Dashboard</a>
-            <a href="#about" className="drop-content">About Us</a>
-            <a href="#help" className="drop-content">Help Center</a>
+            <Link to="/dashboard" className="drop-content">Dashboard</Link>
+            <Link to="#about" className="drop-content">About Us</Link>
+            <Link to="#help" className="drop-content">Help Center</Link>
             </div>
           </div>
         </div>
-        <a href="/">
+        <Link to="/" className="flex gap-2">
           <img src={logo} alt="Catabloc Logo" className="header-logo" />
-        </a>
-        <span className="header-title">CATABLOC</span>
+          <span className="header-title">CATABLOC</span>
+        </Link>
       </div>
       <nav className="header-middle">
-        <a href="/dashboard" className="header-text">
+        <Link to="/dashboard" className="header-text">
           LEARN
-        </a>
-        <a href="#about" className="header-text">
+        </Link>
+        <Link to="#about" className="header-text">
           ABOUT US
-        </a>
-        <a href="#help" className="header-text">
+        </Link>
+        <Link to="#help" className="header-text">
           HELP CENTER
-        </a>
+        </Link>
       </nav>
       {isAuthenticated ? (
         <div className="header-user" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
           <img src={profilePic} alt="profile" className="profile-pic"/>
           <span className="header-username">{user?.name}</span>
         </div>
-      ) : (
-        <a href="/register">
-          <Btn text="Sign Up" state="default"></Btn>
-        </a>
-      )}
+          ) : (
+          <Link to="/register">
+            <Btn text="Sign Up" state="default"></Btn>
+          </Link>
+          )}
       {profileMenuOpen && (
-        <div className="profile-menu fixed top-15 right-13 z-50 bg-white border border-gray-300 rounded shadow-lg p-4 flex flex-col">
+        <div className="profile-menu fixed top-20 md:top-15 right-0 z-50 bg-white border border-gray-300 rounded shadow-lg p-4 flex flex-col">
           <div className="view-profile border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">View Profile</div>
           <div className="help-center border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">Help Center</div>
           <Btn text="Log out" state="warning" onClick={handleLogout}/>

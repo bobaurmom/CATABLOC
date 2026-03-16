@@ -7,6 +7,7 @@ interface input {
   type?: string;
   required?: require;
   error?: string | null;
+  autoComplete?: string;
   onChange?: () => void;
 }
 const Input: React.FC<input> = ({
@@ -17,6 +18,7 @@ const Input: React.FC<input> = ({
   required,
   error,
   onChange,
+  autoComplete
 }) => {
   return (
     <div style={{width: "100%"}}>
@@ -36,6 +38,7 @@ const Input: React.FC<input> = ({
         name={name}
         id={name}
         onChange={onChange}
+        autoComplete={autoComplete}
       />
       {error && <p style={{ color: "red", fontSize: "12px" ,margin:"0"}}>{error}</p>}
     </div>

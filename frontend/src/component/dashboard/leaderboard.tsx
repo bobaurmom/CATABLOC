@@ -26,7 +26,6 @@ const Leaderboard: React.FC = () => {
         
         if (response.ok) {
           const data = await response.json();
-          console.log('Dashboard data:', data);
           
           // Add rank to each profile
           const rankedProfiles = data.leaderboard.map((profile: LeaderboardProfile, index: number) => ({

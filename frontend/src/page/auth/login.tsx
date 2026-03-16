@@ -3,11 +3,9 @@ import Btn from "../../component/ui/button";
 import TalkingCat from "../../component/ui/talkingCat";
 import Input from "../../component/ui/input";
 import { useAuth } from "../../hooks/useAuth";
-// import { login } from "../../services/authService";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Login: React.FC = () => {
-  const nav = useNavigate();
   const { login } = useAuth();
   const [errorMessage, setErrorMessage] = React.useState<{
     email: string | null;
@@ -16,6 +14,7 @@ const Login: React.FC = () => {
     email: null,
     password: null,
   });
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -23,7 +22,6 @@ const Login: React.FC = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const result = await login(email, password);
-    console.log("response:", result.response);
     
     if (result.response && result.response.ok) {
       // nav("/dashboard");
@@ -95,9 +93,9 @@ const Login: React.FC = () => {
           ></Input>
           <Btn text="Login" btnType="submit" width="30"></Btn>
         </form>
-        <a href="#">Forgot password???</a>
+        <Link to="/forgot-password">Forgot password???</Link>
         <br />
-        <a href="/register">New to CATABLOC?? Sign Up</a>
+        <Link to="/register">New to CATABLOC?? Sign Up</Link>
         {/* <Footer/> */}
       </div>
     </>

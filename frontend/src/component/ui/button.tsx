@@ -3,23 +3,22 @@ import "../../style/button.css";
 interface ButtonProps {
   text: string;
   btnType?: HTMLButtonElement["type"]; //type for button element
-  fSize?: number | string;
   width?: number | string;
   id?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
   state?: "default" | "disabled" | "completed" | "warning";
+  className?: string;
 }
 
 const Btn: React.FC<ButtonProps> = ({
   text,
   btnType = "button",
-  fSize = 1,
-  width,
   id,
   onClick,
   disabled = false,
   state = "default",
+  className
 }) => {
   return (
     <button
@@ -27,13 +26,10 @@ const Btn: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       style={{
-        fontSize: `${fSize}rem`,
-        width: width !== undefined ? `${width}%` : "auto", 
         border: "none",
-        padding: "0.6rem 1rem",
+        padding: "10px 3rem",
         cursor: disabled ? "not-allowed" : "pointer",
-        color: "white",
-        borderRadius: "4px",
+        borderRadius: "10px",
         transition: "all 0.2s ease",
         opacity: disabled ? 0.7 : 1,
       }}
@@ -50,7 +46,7 @@ const Btn: React.FC<ButtonProps> = ({
           e.currentTarget.style.boxShadow = "none";
         }
       }}
-      className={state}
+      className={className ? className + " " + state : state}
     >
 
 

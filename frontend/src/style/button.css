@@ -1,12 +1,27 @@
 .default{
-    background-color: blue;
+    background-color: #1013c4;
+    color:#FFFFFF;
 }
 .disabled{
-    background-color: grey;
+    background-color: #E5E7EB;
+    color:#9CA3AF;
 }
 .warning{
-    background-color: red;
+    background-color: #EF4444;
+    color:#FFFFFF;
 }
 .completed{
-    background-color: rgb(4, 143, 4);
+    background-color: #10B981;
+    color:#FFFFFF;
+}
+
+
+.default:hover{
+    background-color: #2563EB;
+}
+.warning:hover{
+    background-color: #DC2626;
+}
+.completed:hover{
+    background-color: #059669;
 }

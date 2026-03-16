@@ -5,16 +5,28 @@ import Footer from './component/layout/footer';
 import Header from './component/layout/header';
 import Home from './page/home';
 import Login from './page/auth/login';
-import SignUp from './page/auth/signup';
 import Dashboard from './page/dashboard';
+import SignUp from './page/auth/signup';;
 import ProtectedRoute from './component/protectedRoute';
 import { AuthProvider } from './contexts/authContext';
-import LevelPage from './page/level';
 import { GameProvider } from './contexts/gameContext';
 import PublicRoute from './component/publicRoute';
 import ErrorPage from './page/Error';
+import { lazy, useEffect } from 'react';
 
+
+const LevelPage = lazy(() => import('./page/level'));
 function App() {
+
+  useEffect(() => {
+    Promise.all([
+      import('./page/level'),
+    ]).then(() => {
+      console.log("Level page is Loaded");
+    }).catch(error => {
+      console.error("Error loading modules:", error);
+    });
+  }, [])
   return (
     <BrowserRouter>
       <AuthProvider>

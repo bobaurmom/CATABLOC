@@ -65,7 +65,7 @@ const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick})
         <div className="block-children-area">
           <div className="indent-guide" />
           {isUserBlock ? (
-            <DropZone id={generateDropZoneId(block.id)}>
+            <DropZone id={generateDropZoneId(block.id)} className='h-fit'>
               {block.nestedBlocks && block.nestedBlocks.length > 0 ? (
                 block.nestedBlocks.map((child) => (
                   <Draggable key={child.id} id={child.id} data={{ type: child.type, label: child.label, condition: child.condition }}>

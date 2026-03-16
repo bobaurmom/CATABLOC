@@ -19,6 +19,7 @@ const executeBlock = (block: CodeBlock, gameEngine:GameEngine): {cat_start: Posi
         throw new Error(`Unsupported block type: ${block.type}`);
     }
     return gameEngine.getCatState();
-        
 }
+
+// const executeBlockSequencially
 export default executeBlock;

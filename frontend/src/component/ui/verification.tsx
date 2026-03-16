@@ -2,18 +2,20 @@ import React, { useRef, useEffect } from "react";// use THE REACT HOOK WE USE RE
 import logo from "../../assets/logo.svg";
 import Btn from "./button";
 import "../../style/verify.css";
-import { verifycode } from "../../services/authService";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { resendcode } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
 
 type borderColorType = 'black' | 'red';
 type errorMessage = string | null;
 const Verification: React.FC<{email: string, onClose: () => void}> = ({ email, onClose }) => {
   // Create ref for each input
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const { verifyEmail } = useAuth();
   const [borderColor, setBorderColor] = useState<borderColorType>("black");
   const [errorMessage, setErrorMessage] = useState<errorMessage>(null);
+  const [isError, setIsError] = useState(false);
   const nav = useNavigate();
 
   useEffect(() => {
@@ -52,19 +54,32 @@ const Verification: React.FC<{email: string, onClose: () => void}> = ({ email, o
   
   };
 
+  const handleFocus = (index: number) => {
+    if(index > 0 && !inputRefs.current[index - 1]?.value){
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+
   const handleVerify = async () => {
     const code = inputRefs.current
       .map(input => input?.value || "")
       .join("");
-    const res = await verifycode(code,email);
-    if(res){
-      console.log("response",res);
-      if(res.ok){
-        nav("/dashboard");
-      } else {
-        setErrorMessage("Invalid verification code. Please try again.");
-        setBorderColor("red");
+    try {
+      const res = await verifyEmail(code, email);
+      if(res){
+        console.log("response",res);
+        if(res.ok){
+          nav("/dashboard");
+        } else {
+          setErrorMessage("Invalid verification code. Please try again.");
+          setBorderColor("red");
+        }
       }
+    } catch (error) {
+      setIsError(true);
+      setErrorMessage("Invalid verification code. Please try again.");
+      setBorderColor("red");
     }
   };
 
@@ -74,8 +89,12 @@ const Verification: React.FC<{email: string, onClose: () => void}> = ({ email, o
     if(res){
       if(res.ok){
         setErrorMessage("Verification code resent successfully.");
+        setIsError(false);
+        setBorderColor("black");
       } else {
+        setIsError(true);
         setErrorMessage("Failed to resend code. Please try again later.");
+        setBorderColor("red");
       }
     }
   };
@@ -90,7 +109,7 @@ const Verification: React.FC<{email: string, onClose: () => void}> = ({ email, o
     <img src={logo} alt="Catabloc Logo" className="verification-logo" />
     <h1 style={{ fontSize: "30px",  marginBottom: "25px", color: "#333" }}>🐾Activation Code🐾</h1>
     <p className="verification-instruction">
-      We sent a secret 6-digit code to <strong>{email}</strong> unlock your Catabloc account.     </p>
+      We sent a secret 6-digit code to <strong>{email}</strong> unlock your Catabloc account.</p>
     <div className="input-container">
       {Array.from({ length: 6 }).map((_, index) => (
         <input
@@ -103,10 +122,11 @@ const Verification: React.FC<{email: string, onClose: () => void}> = ({ email, o
           }}
           onChange={(e) => handleInputChange(index, e)}
           onKeyDown={(e) => handleKeyDown(index, e)}
+          onFocus={() => handleFocus(index)}
         />
       ))}
     </div>
-    {errorMessage && <p className="verification-error">{errorMessage}</p>}
+    {errorMessage && <p className={`verification-message ${isError ? 'error' : 'success'}`}>{errorMessage}</p>}
     <Btn text="Verify Email" id="verify-btn" onClick={handleVerify} width={100} />
     <a href="" onClick={handleResend}>Resend Code</a>
   </div>

@@ -1,6 +1,7 @@
 import { useGameSelection } from "../../hooks/useGameSelection";
 import { useNavigate } from "react-router-dom";
 import { startSession } from "../../services/gameService";
+
 const levelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, gameName: string, handleClose: () => void}) => {
     const { setCurrentLevel, setSessionId, gameId } = useGameSelection();
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const levelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, 
             } else {
                 console.warn("No session returned");
             }
-            navigate('/level');
+            navigate(`/games/${gameId}/level/${levelNumber}`);
         }).catch(error => {
             console.error("Error starting session:", error);
         });

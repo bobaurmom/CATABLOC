@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-const DropZone = (prop: { id: string; children: React.ReactNode}) => {
+const DropZone = (prop: { id: string; children: React.ReactNode; className?: string }) => {
     const { isOver, setNodeRef} = useDroppable({
       id: prop.id});
     const style: React.CSSProperties = {
@@ -8,7 +8,6 @@ const DropZone = (prop: { id: string; children: React.ReactNode}) => {
       borderColor: isOver ? '#4caf50' : '#ccc',
       padding: '20px',
       minHeight: '100%',
-      height: 'fit-content',
       borderRadius: '8px',
       transition: 'all 0.3s ease',
       display: 'flex',
@@ -16,7 +15,7 @@ const DropZone = (prop: { id: string; children: React.ReactNode}) => {
       gap: '0px',
     };
     return (
-        <div ref={setNodeRef} style={style}>{prop.children}</div>
+        <div ref={setNodeRef} style={style} className={prop.className}>{prop.children}</div>
     )
 }   
 export default DropZone;

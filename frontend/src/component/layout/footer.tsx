@@ -1,15 +1,14 @@
 import React from "react";
 import "../../style/footer.css";
 import logo from "../../assets/logo.svg";
+import { Link } from "react-router";
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
-      <div className="footer-brand">
-        <div className="footer-icon">
-          <img src={logo} alt="Catabloc Logo" className="footer-logo" />
-        </div>
+      <Link to="/" className="footer-brand">
+        <img src={logo} alt="Catabloc Logo" className="footer-logo" />
         <span className="footer-title">CATABLOC</span>
-      </div>
+      </Link>
       <div className="footer-container">
         <div className="footer-section">
           <h3 className="footer-heading">About</h3>
