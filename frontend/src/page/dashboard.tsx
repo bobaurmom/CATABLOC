@@ -8,6 +8,7 @@ import "../style/dashboard.css";
 import gameCover1 from "../assets/gamecover1.svg";
 import LevelPanel from "../component/dashboard/gameSelectionPanel";
 import { useGameSelection } from "../hooks/useGameSelection";
+import { getLevelsCount } from "../services/gameService";
 
 interface UserStats {
   exp: number;
@@ -45,8 +46,15 @@ function Dashboard() {
         if (setGameId && setGameName && setTotalLevels) {
             setGameId(gameId);
             setGameName(gameName);
-            setTotalLevels(3);  
-            setPopupVisible(true);
+            
+            // Fetch the actual number of levels for this game
+            getLevelsCount(gameId).then(count => {
+                setTotalLevels(count);
+                setPopupVisible(true);
+            }).catch(error => {
+                console.error("Error fetching levels count:", error);
+                setTotalLevels(0);
+            });
         }
     }, [setGameId, setGameName, setTotalLevels]);
 

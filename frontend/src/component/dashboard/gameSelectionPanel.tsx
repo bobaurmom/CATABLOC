@@ -9,7 +9,7 @@ const levelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, 
         console.log("Current gameId before nav:", gameId);
         setCurrentLevel(levelNumber);
     
-        startSession(levelNumber).then(session => {
+        startSession(gameId, levelNumber).then(session => {
             console.log("Session response:", session);
             if(session) {
                 console.log("Setting sessionId:", session);

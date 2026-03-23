@@ -55,20 +55,24 @@ const LevelPage: React.FC = () => {
   }
   React.useEffect(() => {
     const loadLayout = async () => {
-      const layout = await fetchLayout(currentLevel);
+      const layout = await fetchLayout(gameId, currentLevel);
       if(layout && Array.isArray(layout.availableBlocksStr)){
         layout.availableBlocks = handleProvideCode(layout.availableBlocksStr);
       }
-      setLevelLayout(layout);
-      // Initialize cat position
-      setCatPos(layout.layout.cat_start);
-      setCatFacing(layout.layout.facing || 'right');
-      setGameEngine(new GameEngine(layout.layout));
-      catStart = layout.layout.cat_start;
-      catFace = layout.layout.facing || 'right';
+      if(layout) {
+        setLevelLayout(layout);
+        // Initialize cat position
+        setCatPos(layout.layout.cat_start);
+        setCatFacing(layout.layout.facing || 'right');
+        setGameEngine(new GameEngine(layout.layout));
+        catStart = layout.layout.cat_start;
+        catFace = layout.layout.facing || 'right';
+      }
     };
-    loadLayout();
-  }, []);
+    if(gameId && currentLevel) {
+      loadLayout();
+    }
+  }, [gameId, currentLevel]);
 
   const findBlockById = (blocks: CodeBlock[], id: string): CodeBlock | null => {
     for (const block of blocks) {

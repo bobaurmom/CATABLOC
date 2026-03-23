@@ -3,7 +3,7 @@ import type { CodeBlock, BlockType } from "../component/game/codebloc";
 
 const fetchBloc = async (): Promise<CodeBlock[]> => {
   try {
-    const response = await apiFetch("/api/codeblocks");
+    const response = await apiFetch("/api/games/codeblocks");
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -29,14 +29,19 @@ const fetchBloc = async (): Promise<CodeBlock[]> => {
     return []; 
   }
 };
-export const fetchLayout = async (levelId: number): Promise<any> => {
+export const fetchLayout = async (gameId: number, levelId: number): Promise<any> => {
   try {
-    const response = await apiFetch(`/api/games/level/${levelId}`);
+    const response = await apiFetch(`/api/games/${gameId}/level/${levelId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const layoutData = await response.json();
     console.log("Layout data from backend:", layoutData);
+    
+    // available_codeblocks is already an array of command strings like ["move_forward", "turn_left", ...]
+    const availableBlocksStr = Array.isArray(layoutData.available_codeblocks) 
+      ? layoutData.available_codeblocks
+      : [];
     
     // Map snake_case to camelCase
     return {
@@ -45,7 +50,7 @@ export const fetchLayout = async (levelId: number): Promise<any> => {
       levelNumber: layoutData.level_number,
       title: layoutData.title,
       description: layoutData.description,
-      availableBlocksStr: layoutData.available_codeblocks,
+      availableBlocksStr: availableBlocksStr,
       layout: layoutData.level_layout,
       blockLimit: layoutData.block_limit,
       timeLimit: layoutData.time_limit,
@@ -55,14 +60,14 @@ export const fetchLayout = async (levelId: number): Promise<any> => {
     return null; 
   }
 };
-export const startSession = async (levelId: number): Promise<number | null> => {
+export const startSession = async (gameId: number, levelId: number): Promise<number | null> => {
   try {
     const response = await apiFetch(`/api/games/start`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({"level_id": levelId }),
+      body: JSON.stringify({"game_id": gameId, "level_id": levelId }),
     });
     
     if (!response.ok) {
@@ -107,4 +112,19 @@ export const completeGame = async (sessionId: number, levelId: number, blockUsed
     return null;
   }
 };
+
+export const getLevelsCount = async (gameId: number): Promise<number> => {
+  try {
+    const response = await apiFetch(`/api/games/${gameId}/levels-count`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.levels_count || 0;
+  } catch (error) {
+    console.error("Failed to fetch levels count:", error);
+    return 0;
+  }
+};
+
 export default fetchBloc;
