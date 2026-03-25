@@ -1,6 +1,6 @@
 //# Routes for /api/games
 import { Router } from 'express';
-import { startSession, getLevel, verifyLevel, completeLevel, } from '../controllers/gameController';
+import { startSession, getLevel, verifyLevel, completeLevel, getCodeblocks, getLevelsCount } from '../controllers/gameController';
 import { authenticateToken } from '../utils/jwt';
 
 const router = Router();
@@ -75,6 +75,8 @@ router.post('/start', authenticateToken, startSession);
  */
 //router.get ('/{game_id}/level/:level_id',); this is the multi-game version
 router.get('/:game_id/level/:level_id', authenticateToken, getLevel);
+
+router.get('/:game_id/levels-count', authenticateToken, getLevelsCount);
 
 /**
  * @swagger
@@ -185,7 +187,7 @@ router.post('/complete', authenticateToken , completeLevel);
  *         description: Internal server error
  */
 
-router.get('/codeblocks', authenticateToken);
+router.get('/codeblocks', authenticateToken, getCodeblocks);
 
 /**
  * @swagger

@@ -11,6 +11,7 @@ interface BoardDataAttributes {
     goal_position: string;  
     level_layout?: LevelLayout;
     block_limit?: number;
+    available_codeblocks?: string;
     created_at?: Date;
     updated_at?: Date;
 }
@@ -34,6 +35,7 @@ export class BoardData extends Model<BoardDataAttributes, BoardDataCreationAttri
     public goal_position!: string;
     public level_layout?: LevelLayout;
     public block_limit?: number;
+    public available_codeblocks?: string;
     public created_at?: Date;
     public updated_at?: Date;   
 }
@@ -78,6 +80,11 @@ BoardData.init({
     block_limit: {
         type: DataTypes.INTEGER,
         allowNull: true,
+    },
+    available_codeblocks: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: '[]',
     },
 }, {
     sequelize,

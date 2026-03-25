@@ -149,18 +149,14 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
       ? JSON.parse(boardData.level_layout) 
       : boardData.level_layout;
 
-    // Fetch available codeblocks for this level
-    const codeblocks = await Codeblock.findAll({ 
-      where: { level_id: Number(level_id) },
-      attributes: ['codeblock_id', 'name', 'description', 'type']
-    });
-    
-    const available_codeblocks = codeblocks.map((cb: any) => ({
-      codeblock_id: cb.codeblock_id,
-      name: cb.name,
-      description: cb.description,
-      type: cb.type
-    }));
+    // Fetch available codeblocks from board_data (stored as JSON)
+    let available_codeblocks: string[] = [];
+    if (boardData.available_codeblocks) {
+      const codeblockData = typeof boardData.available_codeblocks === 'string'
+        ? JSON.parse(boardData.available_codeblocks)
+        : boardData.available_codeblocks;
+      available_codeblocks = Array.isArray(codeblockData) ? codeblockData : [];
+    }
 
     res.status(200).json({
       level_id: level.level_id,
@@ -171,7 +167,7 @@ export const getLevel = async (req: AuthenticatedRequest, res: Response) => {
       difficulty: level.difficulty,
       available_codeblocks: available_codeblocks,
       level_layout: level_layout,
-      blocks_limit: boardData.block_limit,
+      block_limit: boardData.block_limit,
       time_limit: level.time_limit
     });
 
@@ -397,6 +393,46 @@ export const verifyLevel = async (req: AuthenticatedRequest, res: Response) => {
     // Return a safe, generic error response to the client
     res.status(500).json({ 
       error: "Failed to verify level",
+    });
+  }
+};
+
+export const getCodeblocks = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const codeblocks = await Codeblock.findAll({
+      attributes: ['codeblock_id', 'block_command', 'block_type', 'name', 'description']
+    });
+
+    res.status(200).json(codeblocks);
+  } catch (error: any) {
+    console.error("GET CODEBLOCKS ERROR:", error);
+    res.status(500).json({
+      error: "Failed to fetch codeblocks",
+    });
+  }
+};
+
+export const getLevelsCount = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { game_id } = req.params;
+    
+    if (!game_id || isNaN(Number(game_id))) {
+      return res.status(400).json({ error: "Invalid game ID" });
+    }
+
+    // Count levels for the specified game
+    const levelCount = await Level.count({
+      where: { game_id: Number(game_id) }
+    });
+
+    res.status(200).json({
+      game_id: Number(game_id),
+      levels_count: levelCount
+    });
+  } catch (error: any) {
+    console.error("GET LEVELS COUNT ERROR:", error);
+    res.status(500).json({
+      error: "Failed to fetch levels count",
     });
   }
 };
