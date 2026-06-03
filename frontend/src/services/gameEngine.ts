@@ -33,7 +33,7 @@
  * 
  * @see {@link src/page/level.tsx } - to see how the GameEngine is used in the Level component.
  **/
-import type { LevelLayout } from '../component/game/index';
+import type { LevelLayout } from '../component/game/GameScene';
 import type { Position } from '../type/gameType';
 export class GameEngine {
     private layout: LevelLayout;
@@ -81,10 +81,26 @@ export class GameEngine {
             case 'left':
                 return { pos: { x: x - 1, y } };
             case 'right':
+                return { pos: { x: x + 1, y } };
             default:
                 return { pos: { x: x + 1, y } };
         }
 
+    }
+    private getBackwardPosition(): Position {
+        const {x, y} = this.layout.cat_start;
+        switch(this.layout.facing) {
+            case 'up':
+                return { x, y: y + 1 };
+            case 'down':
+                return { x, y: y - 1 };
+            case 'left':
+                return { x: x + 1, y };
+            case 'right':
+                return { x: x - 1, y };
+            default:
+                return { x: x - 1, y };
+        }
     }
     moveForward(): boolean {
         const { pos } = this.getNextPosition();
@@ -94,6 +110,16 @@ export class GameEngine {
         }
         return false;
     }
+
+    moveBackward(): boolean {;
+        const backwardPos = this.getBackwardPosition(); 
+        if(this.moveIsValid(backwardPos)) {
+            this.layout.cat_start = backwardPos;
+            return true;
+        }
+        return false;
+    }
+
     turnLeft(): void {
         this.deg -= 90;
         this.layout.facing = this.degToFacing(this.deg);

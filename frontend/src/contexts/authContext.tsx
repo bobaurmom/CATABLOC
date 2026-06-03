@@ -3,6 +3,8 @@ import type { User as user } from "../type/user";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import type { AxiosResponse } from "axios";
+
+
 export interface AuthContextType {
   user?: user | null;
   isAuthenticated: boolean;
@@ -11,7 +13,8 @@ export interface AuthContextType {
   logout: () => void;
   getToken: () => string | null;
   isLoading: boolean;
-  verifyEmail: (code: string, email: string) => Promise<Response>;
+  verifyEmail: (code: string, email: string, type?: "email_verification" | "password_reset") => Promise<any>;
+  resetPassword: (email: string) => Promise<any>;
 }
 
 interface AuthResponse {
@@ -84,12 +87,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             const responseData = await response.json();
             
             if(response.ok){
-                console.log("Login response data:", responseData);
                 const user = {email:responseData.data.user.email, name:responseData.data.user.username};
                 localStorage.setItem("user",JSON.stringify(user));
                 setUser(user);
             }
-            console.log("Login response:", response);
             return { response, data: responseData };
         } catch (error) {
             throw error;
@@ -120,23 +121,22 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             throw error;
         }
     }
-    const verifyEmail = async (code: string, email: string): Promise<any> => {
+    const verifyEmail = async (code: string, email: string, type = "email_verification"): Promise<any> => {
         try {
-            const response = await api.post(`${url}/verify-otp`, {email, code, type: "email_verification" });
+            const response = await api.post(`${url}/verify-otp`, {email, code, type}, { withCredentials: true });
             
-            // Add .ok property for compatibility with fetch Response interface
+            if(type === "password_reset"){
+                sessionStorage.setItem("resetToken", response.data.data.resetToken);
+                return response;
+            }
+
             const result = mapResponseToAuthResponse(response);
             
-            // If successful, store user and token
             if (result.ok && response.data?.data?.user) {
                 const { user: userData, token, refreshToken } = response.data.data;
                 const user = { email: userData.email, name: userData.username };
                 localStorage.setItem("user", JSON.stringify(user));
                 localStorage.setItem("token", token);
-                const existingRefreshToken = localStorage.getItem("refreshToken");
-                const localToken = localStorage.getItem("token");
-                console.log("Existing refresh token:", existingRefreshToken);
-                console.log("Local token:", localToken);
                 if (refreshToken) {
                     localStorage.setItem("refreshToken", refreshToken);
                 }
@@ -148,6 +148,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             throw {ok: false, error};
         }
     }
+
+    const resetPassword = async (email: string): Promise<any> => {
+        try {
+            const response = await api.post(`${url}/forgot-password`, { email }, { withCredentials: true });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
 
     const logout = async () => {
         localStorage.removeItem("user");
@@ -172,7 +181,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         register,
         logout,
         getToken,
-        verifyEmail
+        verifyEmail,
+        resetPassword
     };
     return createElement(AuthContext.Provider, { value }, children);
 };  

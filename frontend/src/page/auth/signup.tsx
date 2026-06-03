@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import TalkingCat from "../../component/ui/talkingCat";
+import TalkingCat from "../../component/ui/TalkingCat";
 import Input from "../../component/ui/input";
-import Btn from "../../component/ui/button";
+import Btn from "../../component/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
-import Verification from "../../component/ui/verification";
+import Verification from "../../component/ui/Verification";
 import { Link } from "react-router-dom";
 import { validateRegisterForm } from "../../services/authService";
 
@@ -87,7 +87,6 @@ const SignUp: React.FC = () => {
       }
     } catch (error) {
       setButtonState("default");
-      console.error("Signup error:", error);
     }
   }
   return (
@@ -149,12 +148,14 @@ const SignUp: React.FC = () => {
             error={errorMessage.confirmPassword}
             autoComplete="new-password"
           ></Input>
-          <Btn text="Sign Up" btnType="submit" state={buttonState} disabled={buttonState === "disabled"}></Btn>
+          <Btn btnType="submit" state={buttonState} disabled={buttonState === "disabled"}>
+            Sign Up
+          </Btn>
         </form>
         {/* <Footer/> */}
         <Link to="/login">I already have an account</Link>
       </div>
-      {popUp && <Verification email={email} onClose={() => setPopUp(false)} />}
+      {popUp && <Verification email={email} onClose={() => setPopUp(false)} OTPtype="email_verification" />}
     </>
   );
 };

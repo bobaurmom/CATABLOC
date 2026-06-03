@@ -1,9 +1,10 @@
 import React from "react";
-import Btn from "../../component/ui/button";
-import TalkingCat from "../../component/ui/talkingCat";
+import Btn from "../../component/ui/Button";
+import TalkingCat from "../../component/ui/TalkingCat";
 import Input from "../../component/ui/input";
 import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
+import BreadcrumbAlert from "../../component/ui/Snackbar";
 
 const Login: React.FC = () => {
   const { login } = useAuth();
@@ -14,9 +15,11 @@ const Login: React.FC = () => {
     email: null,
     password: null,
   });
+  const [showAlert, setShowAlert] = React.useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setShowAlert(true);
     const form = event.currentTarget;
     const formData = new FormData(form);
     const email = formData.get("email") as string;
@@ -24,7 +27,7 @@ const Login: React.FC = () => {
     const result = await login(email, password);
     
     if (result.response && result.response.ok) {
-      // nav("/dashboard");
+      // Login successful
     } else if (result.response && !result.response.ok) {
       const data = result.data;
       
@@ -43,6 +46,7 @@ const Login: React.FC = () => {
         });
       }
     }
+    setShowAlert(false);
   }
   const handleInputChange = (fieldName: "email" | "password") => {
     setErrorMessage((prev) => ({
@@ -91,12 +95,18 @@ const Login: React.FC = () => {
             error={errorMessage.password}
             onChange={() => handleInputChange("password")}
           ></Input>
-          <Btn text="Login" btnType="submit" width="30"></Btn>
+          <Btn btnType="submit" width="30">
+            Login
+          </Btn>
         </form>
         <Link to="/forgot-password">Forgot password???</Link>
         <br />
         <Link to="/register">New to CATABLOC?? Sign Up</Link>
-        {/* <Footer/> */}
+        {showAlert && (
+          <BreadcrumbAlert state="default" duration={3000} onClose={() => setShowAlert(false)}>
+            Logging in...
+          </BreadcrumbAlert>
+        )}
       </div>
     </>
   );

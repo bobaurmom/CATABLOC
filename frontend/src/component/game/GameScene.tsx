@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Cat from './cat';
-import Mouse from './mouse';
-import Grid from './grid';
+import Cat from './Cat';
+import Mouse from './Mouse';
+import Grid from './Grid';
 import type { Position } from '../../type/gameType';
 
 export type Facing = 'left' | 'right' | 'up' | 'down';

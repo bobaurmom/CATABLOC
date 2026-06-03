@@ -1,29 +1,41 @@
 import React from "react";
-import "../../style/button.css";
+
 interface ButtonProps {
-  text: string;
-  btnType?: HTMLButtonElement["type"]; //type for button element
+  text?: string;
+  btnType?: HTMLButtonElement["type"];
   width?: number | string;
   id?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onHover?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
   state?: "default" | "disabled" | "completed" | "warning";
   className?: string;
+  children?: React.ReactNode;
 }
+
+const stateClasses: Record<string, string> = {
+  default: 'bg-[#1013c4] text-white hover:bg-[#2563EB]',
+  disabled: 'bg-[#E5E7EB] text-[#9CA3AF]',
+  warning: 'bg-[#EF4444] text-white hover:bg-[#DC2626]',
+  completed: 'bg-[#10B981] text-white hover:bg-[#059669]',
+};
 
 const Btn: React.FC<ButtonProps> = ({
   text,
   btnType = "button",
   id,
   onClick,
+  onHover,
   disabled = false,
   state = "default",
-  className
+  className,
+  children,
 }) => {
   return (
     <button
       type={btnType}
       onClick={onClick}
+      onMouseOver={onHover}
       disabled={disabled}
       style={{
         border: "none",
@@ -46,11 +58,9 @@ const Btn: React.FC<ButtonProps> = ({
           e.currentTarget.style.boxShadow = "none";
         }
       }}
-      className={className ? className + " " + state : state}
+      className={(className ? className + " " : "") + (stateClasses[state] || stateClasses.default)}
     >
-
-
-      {text}
+      {children}
     </button>
   );
 };

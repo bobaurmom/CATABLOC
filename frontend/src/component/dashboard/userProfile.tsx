@@ -1,11 +1,10 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../style/userProfile.css";
 import catImage from "../../assets/cat.png";
 import starIcon from "../../assets/star.svg";
 import fireIcon from "../../assets/fire.svg";
-import Btn from "../ui/button";
+import Btn from "../ui/Button";
 import apiFetch from "../../services/profile";
 
 interface UserStats {
@@ -84,34 +83,34 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
 
   if (error) {
     return (
-      <div className="userCard error-state" role="alert">
+      <div className="flex flex-col items-center justify-between min-h-[280px] bg-white rounded-[20px] p-[30px_2rem] shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.15)] mt-auto" role="alert">
         <p>{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="userCard w-full" role="region" aria-label={`Profile of ${name}`}>
-      <div className="profile">
-        <div className="profile-image" aria-hidden="true">
+    <div className="flex flex-col items-center justify-between min-h-[280px] bg-white rounded-[20px] p-[30px_2rem] shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.15)] mt-auto w-full" role="region" aria-label={`Profile of ${name}`}>
+      <div className="flex items-center w-full">
+        <div className="relative w-[50px] h-[50px] rounded-full bg-black p-[2px] mr-5" aria-hidden="true">
           <img
             src={catImage}
             alt={`${name}'s profile`}
-            className="image-user"
+            className="w-full h-full object-cover rounded-full block"
           />
         </div>
-        <div className="text-user">
-          <span className="name">{name}</span>
+        <div className="flex flex-col items-start">
+          <span className="text-black text-xl font-medium">{name}</span>
         </div>
       </div>
 
-      <div className="stats grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 w-full">
+      <div className="mt-[25px] mb-[10px] justify-between w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
         <StatCard
           label="EXP"
           value={stats.exp}
           icon={starIcon}
           iconAlt="Experience points"
-          gradientClass="stat-exp"
+          gradientClass="bg-gradient-to-r from-[#1013c4] to-[#393cff]"
           isLoading={isLoading}
         />
         <StatCard
@@ -119,12 +118,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
           value={stats.streak}
           icon={fireIcon}
           iconAlt="Current streak"
-          gradientClass="stat-streak"
+          gradientClass="bg-gradient-to-r from-[#fb923c] to-[#ff9862]"
           isLoading={isLoading}
         />
       </div>
 
-      <Btn text="VIEW PROFILE" onClick={() => navigate('/profile')} />
+      <Btn onClick={() => navigate('/profile')}>
+        VIEW PROFILE
+      </Btn>
     </div>
   );
 };
@@ -146,12 +147,12 @@ const StatCard: React.FC<StatCardProps> = ({
   gradientClass,
   isLoading = false,
 }) => (
-  <div className={`stat-card ${gradientClass} w-full`}>
-    <div className="stat-content">
-      <span className="stat-label">{label}</span>
-      <div className="stat-details">
-        <img src={icon} alt={iconAlt} className="icon" />
-        <span className="stat-number">
+  <div className={`flex flex-col items-start rounded-[12px] p-[20px_15px] transition-transform duration-200 hover:scale-105 cursor-pointer ${gradientClass} w-full`}>
+    <div className="flex flex-col w-full">
+      <span className="text-white text-2xl font-bold mb-[10px] text-left w-full">{label}</span>
+      <div className="flex items-center w-full">
+        <img src={icon} alt={iconAlt} className="w-[30px] h-[30px] mr-5 shrink-0" />
+        <span className="text-[40px] text-white font-bold">
           {isLoading ? "..." : value}
         </span>
       </div>

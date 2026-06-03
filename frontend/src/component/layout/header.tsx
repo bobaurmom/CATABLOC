@@ -1,67 +1,84 @@
 import React from "react";
 import logo from "../../assets/logo.svg";
-import "../../style/header.css";
-import Btn from "../ui/button";
+import Btn from "../ui/Button";
 import { useAuth } from "../../hooks/useAuth";
 import profilePic from "../../assets/defaultProfile.png";
 import { Link } from "react-router-dom";
 const Header: React.FC = () => {
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
-  const { user, isAuthenticated , logout} = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const dropDown = () => {
-      setIsOpen(!isOpen);
-    }
+    setIsOpen(!isOpen);
+  };
   const handleLogout = () => {
     logout();
     setProfileMenuOpen(false);
-  }
+  };
   return (
-    <header className="header">
-      <div className="header-left">
-          <div className={`burger ${isOpen ? "burger-open" : ""}`} onClick={dropDown}>
-            <div className="line line-first"></div>
-            <div className="line line-second"></div>
-            <div className="line line-third"></div>
-          <div className={`dropDown ${isOpen ? "dropDown-show" : ""}`}>
-          <div className="dropDown-content">
-            <Link to="/dashboard" className="drop-content">Dashboard</Link>
-            <Link to="#about" className="drop-content">About Us</Link>
-            <Link to="#help" className="drop-content">Help Center</Link>
+    <header className="sticky top-0 left-0 z-[1000] flex justify-between items-center px-[5%] h-[60px] bg-[#0a0909]">
+      <div className="flex items-center gap-[5px]">
+        <div
+          className={`md:hidden flex-col gap-[5px] ${isOpen ? "flex" : "flex"}`}
+          onClick={dropDown}
+        >
+          <div className={`bg-gray-500 w-[30px] h-[5px] rounded-[10px] origin-left transition-all duration-[0.1s] ${isOpen ? "rotate-45" : ""}`}></div>
+          <div className={`bg-gray-500 w-[30px] h-[5px] rounded-[10px] ${isOpen ? "invisible" : ""}`}></div>
+          <div className={`bg-gray-500 w-[30px] h-[5px] rounded-[10px] origin-left transition-all duration-[0.1s] ${isOpen ? "-rotate-45" : ""}`}></div>
+          <div className={`${isOpen ? "flex flex-col" : "hidden"} fixed top-[60px] left-0`}>
+            <div className="flex flex-col bg-white">
+              <Link to="/dashboard" className="border border-black p-[10px] no-underline text-black hover:bg-[hsl(0,0%,66%)]">
+                Dashboard
+              </Link>
+              <Link to="#about" className="border border-black p-[10px] no-underline text-black hover:bg-[hsl(0,0%,66%)]">
+                About Us
+              </Link>
+              <Link to="#help" className="border border-black p-[10px] no-underline text-black hover:bg-[hsl(0,0%,66%)]">
+                Help Center
+              </Link>
             </div>
           </div>
         </div>
-        <Link to="/" className="flex gap-2">
-          <img src={logo} alt="Catabloc Logo" className="header-logo" />
-          <span className="header-title">CATABLOC</span>
+        <Link to="/" className="flex gap-2 items-center">
+          <img src={logo} alt="Catabloc Logo" className="w-10 h-auto" />
+          <span className="text-white text-lg font-bold">CATABLOC</span>
         </Link>
       </div>
-      <nav className="header-middle">
-        <Link to="/dashboard" className="header-text">
+      <nav className="flex items-center gap-[70px] max-md:hidden">
+        <Link to="/dashboard" className="text-white no-underline text-base transition-colors duration-300 hover:text-[#1914b6]">
           LEARN
         </Link>
-        <Link to="#about" className="header-text">
+        <Link to="#about" className="text-white no-underline text-base transition-colors duration-300 hover:text-[#1914b6]">
           ABOUT US
         </Link>
-        <Link to="#help" className="header-text">
+        <Link to="#help" className="text-white no-underline text-base transition-colors duration-300 hover:text-[#1914b6]">
           HELP CENTER
         </Link>
       </nav>
       {isAuthenticated ? (
-        <div className="header-user" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
-          <img src={profilePic} alt="profile" className="profile-pic"/>
-          <span className="header-username">{user?.name}</span>
+        <div
+          className="flex items-center justify-center gap-[10%] bg-[#0a0909] h-[60px] px-[1%] hover:bg-[hsl(0,5%,15%)] cursor-pointer"
+          onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+        >
+          <img src={profilePic} alt="profile" className="w-10 rounded-full" />
+          <span className="text-white text-base">{user?.name}</span>
         </div>
-          ) : (
-          <Link to="/register">
-            <Btn text="Sign Up" state="default"></Btn>
-          </Link>
-          )}
+      ) : (
+        <Link to="/register">
+          <Btn state="default">Sign Up</Btn>
+        </Link>
+      )}
       {profileMenuOpen && (
-        <div className="profile-menu fixed top-20 md:top-15 right-0 z-50 bg-white border border-gray-300 rounded shadow-lg p-4 flex flex-col">
-          <div className="view-profile border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">View Profile</div>
-          <div className="help-center border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">Help Center</div>
-          <Btn text="Log out" state="warning" onClick={handleLogout}/>
+        <div className="fixed top-20 md:top-15 right-0 z-50 bg-white border border-gray-300 rounded shadow-lg p-4 flex flex-col">
+          <div className="border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">
+            View Profile
+          </div>
+          <div className="border-b border-gray-300 p-2 mb-2 hover:bg-gray-100 cursor-pointer w-full">
+            Help Center
+          </div>
+          <Btn state="warning" onClick={handleLogout}>
+            Log out
+          </Btn>
         </div>
       )}
     </header>

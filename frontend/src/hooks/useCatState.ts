@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { Position } from "../type/gameType"
-import type { Facing, LevelLayout } from "../component/game";
+import type { Facing, LevelLayout } from "../component/game/GameScene";
 import { GameEngine } from "../services/gameEngine";
 
 

@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import "../../style/gameCard.css";
+import React from "react";
 import catImage from "../../assets/cat.png";
-import Btn from "../ui/button";
+import Btn from "../ui/Button";
 
 interface GameCardProps {
   text: string;
@@ -18,8 +17,6 @@ const GameCard: React.FC<GameCardProps> = ({
   onPlay,
   disabled = false
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
   const handlePlay = () => {
     if (!disabled && onPlay) {
       onPlay();
@@ -34,26 +31,23 @@ const GameCard: React.FC<GameCardProps> = ({
 
   return (
     <div 
-      className="card transition-transform duration-300 ease-in-out hover:scale-105"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="flex flex-row items-center justify-between min-h-[250px] bg-white rounded-[15px] shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_6px_16px_rgba(0,0,0,0.15)] cursor-pointer mt-[30px] max-md:flex-col max-md:pb-8"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      onKeyPress={(e) => e.key === 'Enter' && handleCardClick()}
+      onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
       style={{ 
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.8 : 1 
       }}
     >
-      <img src={gameImage} alt={text} className="image" />
-      <div className="description">
+      <img src={gameImage} alt={text} className="w-[250px] h-[250px] object-cover bg-[#f0f0f0] shrink-0 max-md:w-full" />
+      <div className="flex flex-1 h-auto gap-3 flex-col justify-between items-start mx-[15px]">
         <div>
-          <h1>{text}</h1>
+          <h1 className="m-0 text-lg font-semibold text-black">{text}</h1>
         </div>
-        <p>{detail}</p>
+        <p className="m-0 text-[13px] leading-[1.4] text-[#666] line-clamp-2 overflow-hidden">{detail}</p>
         <Btn 
-          text={disabled ? "SOON..." : "PLAY"} 
           btnType="button"
           onClick={(e) => {
             e.stopPropagation();
@@ -61,7 +55,10 @@ const GameCard: React.FC<GameCardProps> = ({
           }}
           disabled={disabled}
           state={disabled ? "disabled" : "default"}
-        />
+        >
+          {disabled ? "SOON..." : "PLAY"}
+        </Btn>
+
       </div>
     </div>
   );

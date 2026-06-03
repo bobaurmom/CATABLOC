@@ -1,12 +1,13 @@
 import { useDraggable } from "@dnd-kit/core";
-import {CSS} from '@dnd-kit/utilities';
+
 const Draggable = (prop: { id: string; children: React.ReactNode; data?: any}) => {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
       id: prop.id,
       data: prop.data
     });
 
     const handleMouseDown = (e: React.MouseEvent) => {
+
         // Allow clicks on elements with class 'condition-box' to pass through without starting drag
         const target = e.target as HTMLElement;
         if (!target.closest('.condition-box')) {

@@ -1,26 +1,25 @@
 import { BrowserRouter,Route, Routes } from 'react-router-dom'
-import './App.css'
-import './index.css'
-import Footer from './component/layout/footer';
-import Header from './component/layout/header';
-import Home from './page/home';
-import Login from './page/auth/login';
-import Dashboard from './page/dashboard';
-import SignUp from './page/auth/signup';;
-import ProtectedRoute from './component/protectedRoute';
+import Footer from './component/layout/Footer';
+import Header from './component/layout/Header';
+import Home from './page/Home';
+import Login from './page/auth/Login';
+import Dashboard from './page/Dashboard';
+import SignUp from './page/auth/Signup';;
+import ForgotPassword from './page/auth/ForgotPassword';
+import ProtectedRoute from './component/ProtectedRoute';
 import { AuthProvider } from './contexts/authContext';
 import { GameProvider } from './contexts/gameContext';
-import PublicRoute from './component/publicRoute';
+import PublicRoute from './component/PublicRoute';
 import ErrorPage from './page/Error';
 import { lazy, useEffect } from 'react';
 
 
-const LevelPage = lazy(() => import('./page/level'));
+const LevelPage = lazy(() => import('./page/Level'));
 function App() {
 
   useEffect(() => {
     Promise.all([
-      import('./page/level'),
+      import('./page/Level'),
     ]).then(() => {
       console.log("Level page is Loaded");
     }).catch(error => {
@@ -31,12 +30,13 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <GameProvider>
-          <div className="app-container min-h-screen flex flex-col justify-between">
+          <div className="min-h-screen flex flex-col bg-white">
             <Header />
             <Routes> 
               <Route path='/' element={<PublicRoute><Home /></PublicRoute>} />
               <Route path='/login' element={<PublicRoute><Login /></PublicRoute>} />
-              <Route path='/register' element={<PublicRoute><SignUp /></PublicRoute>} />  
+              <Route path='/register' element={<PublicRoute><SignUp /></PublicRoute>} /> 
+              <Route path='/forgot-password' element={<PublicRoute><ForgotPassword /></PublicRoute>} /> 
               <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path='/games/:gameId/level/:levelId' element={<ProtectedRoute><LevelPage /></ProtectedRoute>} />
               <Route path='*' element={<ErrorPage />} />

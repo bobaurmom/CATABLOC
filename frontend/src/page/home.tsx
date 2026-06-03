@@ -1,5 +1,5 @@
 import logo from "../assets/logo.svg";
-import Btn from "../component/ui/button";
+import Btn from "../component/ui/Button";
 import { Link } from "react-router-dom";
 
 function Home() {
@@ -12,7 +12,10 @@ function Home() {
         </h1>
         <p>Explore the most fun game while learning algorithms</p>
         <Link to="/login">
-          <Btn text="Start Now" />
+          <Btn>
+            Start Now
+          </Btn>
+
         </Link>
       </div>
     </main>

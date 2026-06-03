@@ -6,8 +6,8 @@ interface errorResponse {
 }
 
 
-const resendcode = async (email:string): Promise<Response | undefined> => {
-  const data = {email,type:"email_verification"};
+const resendcode = async (email:string, type: "email_verification" | "password_reset"): Promise<Response | undefined> => {
+  const data = {email, type};
   const jsonData = JSON.stringify(data);
   try {
     const res = await fetch(`${url}/resend-otp`, {
@@ -67,4 +67,4 @@ const validateRegisterForm = (data: { email: string; username: string; password:
 };
 
 
-export { resendcode, validateRegisterForm};
+export { resendcode, validateRegisterForm };
