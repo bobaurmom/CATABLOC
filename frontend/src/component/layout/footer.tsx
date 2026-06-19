@@ -29,9 +29,9 @@ const Footer: React.FC = () => {
             <a href="#" className="block text-[#6c757d] no-underline transition-colors duration-300 hover:text-[#007bff]">
               Challenge
             </a>
-            <span className="block text-[#6c757d] opacity-70">Coming Soon...</span>
-            <span className="block text-[#6c757d] opacity-70">Coming Soon...</span>
-            <span className="block text-[#6c757d] opacity-70">Coming Soon...</span>
+            <span className="block text-[#6c757d] opacity-70">Coming Soon…</span>
+            <span className="block text-[#6c757d] opacity-70">Coming Soon…</span>
+            <span className="block text-[#6c757d] opacity-70">Coming Soon…</span>
           </div>
         </div>
         <div className="flex flex-col items-start">

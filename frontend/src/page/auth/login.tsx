@@ -104,7 +104,7 @@ const Login: React.FC = () => {
         <Link to="/register">New to CATABLOC?? Sign Up</Link>
         {showAlert && (
           <BreadcrumbAlert state="default" duration={3000} onClose={() => setShowAlert(false)}>
-            Logging in...
+            Logging in…
           </BreadcrumbAlert>
         )}
       </div>

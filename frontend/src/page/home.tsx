@@ -6,7 +6,7 @@ function Home() {
   return (
     <main className="main-content flex justify-center items-center h-screen">
       <div className="home-container flex flex-col items-center gap-6 text-center">
-        <img src={logo} className="w-25" />
+        <img src={logo} alt="catabloc logo" className="w-25" />
         <h1 className="font-bold text-4xl">
           Start <br /> Your Learning Now
         </h1>

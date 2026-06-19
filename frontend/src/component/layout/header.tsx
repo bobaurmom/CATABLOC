@@ -21,6 +21,14 @@ const Header: React.FC = () => {
         <div
           className={`md:hidden flex-col gap-[5px] ${isOpen ? "flex" : "flex"}`}
           onClick={dropDown}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              dropDown();
+            }
+          }}
         >
           <div className={`bg-gray-500 w-[30px] h-[5px] rounded-[10px] origin-left transition-all duration-[0.1s] ${isOpen ? "rotate-45" : ""}`}></div>
           <div className={`bg-gray-500 w-[30px] h-[5px] rounded-[10px] ${isOpen ? "invisible" : ""}`}></div>

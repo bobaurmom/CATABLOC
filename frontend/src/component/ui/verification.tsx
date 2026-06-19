@@ -12,7 +12,15 @@ const Verification: React.FC<{email: string, OTPtype: "email_verification" | "pa
   // Create ref for each input
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const { verifyEmail } = useAuth();
-  const [borderColor, setBorderColor] = useState<borderColorType>("black");
+  const borderColorRef = useRef<borderColorType>("black");
+  const updateBorderColor = (color: borderColorType) => {
+    borderColorRef.current = color;
+    inputRefs.current.forEach((input) => {
+      if (input) {
+        input.style.borderColor = color;
+      }
+    });
+  };
   const [errorMessage, setErrorMessage] = useState<errorMessage>(null);
   const [isError, setIsError] = useState(false);
   const nav = useNavigate();
@@ -23,15 +31,9 @@ const Verification: React.FC<{email: string, OTPtype: "email_verification" | "pa
       document.body.style.overflow = 'unset';
     } 
   }, []);
-  // Update border color based on state
-  inputRefs.current.forEach((input) => {
-    if (input) {
-      input.style.borderColor = borderColor;
-    }
-  });
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setBorderColor("black");
+    updateBorderColor("black");
     setErrorMessage(null);
     // Only allow digits
     if (!/^\d*$/.test(value)) {
@@ -72,28 +74,28 @@ const Verification: React.FC<{email: string, OTPtype: "email_verification" | "pa
           onClose();
         } else {
           setErrorMessage("Invalid verification code. Please check again.");
-          setBorderColor("red");
+          updateBorderColor("red");
         }
       }
     } catch (error) {
       setIsError(true);
       setErrorMessage("Invalid verification code. Please check again.");
-      setBorderColor("red");
+      updateBorderColor("red");
     }
   };
 
-  const handleResend = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleResend = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const res = await resendcode(email, OTPtype);
     if(res){
       if(res.status === 200){
         setErrorMessage("Verification code resent successfully.");
         setIsError(false);
-        setBorderColor("black");
+        updateBorderColor("black");
       } else {
         setIsError(true);
         setErrorMessage("Failed to resend code. Please try again later.");
-        setBorderColor("red");
+        updateBorderColor("red");
       }
     }
   };
@@ -103,7 +105,18 @@ const Verification: React.FC<{email: string, OTPtype: "email_verification" | "pa
   }, []);
 
   return (
-<div className="fixed inset-0 w-full h-full bg-black/70 backdrop-blur-[8px] flex justify-center items-center z-[2000]" onClick={onClose}>
+<div 
+  className="fixed inset-0 w-full h-full bg-black/70 backdrop-blur-[8px] flex justify-center items-center z-[2000]" 
+  onClick={onClose}
+  role="button"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClose();
+    }
+  }}
+>
   <div className="bg-white p-10 rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.15)] text-center max-w-[90%] w-[400px] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
     <img src={logo} alt="Catabloc Logo" className="w-[80px] mb-[5px]" />
     <h1 style={{ fontSize: "30px",  marginBottom: "25px", color: "#333" }}>🐾{OTPtype === "email_verification" ? "Activation Code" : "Password Reset"}🐾</h1>
@@ -129,9 +142,9 @@ const Verification: React.FC<{email: string, OTPtype: "email_verification" | "pa
     <Btn id="verify-btn" onClick={handleVerify} width={100}>
       Verify Email
     </Btn>
-    <a href="" onClick={handleResend}>
+    <button type="button" onClick={handleResend} style={{ background: 'none', border: 'none', padding: 0, color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
       Resend Code
-    </a>
+    </button>
   </div>
 </div>
   );

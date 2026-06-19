@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import catImage from "../../assets/cat.png";
 import starIcon from "../../assets/star.svg";
@@ -15,10 +15,9 @@ interface UserStats {
 
 interface UserProfileProps {
   name: string;
-  onStatsLoad?: (stats: UserStats) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ name }) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats>({
     exp: 0,
@@ -27,16 +26,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
     });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchedRef = useRef(false);
 
-  useEffect(() => {
-    const loadProfileData = async () => {
+  if (!fetchedRef.current) {
+    fetchedRef.current = true;
+    (async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        
         const response = await apiFetch("/api/dashboard/dashboard");
         
-        // Check content type to determine if response is JSON
         const contentType = response.headers.get("content-type");
         if (!contentType?.includes("application/json")) {
           setError("Invalid response from server");
@@ -62,10 +59,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
           };
           
           setStats(newStats);
-          
-          if (onStatsLoad) {
-            onStatsLoad(newStats);
-          }
         } else {
           const errorData = await response.json().catch(() => ({ message: "Failed to load profile" }));
           setError(errorData.message || "Failed to load profile");
@@ -76,10 +69,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ name, onStatsLoad }) => {
       } finally {
         setIsLoading(false);
       }
-    };
-
-    loadProfileData();
-  }, [onStatsLoad]);
+    })();
+  }
 
   if (error) {
     return (

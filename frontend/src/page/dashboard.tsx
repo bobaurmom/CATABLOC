@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import TalkingCat from "../component/ui/TalkingCat";
 import Leaderboard from "../component/dashboard/Leaderboard";
@@ -9,41 +9,27 @@ import LevelPanel from "../component/dashboard/GameSelectionPanel";
 import { useGameSelection } from "../hooks/useGameSelection";
 import BreadcrumbAlert from "../component/ui/Snackbar";
 
-interface UserStats {
-  exp: number;
-  streak: number;
-  bio: string;
-}
-
 const style = document.createElement('style');
 style.textContent = `@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`;
 document.head.appendChild(style);
 
 function Dashboard() {
     const navigate = useNavigate();
-    const [userName, setUserName] = useState("student");
-    const [ popUpVisible, setPopupVisible ] = useState(false);
-    const [userStats, setUserStats] = useState<UserStats | null>(null);
-    const { gameId, setGameId, totalLevels, setTotalLevels, gameName, setGameName } = useGameSelection();
-
-    useEffect(() => {
-        // Get username from localStorage
+    const [userName] = useState(() => {
         const storedName = localStorage.getItem("user");
         if (storedName) {
             try {
                 const user = JSON.parse(storedName);
-                setUserName(user.name || "student");
+                return user.name || "student";
             } catch (error) {
                 console.error("Failed to parse user data:", error);
-                setUserName("student");
+                return "student";
             }
         }
-    }, []);
-
-    // Callback to receive stats from Profile component
-    const handleStatsLoad = useCallback((stats: UserStats) => {
-        setUserStats(stats);
-    }, []);
+        return "student";
+    });
+    const [ popUpVisible, setPopupVisible ] = useState(false);
+    const { gameId, setGameId, totalLevels, setTotalLevels, gameName, setGameName } = useGameSelection();
 
     const handlePlayGame = useCallback((gameName: string, gameId: number) => {
         if (setGameId && setGameName && setTotalLevels) {
@@ -79,10 +65,7 @@ function Dashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 w-3/5 gap-[25px] xl:sticky xl:top-20 max-xl:static">
-                    <Profile 
-                        name={userName} 
-                        onStatsLoad={handleStatsLoad}
-                    />
+                    <Profile name={userName} />
                     <Leaderboard />
                 </div>
             </div>

@@ -49,7 +49,7 @@ const LevelPage: React.FC = () => {
   const [ levelLayout, setLevelLayout ] = useState<LevelData | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeData, setActiveData] = useState<any>(null);
-  const [isChanged, setIsChanged] = useState(false);
+  const isChangedRef = useRef(false);
   const [error, setError] = useState("");
 
   const positionRef = useRef<"above" | "below">("below");
@@ -119,7 +119,7 @@ const handleDragEnd = (event: any) => {
       removeBlockById(active.id);
       addBlock(blockExists);
     }
-    setIsChanged(true);
+    isChangedRef.current = true;
   } else if(over?.id && over.id.startsWith("dropZone-") && active?.data?.current) {
     const parentBlockId = over.id.replace("dropZone-", "");
     const blockExists = findBlockById(active.id);
@@ -130,10 +130,10 @@ const handleDragEnd = (event: any) => {
       removeBlockById(active.id);
       addBlock(blockExists, parentBlockId);
     }
-    setIsChanged(true);
+    isChangedRef.current = true;
   } else if(!over && active.id.startsWith("block-")) {
     removeBlockById(active.id);
-    setIsChanged(true);
+    isChangedRef.current = true;
   } else if(over?.id === active?.id) {
     return;
   } else if(over?.id && over.id.startsWith("block-") && active?.data?.current) {
@@ -145,7 +145,7 @@ const handleDragEnd = (event: any) => {
       removeBlockById(active.id);
       addBlockInBetween(blockExists, over.id, positionRef.current === "below");
     }
-    setIsChanged(true);
+    isChangedRef.current = true;
   }
 };
   
@@ -174,7 +174,7 @@ const executeBlocksSequentially = async (blocks: CodeBlock[], currentPos: Positi
     if(block.type === 'action') {
       console.log(`Executing block: ${block.label}`);
       const catState = executeBlock(block, getEngine() as GameEngine);
-      setIsChanged(false);
+      isChangedRef.current = false;
 
       if(catState && !catState.success) {
         block.classList = "bg-[rgb(250,85,85)]"
@@ -230,7 +230,7 @@ const handleRunCode = async () => {
   resetCatState();
   getEngine()?.reset();
   resetExecution();
-  setIsChanged(false);
+  isChangedRef.current = false;
 
 
   const initialPos = layout.cat_start;
@@ -275,14 +275,14 @@ const handleUndo = () => {
 
 const handleRedo = () => {
   stopTimer();
-  if(isChanged) {
+  if(isChangedRef.current) {
     resetCatState();
   }
   const catState = executeCodeBlock();
   if(catState && catState.success){
     updateCatState(catState.cat_start, catState.deg);
   }
-  setIsChanged(false);
+  isChangedRef.current = false;
   resumeTimer();
 }      
   return (

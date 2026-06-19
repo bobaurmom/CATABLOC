@@ -51,6 +51,11 @@ interface TimeState {
   startTime: number | null;
 }
 
+const calculateElapsedTime = (currentTime: timeFormat): number => {
+  const { hour, minute, second } = currentTime;
+  return (hour * 3600 + minute * 60 + second) * 1000;
+};
+
 const useTimer = (initialRunning: boolean = false) => {
   const [currentTime, setCurrentTime] = useState<TimeState>({
     currentTime: { hour: 0, minute: 0, second: 0 },
@@ -76,11 +81,6 @@ const useTimer = (initialRunning: boolean = false) => {
 
     return () => clearInterval(timer);
   }, [currentTime.isRunning, currentTime.startTime]);
-
-  const calculateElapsedTime = (currentTime: timeFormat): number => {
-    const { hour, minute, second } = currentTime;
-    return (hour * 3600 + minute * 60 + second) * 1000;
-  };
 
   const startTimer = () => {
     if (!currentTime.isRunning) {

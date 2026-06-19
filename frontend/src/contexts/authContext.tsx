@@ -23,6 +23,50 @@ interface AuthResponse {
 }
 export const AuthContext = createContext<AuthContextType | null>(null);
 const url = "http://localhost:8000/api/auth";
+const mapResponseToAuthResponse = (response: AxiosResponse): AuthResponse => {
+    return {
+        axiosResponse: response,
+        ok: response.status >= 200 && response.status < 300
+    }
+};
+
+const register = async (payload: { email: string; username: string; password: string; confirmPassword: string }): Promise<{ response: Response; data: any }> => {
+    try {
+        const response = await fetch(`${url}/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(payload),
+        });
+
+        let data: any = null;
+        try {
+            data = await response.clone().json();
+        } catch {
+            data = null;
+        }
+
+        return { response, data };
+    } catch (error) {
+        throw error;
+    }
+};
+
+const resetPassword = async (email: string): Promise<any> => {
+    try {
+        const response = await api.post(`${url}/forgot-password`, { email }, { withCredentials: true });
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const getToken = () => {
+    return localStorage.getItem("token");
+};
+
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<user | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -64,14 +108,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         initializeAuth();
     }, [nav]);
 
-    const mapResponseToAuthResponse = (response: AxiosResponse): AuthResponse => {
-        return {
-            axiosResponse: response,
-            ok: response.status >= 200 && response.status < 300
-        }
-    };
-
-
     const login = async (email:string,password:string): Promise<{response: Response, data?: any}> => {
         setIsLoading(true);
         try {
@@ -96,29 +132,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             throw error;
         } finally {
             setIsLoading(false);
-        }
-    }
-    const register = async (payload: { email: string; username: string; password: string; confirmPassword: string }): Promise<{ response: Response; data: any }> => {
-        try {
-            const response = await fetch(`${url}/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(payload),
-            });
-
-            let data: any = null;
-            try {
-                data = await response.clone().json();
-            } catch {
-                data = null;
-            }
-
-            return { response, data };
-        } catch (error) {
-            throw error;
         }
     }
     const verifyEmail = async (code: string, email: string, type = "email_verification"): Promise<any> => {
@@ -149,15 +162,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }
     }
 
-    const resetPassword = async (email: string): Promise<any> => {
-        try {
-            const response = await api.post(`${url}/forgot-password`, { email }, { withCredentials: true });
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-
     const logout = async () => {
         localStorage.removeItem("user");
         setUser(null);
@@ -169,9 +173,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         } catch (error) {
             throw error;
         }
-    }
-    const getToken = () => {
-        return localStorage.getItem("token");
     }
     const value: AuthContextType = {
         isLoading,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import medalIcon from "../../assets/medal.svg";
 import catImage from "../../assets/cat.png";
 import apiFetch from "../../services/profile";
@@ -9,24 +9,31 @@ interface LeaderboardProfile {
   total_exp: number;
 }
 
+const getRankColor = (rank: number) => {
+  switch (rank) {
+    case 1: return '#FFD700'; 
+    case 2: return '#C0C0C0'; 
+    case 3: return '#CD7F32'; 
+    default: return '#000';
+  }
+};
+
 const Leaderboard: React.FC = () => {
   const [profiles, setProfiles] = useState<LeaderboardProfile[]>([]);
   const [hoveredRank, setHoveredRank] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchedRef = useRef(false);
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
+  if (!fetchedRef.current) {
+    fetchedRef.current = true;
+    (async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-
         const response = await apiFetch('/api/dashboard/dashboard');
         
         if (response.ok) {
           const data = await response.json();
           
-          // Add rank to each profile
           const rankedProfiles = data.leaderboard.map((profile: LeaderboardProfile, index: number) => ({
             ...profile,
             rank: index + 1
@@ -44,19 +51,8 @@ const Leaderboard: React.FC = () => {
       } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchLeaderboard();
-  }, []);
-
-  const getRankColor = (rank: number) => {
-    switch (rank) {
-      case 1: return '#FFD700'; 
-      case 2: return '#C0C0C0'; 
-      case 3: return '#CD7F32'; 
-      default: return '#000';
-    }
-  };
+    })();
+  }
 
   return (
     <section className="flex flex-col items-start justify-start w-full min-h-[500px] bg-white rounded-[20px] p-[25px] shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.15)]">
@@ -86,7 +82,7 @@ const Leaderboard: React.FC = () => {
             padding: '40px 20px',
             color: '#666'
           }}>
-            Loading leaderboard...
+            Loading leaderboard…
           </div>
         ) : profiles.length === 0 ? (
           <div style={{

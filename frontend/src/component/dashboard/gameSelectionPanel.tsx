@@ -1,14 +1,26 @@
 import { useGameSelection } from "../../hooks/useGameSelection";
 import { useNavigate } from "react-router-dom";
 
-const levelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, gameName: string, handleClose: () => void}) => {
+const LevelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, gameName: string, handleClose: () => void}) => {
     const { setCurrentLevel, setSessionId, gameId } = useGameSelection();
     const navigate = useNavigate();
     const handleLevelSelect = (levelNumber: number) => {
         navigate(`/games/${gameId}/level/${levelNumber}`);
     }   
 	return (
-        <div className="modal-game-selection-levels fixed inset-0 flex flex-col items-center justify-center z-50 w-full h-full" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}} onClick={handleClose}>
+        <div 
+            className="modal-game-selection-levels fixed inset-0 flex flex-col items-center justify-center z-50 w-full h-full" 
+            style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}} 
+            onClick={handleClose}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleClose();
+                }
+            }}
+        >
             <div className="game-selection-panel p-6 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center">
                 <h3>{gameName}: Select Your Level</h3>
                 <div className="game-selection-level-container grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
@@ -22,4 +34,4 @@ const levelPanel = ({totalLevels, gameName, handleClose}: {totalLevels: number, 
         </div>
     )
 }
-export default levelPanel;
+export default LevelPanel;

@@ -17,6 +17,10 @@ const CONDITION_OPTIONS = {
   while: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
   if: ['front_is_clear', 'on_grass_tile', 'at_mouse'],
 };
+const generateDropZoneId = (parentId : string) => {
+  return `dropZone-${parentId}`;
+};
+
 const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const handleSelect = (option: string, e: React.MouseEvent) => {
@@ -24,9 +28,6 @@ const CodeBloc: React.FC<CodeBlockProps> = ({ block, isUserBlock, onBlockClick})
     block.condition = option; 
     setIsMenuOpen(false);     
   };
-  const generateDropZoneId = (parentId : string) => {
-    return `dropZone-${parentId}`;
-  }
   const isContainer = ['while', 'if', 'else', 'repeat'].includes(block.type);
   const options = CONDITION_OPTIONS[block.type as keyof typeof CONDITION_OPTIONS] || [];
 

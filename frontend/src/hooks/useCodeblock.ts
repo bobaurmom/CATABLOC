@@ -133,29 +133,29 @@ const addBlockInBetweenHelper = (
     return bloc;
   });
 };
+const createCodeBlock = (codeBlockStr: string): CodeBlock => {
+  if(codeBlockStr === 'move_forward' || codeBlockStr === 'turn_left' || codeBlockStr === 'turn_right') {
+    return { id: generateId(), type: 'action' as const, label: codeBlockStr };
+  } else if (codeBlockStr === 'if') {
+    return { id: generateId(), type: 'if' as const ,condition: 'front_is_clear', nestedBlocks: []};
+  } else if (codeBlockStr === 'while') {
+    return { id: generateId(), type: 'while' as const ,condition: 'front_is_clear', nestedBlocks: []};
+  } else if (codeBlockStr === 'repeat') {
+    return { id: generateId(), type: 'repeat' as const , condition: '2 times', nestedBlocks: []};
+  }
+  return { id: generateId(), type: 'action' as const, label: codeBlockStr };
+};
+
+const createCodeBlockWithData = (type: 'action' | 'if' | 'while' | 'repeat',label: string | undefined, condition: string | undefined): CodeBlock => { 
+  return { id: generateId(), type, label, condition, nestedBlocks: [] };
+};
+
+const createCodeBlocks = (codeBlockStrs: string[]): CodeBlock[] => {
+  return codeBlockStrs.map(createCodeBlock);
+};
+
 const useCodeblock = () => {
   const [userCode, setUserCode] = useState<CodeBlock[]>([]);
-  
-  const createCodeBlock = (codeBlockStr: string): CodeBlock => {
-    if(codeBlockStr === 'move_forward' || codeBlockStr === 'turn_left' || codeBlockStr === 'turn_right') {
-      return { id: generateId(), type: 'action' as const, label: codeBlockStr };
-    } else if (codeBlockStr === 'if') {
-      return { id: generateId(), type: 'if' as const ,condition: 'front_is_clear', nestedBlocks: []};
-    } else if (codeBlockStr === 'while') {
-      return { id: generateId(), type: 'while' as const ,condition: 'front_is_clear', nestedBlocks: []};
-    } else if (codeBlockStr === 'repeat') {
-      return { id: generateId(), type: 'repeat' as const , condition: '2 times', nestedBlocks: []};
-    }
-    return { id: generateId(), type: 'action' as const, label: codeBlockStr }; // Default to action if unknown type
-  }
-
-  const createCodeBlockWithData = (type: 'action' | 'if' | 'while' | 'repeat',label: string | undefined, condition: string | undefined): CodeBlock => { 
-    return { id: generateId(), type, label, condition, nestedBlocks: [] };
-  };
-
-  const createCodeBlocks = (codeBlockStrs: string[]): CodeBlock[] => {
-    return codeBlockStrs.map(createCodeBlock);
-  };
 
   const findBlockById = useCallback((id: string): CodeBlock | null => {
     return findBlockByIdHelper(userCode, id);
